@@ -1,0 +1,52 @@
+{
+  "family": "rambow-keycloak-rds",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "runtimePlatform": { "cpuArchitecture": "X86_64", "operatingSystemFamily": "LINUX" },
+  "taskRoleArn": "arn:aws:iam::REPLACE_ACCOUNT:role/REPLACE_DATABASE_TASK_ROLE",
+  "executionRoleArn": "arn:aws:iam::REPLACE_ACCOUNT:role/REPLACE_EXECUTION_ROLE",
+  "containerDefinitions": [
+    {
+      "name": "keycloak",
+      "image": "REPLACE_WITH_AWS_PROFILE_IMAGE_AT_SHA256_DIGEST",
+      "essential": true,
+      "user": "65532:65532",
+      "readonlyRootFilesystem": true,
+      "stopTimeout": 120,
+      "linuxParameters": { "capabilities": { "drop": ["ALL"] } },
+      "portMappings": [
+        { "containerPort": 8080, "protocol": "tcp" },
+        { "containerPort": 9000, "protocol": "tcp" }
+      ],
+      "mountPoints": [
+        { "sourceVolume": "tmp", "containerPath": "/tmp", "readOnly": false },
+        { "sourceVolume": "data", "containerPath": "/opt/keycloak/data", "readOnly": false }
+      ],
+      "environment": [
+        { "name": "KC_DB_URL", "value": "jdbc:aws-wrapper:postgresql://REPLACE_RDS_ENDPOINT:5432/keycloak?wrapperPlugins=iam" },
+        { "name": "KC_DB_USERNAME", "value": "keycloak_iam" },
+        { "name": "AWS_REGION", "value": "REPLACE_AWS_REGION" },
+        { "name": "KC_HOSTNAME", "value": "https://REPLACE_PUBLIC_HOSTNAME" },
+        { "name": "KC_HTTP_ENABLED", "value": "true" },
+        { "name": "KC_PROXY_HEADERS", "value": "xforwarded" },
+        { "name": "KC_PROXY_TRUSTED_ADDRESSES", "value": "REPLACE_ALB_SUBNET_CIDRS" },
+        { "name": "KC_DB_POOL_MAX_SIZE", "value": "20" },
+        { "name": "KC_BOOTSTRAP_ADMIN_USERNAME", "value": "bootstrap-admin" }
+      ],
+      "secrets": [
+        { "name": "KC_BOOTSTRAP_ADMIN_PASSWORD", "valueFrom": "arn:aws:secretsmanager:REPLACE_REGION:REPLACE_ACCOUNT:secret:REPLACE_BOOTSTRAP_SECRET" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "REPLACE_EXISTING_LOG_GROUP",
+          "awslogs-region": "REPLACE_AWS_REGION",
+          "awslogs-stream-prefix": "keycloak"
+        }
+      }
+    }
+  ],
+  "volumes": [{ "name": "tmp" }, { "name": "data" }]
+}

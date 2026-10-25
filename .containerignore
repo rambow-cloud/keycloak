@@ -2,3 +2,9 @@
 !Containerfile
 !config
 !config/java.options
+!.cache
+!.cache/aws
+!.cache/aws/providers
+!.cache/aws/providers/*.jar
+!.cache/aws/certs
+!.cache/aws/certs/rds-ca-bundle.pem

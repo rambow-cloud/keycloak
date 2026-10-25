@@ -5,6 +5,7 @@ Keycloak OCI images built with **Buildah**, with **distroless Java 25 LTS** and 
 ## Initial supported configuration
 
 - Keycloak 26.8.1, optimized at build time for PostgreSQL, with health and metrics enabled.
+- Two build profiles: `core` (default, native PostgreSQL driver) and `aws` (AWS JDBC Wrapper 4.5.0, AWS SDK 2.46.10, XA disabled, checksum-pinned public RDS CA bundle, and verified database TLS by default). See [RDS configuration](docs/rds-postgresql.md) and the [ECS/Fargate task example](examples/ecs-rds.task-definition.json). Live cloud certification is pending dedicated staging tests.
 - Java 25 LTS for both build optimization (Temurin JDK) and the final distroless runtime. Select the latest LTS explicitly supported by the pinned Keycloak release, rather than copying the upstream container's default JDK. [Keycloak recommends Java 25](https://www.keycloak.org/server/supported-configurations); its upstream container remains on Java 21. Build tools and the JDK are excluded from the final image.
 - Linux amd64. Keycloak, distroless, and the verification database are pinned by digest in [images.lock.json](images.lock.json).
 - Buildah for builds; Podman for verification/runtime; Skopeo for OCI inspection. No Docker daemon, Docker CLI, Docker-in-Docker, or Docker-based build actions are required. The `docker.io` registry and Skopeo's `docker://` registry transport are names, not Docker tooling.
@@ -27,11 +28,15 @@ sudo apt-get update
 sudo apt-get install --no-install-recommends -y buildah podman skopeo
 bash scripts/build.sh
 bash scripts/verify-image.sh
+
+# The AWS profile uses the wrapper JDBC URL format described in docs/rds-postgresql.md.
+BUILD_PROFILE=aws bash scripts/build.sh
+BUILD_PROFILE=aws bash scripts/verify-image.sh
 ```
 
 On Windows, use a separate Linux host or Linux WSL distribution; Docker Desktop is not needed. Rootless Buildah/Podman require working user namespaces and subordinate UID/GID mappings.
 
-CI builds with Buildah, checks the build JDK major and shell-free filesystem, verifies the locked Keycloak and runtime Java versions/non-root configuration, starts Keycloak against temporary PostgreSQL on a read-only root filesystem, and checks graceful SIGTERM shutdown. It then uploads an OCI archive, its SHA-256 checksum, and the input lock file. CI does not publish registry images. Download the artifact from [Actions](https://github.com/rambow-cloud/keycloak/actions/workflows/ci.yml) and load it with:
+CI builds both profiles with Buildah, checks Java/Keycloak versions and the shell-free/non-root filesystem, and starts each image against temporary PostgreSQL with verified TLS and a read-only root filesystem. Wrong CA and hostname configurations must fail. Protocol tests create an isolated realm, perform database writes, validate signed client-credentials tokens, and remove the realm before checking graceful shutdown. The required `Build and verify` status aggregates static checks and both image jobs. Each profile uploads its OCI archive, checksum, and locks. CI does not publish registry images. Download a profile artifact from [Actions](https://github.com/rambow-cloud/keycloak/actions/workflows/ci.yml) and load it with:
 
 ```sh
 sha256sum -c keycloak.oci.tar.sha256
@@ -47,6 +52,14 @@ node scripts/lock-images.mjs 26.8.1
 ```
 
 Review changes in a maintenance issue/PR and rerun the image checks. There is no floating base image fallback.
+
+To refresh AWS dependencies and the public RDS CA bundle, use Maven 3.9+ and Java 17+ on the maintenance host:
+
+```sh
+node scripts/aws-dependencies.mjs lock
+```
+
+Review and commit the POM, JAR lock, and updated image lock together. Normal AWS builds only download the locked JARs and CA bundle and verify their SHA-256 hashes; they do not require Maven. The asynchronous Netty client and duplicate PostgreSQL/SLF4J JARs are excluded. The AWS fixture also exercises IAM token signing with deliberately fake credentials; PostgreSQL must reject that token. This is not live RDS IAM certification. See [external staging verification](docs/rds-postgresql.md#external-staging-verification) for opt-in cloud tests.
 
 ## Run locally against existing PostgreSQL
 
