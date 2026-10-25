@@ -1,0 +1,165 @@
+{
+  "pomSha256": "0f31e880b07448d9197b08e4639a00e06f6d6ea8b00c83ef85b55396b5c9020c",
+  "artifacts": [
+    {
+      "file": "annotations-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/annotations/2.46.10/annotations-2.46.10.jar",
+      "sha256": "a2487ca282aee85e4b29015d1a6cf864417335182bf07bca8c6e1f0bc9de5b40"
+    },
+    {
+      "file": "apache5-client-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/apache5-client/2.46.10/apache5-client-2.46.10.jar",
+      "sha256": "e57f9df68a7622756acbe9d4a3b3f18a4d6c29e5b90037d6bffcbaa90e2653fe"
+    },
+    {
+      "file": "auth-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/auth/2.46.10/auth-2.46.10.jar",
+      "sha256": "5d6e8f8e2179d5fb2849b6da85e1e7a4a4f13ee466e9d08446489dff4800ac4f"
+    },
+    {
+      "file": "aws-advanced-jdbc-wrapper-4.5.0.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/jdbc/aws-advanced-jdbc-wrapper/4.5.0/aws-advanced-jdbc-wrapper-4.5.0.jar",
+      "sha256": "38a37853c22247cc7520ebd35dee2e12e7e57f1ae2ab2b078bce8f88ac14f006"
+    },
+    {
+      "file": "aws-core-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/aws-core/2.46.10/aws-core-2.46.10.jar",
+      "sha256": "5efdafa60c7a9e991a40f00125513f44cfdd86037692da4d2f12afc1e0201f62"
+    },
+    {
+      "file": "aws-query-protocol-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/aws-query-protocol/2.46.10/aws-query-protocol-2.46.10.jar",
+      "sha256": "8168bb8d5f2ee8045d8ad491534c70c7795ecef82f14cda6aa723e2bc59b1db7"
+    },
+    {
+      "file": "checksums-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/checksums/2.46.10/checksums-2.46.10.jar",
+      "sha256": "55af2e74e74e4214be024d14ef576a6c21c42ed856c1974971c146ab8a1311e1"
+    },
+    {
+      "file": "checksums-spi-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/checksums-spi/2.46.10/checksums-spi-2.46.10.jar",
+      "sha256": "f96abdad10e6c4dccf392600bff427c02fdb5dc390814f5cf60eaf305fb73a79"
+    },
+    {
+      "file": "endpoints-spi-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/endpoints-spi/2.46.10/endpoints-spi-2.46.10.jar",
+      "sha256": "fda194720a4b496c9b554d6d96a4eceaed55b7fc1908beddd6925f3d89877e4b"
+    },
+    {
+      "file": "eventstream-1.0.1.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/eventstream/eventstream/1.0.1/eventstream-1.0.1.jar",
+      "sha256": "0c37d8e696117f02c302191b8110b0d0eb20fa412fce34c3a269ec73c16ce822"
+    },
+    {
+      "file": "http-auth-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/http-auth/2.46.10/http-auth-2.46.10.jar",
+      "sha256": "ff305223d103c025f0e804480400635b7626aa345d38e9399148d596a7d1ce62"
+    },
+    {
+      "file": "http-auth-aws-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/http-auth-aws/2.46.10/http-auth-aws-2.46.10.jar",
+      "sha256": "5fba8ca04bfb0b05ee82fb411a421813a02107d3281d3d99118cf4300ab21cac"
+    },
+    {
+      "file": "http-auth-aws-eventstream-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/http-auth-aws-eventstream/2.46.10/http-auth-aws-eventstream-2.46.10.jar",
+      "sha256": "dd8cc5b3b5413953c36275053d6c4408d913ec4e63d819ee1c227680023ff736"
+    },
+    {
+      "file": "http-auth-spi-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/http-auth-spi/2.46.10/http-auth-spi-2.46.10.jar",
+      "sha256": "a8abccf97d2093e884ea729f49db4bb7dbe16b47aac71dc53ae751d5cf7748d5"
+    },
+    {
+      "file": "http-client-spi-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/http-client-spi/2.46.10/http-client-spi-2.46.10.jar",
+      "sha256": "67dc8ad4d8d4402cdc11430d639418ee22b9c4439406ae76e1360e277a7c4877"
+    },
+    {
+      "file": "httpclient5-5.6.1.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.6.1/httpclient5-5.6.1.jar",
+      "sha256": "1e3d8444c3c27772e4b9d42a790f06b3345a8ece4fd16d00981f2f2460e1e772"
+    },
+    {
+      "file": "httpcore5-5.4.2.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.4.2/httpcore5-5.4.2.jar",
+      "sha256": "7c34a25506e7207b6748cef9e91163ed03081bee805cef930d82e1d8761d62f1"
+    },
+    {
+      "file": "httpcore5-h2-5.4.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.4/httpcore5-h2-5.4.jar",
+      "sha256": "2e0f4ace15db2d1609c2b06eca6012e7582afe4a99ad8d15073f62dd8edb3460"
+    },
+    {
+      "file": "identity-spi-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/identity-spi/2.46.10/identity-spi-2.46.10.jar",
+      "sha256": "f59b879865cc742326f517d68aa77b9fad92c9dbb67d18b77b6fb30613808bfc"
+    },
+    {
+      "file": "json-utils-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/json-utils/2.46.10/json-utils-2.46.10.jar",
+      "sha256": "512db609a394d889d1f30f1b536bed30c1f1950fa23cbd867a18fa195e205208"
+    },
+    {
+      "file": "metrics-spi-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/metrics-spi/2.46.10/metrics-spi-2.46.10.jar",
+      "sha256": "e46a1d7cc5d878eb1be2e8e14eccc40c083e2afc814c3f09b21605b6b6c91865"
+    },
+    {
+      "file": "profiles-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/profiles/2.46.10/profiles-2.46.10.jar",
+      "sha256": "eea678410179eac567f4d82ba857890b34b2e4d2886eeb0d243b80b92cafbfad"
+    },
+    {
+      "file": "protocol-core-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/protocol-core/2.46.10/protocol-core-2.46.10.jar",
+      "sha256": "650add48c3aabac4da9e053434e06a0e5e55fa218519de6f56047da553b71119"
+    },
+    {
+      "file": "rds-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/rds/2.46.10/rds-2.46.10.jar",
+      "sha256": "d6da475d372a133c071e5829f0e2e59452b5dba91f4dafc2889793ff2ec4a35f"
+    },
+    {
+      "file": "reactive-streams-1.0.4.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/reactivestreams/reactive-streams/1.0.4/reactive-streams-1.0.4.jar",
+      "sha256": "f75ca597789b3dac58f61857b9ac2e1034a68fa672db35055a8fb4509e325f28"
+    },
+    {
+      "file": "regions-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/regions/2.46.10/regions-2.46.10.jar",
+      "sha256": "ff9385a946b61ce85604b13b886aa7aaaa5b895c3cd4e906b90abfe0f1e9f2a8"
+    },
+    {
+      "file": "retries-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/retries/2.46.10/retries-2.46.10.jar",
+      "sha256": "64955e52bc902e51dceb945fdf9955a87d308021676136f3e5661844e9009102"
+    },
+    {
+      "file": "retries-spi-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/retries-spi/2.46.10/retries-spi-2.46.10.jar",
+      "sha256": "9458d9095688b7eb7d592c21a1f4d70e9198a4c6b85dbf203bc49a5a707548bc"
+    },
+    {
+      "file": "sdk-core-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/sdk-core/2.46.10/sdk-core-2.46.10.jar",
+      "sha256": "a36c1ce4930a09c55b2355baa24ec2399dc4ada507959071889d8609971bd4f0"
+    },
+    {
+      "file": "third-party-jackson-core-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/third-party-jackson-core/2.46.10/third-party-jackson-core-2.46.10.jar",
+      "sha256": "b0750c5294de4a74ba7377326aee99aca277c763b746bf61629d373ca7a9c6dc"
+    },
+    {
+      "file": "utils-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/utils/2.46.10/utils-2.46.10.jar",
+      "sha256": "92709de1d3f1c4c2a1e9c0cec33f452883cc1fe3f55b83dbae6515f50c6d335f"
+    },
+    {
+      "file": "utils-lite-2.46.10.jar",
+      "url": "https://repo.maven.apache.org/maven2/software/amazon/awssdk/utils-lite/2.46.10/utils-lite-2.46.10.jar",
+      "sha256": "6ba8b2d5ebafbd83bab7cf3cf4a2ef530aa10643b76848c6d249bf92a20075b3"
+    }
+  ]
+}

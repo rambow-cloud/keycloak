@@ -10,27 +10,43 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  build:
-    name: Build and verify
+  static:
+    name: Static checks
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Check issue policy and whitespace
+      - name: Check policy, scripts, and whitespace
         run: |
-          node --test tests/issue-policy.test.cjs
+          node --test tests/*.test.cjs
+          node --check scripts/aws-dependencies.mjs
+          node --check scripts/verify-external.mjs
+          node --check tests/keycloak-protocol.mjs
+          shellcheck scripts/*.sh
           git show --format= --check HEAD
+  build:
+    name: Build ${{ matrix.profile }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [core, aws]
+    env:
+      BUILD_PROFILE: ${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Install open-source OCI tools
         run: |
           sudo apt-get update
-          sudo apt-get install --no-install-recommends -y buildah podman skopeo shellcheck
+          sudo apt-get install --no-install-recommends -y buildah podman skopeo openssl
           buildah --version
           podman --version
           skopeo --version
-      - name: Check shell scripts
-        run: shellcheck scripts/*.sh
       - name: Build OCI image with Buildah
         run: bash scripts/build.sh
       - name: Verify distroless image against PostgreSQL
@@ -40,13 +56,28 @@ jobs:
           mkdir -p dist
           buildah push localhost/rambow-keycloak:test oci-archive:dist/keycloak.oci.tar
           cp images.lock.json dist/
+          if [ "$BUILD_PROFILE" = aws ]; then cp dependencies/aws/dependencies.lock.json dist/; fi
       - name: Checksum OCI archive
         working-directory: dist
         run: sha256sum keycloak.oci.tar > keycloak.oci.tar.sha256
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: keycloak-oci-amd64-${{ github.sha }}
+          name: keycloak-oci-${{ matrix.profile }}-amd64-${{ github.sha }}
           path: dist/
           compression-level: 0
           retention-days: 7
           if-no-files-found: error
+  verify:
+    name: Build and verify
+    if: always()
+    needs: [static, build]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Require static checks and both image profiles
+        env:
+          STATIC_RESULT: ${{ needs.static.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+        run: |
+          test "$STATIC_RESULT" = success
+          test "$BUILD_RESULT" = success

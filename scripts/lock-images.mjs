@@ -1,5 +1,5 @@
 // Resolve immutable OCI index digests. Review and commit this file's output through an Issue/PR.
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 
 const version = process.argv[2];
@@ -39,5 +39,6 @@ async function resolve(reference) {
   return `${reference}@${digest}`;
 }
 const resolved = Object.fromEntries(await Promise.all(Object.entries(images).map(async ([key, ref]) => [key, await resolve(ref)])));
-await writeFile(new URL('../images.lock.json', import.meta.url), JSON.stringify({ keycloakVersion: version, javaVersion, platform: 'linux/amd64', ...resolved }, null, 2) + '\n');
+const previous = JSON.parse(await readFile(new URL('../images.lock.json', import.meta.url), 'utf8'));
+await writeFile(new URL('../images.lock.json', import.meta.url), JSON.stringify({ keycloakVersion: version, javaVersion, platform: 'linux/amd64', ...resolved, awsDependencies: previous.awsDependencies }, null, 2) + '\n');
 console.log('Updated images.lock.json; review digests and verify the resulting image before merging.');

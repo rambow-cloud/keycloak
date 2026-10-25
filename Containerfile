@@ -5,22 +5,42 @@ ARG RUNTIME_IMAGE
 ARG KEYCLOAK_JAVA_MAJOR
 FROM ${KEYCLOAK_IMAGE} AS distribution
 
-FROM ${BUILD_IMAGE} AS builder
+FROM ${BUILD_IMAGE} AS source
 ARG KEYCLOAK_JAVA_MAJOR
 COPY --from=distribution /opt/keycloak /opt/keycloak
 ENV KC_DB=postgres KC_HEALTH_ENABLED=true KC_METRICS_ENABLED=true
-RUN java -version 2>&1 | grep -F "version \"${KEYCLOAK_JAVA_MAJOR}." && /opt/keycloak/bin/kc.sh build
+RUN java -version 2>&1 | grep -F "version \"${KEYCLOAK_JAVA_MAJOR}."
+
+FROM source AS core-builder
+RUN /opt/keycloak/bin/kc.sh build
 USER 0
 RUN rm -rf /opt/keycloak/bin && mkdir -p /opt/keycloak/data && chmod -R a+rX /opt/keycloak
 
-FROM ${RUNTIME_IMAGE}
-COPY --from=builder --chown=0:0 /opt/keycloak /opt/keycloak
-COPY --from=builder --chown=65532:65532 /opt/keycloak/data /opt/keycloak/data
+FROM source AS aws-builder
+COPY .cache/aws/providers/ /opt/keycloak/providers/
+ENV KC_DB_DRIVER=software.amazon.jdbc.Driver KC_TRANSACTION_XA_ENABLED=false
+RUN /opt/keycloak/bin/kc.sh build
+RUN rm -rf /opt/keycloak/bin && mkdir -p /opt/keycloak/data && chmod -R a+rX /opt/keycloak
+
+FROM ${RUNTIME_IMAGE} AS runtime
 COPY --chown=0:0 config/java.options /opt/keycloak/java.options
 ENV KC_DB=postgres KC_HEALTH_ENABLED=true KC_METRICS_ENABLED=true \
     JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=70 -XX:MinRAMPercentage=70 -XX:InitialRAMPercentage=50"
 WORKDIR /opt/keycloak
 USER 65532:65532
+VOLUME ["/tmp", "/opt/keycloak/data"]
 EXPOSE 8080 8443 9000
 ENTRYPOINT ["/usr/bin/java", "@/opt/keycloak/java.options", "-cp", "/opt/keycloak/lib/quarkus-run.jar", "io.quarkus.bootstrap.runner.QuarkusEntryPoint"]
 CMD ["start", "--optimized"]
+
+FROM runtime AS aws
+COPY --from=aws-builder --chown=0:0 /opt/keycloak /opt/keycloak
+COPY --from=aws-builder --chown=65532:65532 /opt/keycloak/data /opt/keycloak/data
+COPY --chown=0:0 .cache/aws/certs/rds-ca-bundle.pem /opt/keycloak/certs/rds-ca-bundle.pem
+ENV KC_DB_DRIVER=software.amazon.jdbc.Driver KC_TRANSACTION_XA_ENABLED=false \
+    KC_DB_TLS_MODE=verify-server KC_DB_TLS_TRUST_STORE_FILE=/opt/keycloak/certs/rds-ca-bundle.pem
+
+# Keep the generic image as the default final target for direct Containerfile users.
+FROM runtime AS core
+COPY --from=core-builder --chown=0:0 /opt/keycloak /opt/keycloak
+COPY --from=core-builder --chown=65532:65532 /opt/keycloak/data /opt/keycloak/data
