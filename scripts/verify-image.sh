@@ -117,7 +117,7 @@ if [[ "$profile" == aws ]]; then
   start_server database ca.pem true
   iam_rejected=false
   for ((attempt=0; attempt<60; attempt++)); do
-    if podman logs "$server" 2>&1 | grep -q 'password authentication failed'; then iam_rejected=true; break; fi
+    if podman logs "$server" 2>&1 | grep -F 'password authentication failed' >/dev/null; then iam_rejected=true; break; fi
     [[ "$(podman inspect --format '{{.State.Running}}' "$server")" == true ]] || break
     sleep 2
   done
@@ -135,5 +135,5 @@ podman exec "$db" psql -U keycloak -d keycloak -Atc "SELECT count(*) FROM databa
 podman stop --time 30 "$server" >/dev/null
 exit_code=$(podman inspect --format '{{.State.ExitCode}}' "$server")
 [[ "$exit_code" == 0 || "$exit_code" == 143 ]] || { echo "Unexpected shutdown: $exit_code" >&2; exit 1; }
-podman logs "$server" 2>&1 | grep -Eq 'stopped in|Shutdown complete'
+podman logs "$server" 2>&1 | grep -E 'stopped in|Shutdown complete' >/dev/null
 echo "Verified $profile: Java/Keycloak versions, UID, shell-free rootfs, verified TLS, schema, authentication and graceful shutdown."
