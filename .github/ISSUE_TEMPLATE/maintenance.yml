@@ -1,0 +1,44 @@
+name: "Maintenance task"
+description: "Plan dependency, security, documentation, CI, or release maintenance."
+title: "[Maintenance]: "
+labels: ["maintenance"]
+body:
+  - type: markdown
+    attributes:
+      value: "Use English. Complete every section before implementation. Never include secrets or undisclosed vulnerability details."
+  - type: textarea
+    id: goal
+    attributes:
+      label: "Maintenance goal"
+      description: "Describe the maintenance need and reason."
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: "Scope"
+      description: "List affected components and explicit boundaries."
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: "Security and compatibility"
+      description: "Describe security, supply chain, runtime, and compatibility impact."
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "Acceptance criteria"
+      description: "List observable outcomes as Markdown checkboxes."
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: "Validation plan"
+      description: "Describe relevant validation and how success will be assessed."
+    validations:
+      required: true
+

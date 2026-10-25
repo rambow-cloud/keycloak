@@ -1,0 +1,44 @@
+name: "Feature request"
+description: "Propose a feature with scope, security impact, and acceptance criteria."
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: "Use English. Complete every section before implementation. Never include secrets or undisclosed vulnerability details."
+  - type: textarea
+    id: motivation
+    attributes:
+      label: "Problem and motivation"
+      description: "Describe the user need and why the current behavior is insufficient."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Proposed solution"
+      description: "Describe the intended behavior and scope. Include alternatives if relevant."
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: "Security and compatibility"
+      description: "Describe security impact, runtime/base image changes, and compatibility. State none with a reason if applicable."
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "Acceptance criteria"
+      description: "List observable outcomes as Markdown checkboxes."
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: "Validation plan"
+      description: "Describe the checks that demonstrate the intended behavior."
+    validations:
+      required: true
+

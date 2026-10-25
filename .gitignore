@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+dist/
+node_modules/
+*.oci.tar
+*.log
+*.pem
+*.key
+auth.json

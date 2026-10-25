@@ -1,0 +1,36 @@
+[
+  {
+    "prefix": "[Feature]:",
+    "requiredSections": [
+      "Problem and motivation",
+      "Proposed solution",
+      "Security and compatibility",
+      "Acceptance criteria",
+      "Validation plan"
+    ]
+  },
+  {
+    "prefix": "[Bug]:",
+    "requiredSections": [
+      "Problem description",
+      "Reproduction steps",
+      "Expected behavior",
+      "Actual behavior",
+      "Environment",
+      "Sanitized logs",
+      "Acceptance criteria",
+      "Validation plan"
+    ]
+  },
+  {
+    "prefix": "[Maintenance]:",
+    "requiredSections": [
+      "Maintenance goal",
+      "Scope",
+      "Security and compatibility",
+      "Acceptance criteria",
+      "Validation plan"
+    ]
+  }
+]
+

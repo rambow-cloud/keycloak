@@ -1,0 +1,27 @@
+# Aligned with Keycloak 26.8.1 kc.sh; re-check on every Keycloak upgrade.
+-Dkc.home.dir=/opt/keycloak
+-Djboss.server.config.dir=/opt/keycloak/conf
+-Djava.util.logging.manager=org.jboss.logmanager.LogManager
+-Dpicocli.disable.closures=true
+-Dquarkus-log-max-startup-records=10000
+-Dkc.script.pid=1
+-Djava.util.concurrent.ForkJoinPool.common.threadFactory=io.quarkus.bootstrap.forkjoin.QuarkusForkJoinWorkerThreadFactory
+-Dfile.encoding=UTF-8
+-Dsun.stdout.encoding=UTF-8
+-Dsun.err.encoding=UTF-8
+-Dstdout.encoding=UTF-8
+-Dstderr.encoding=UTF-8
+-Djava.security.egd=file:/dev/urandom
+-Djdk.tls.rejectClientInitiatedRenegotiation=true
+-Duser.language=en
+-Duser.country=US
+-XX:MetaspaceSize=96M
+-XX:MaxMetaspaceSize=256m
+-XX:+ExitOnOutOfMemoryError
+-XX:+UseG1GC
+-XX:FlightRecorderOptions=stackdepth=512
+--add-opens=java.base/java.util=ALL-UNNAMED
+--add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+--add-opens=java.base/java.security=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+--enable-native-access=ALL-UNNAMED
