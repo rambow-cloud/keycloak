@@ -1,9 +1,15 @@
 # Build arguments are supplied exclusively from images.lock.json by scripts/build.sh.
 ARG KEYCLOAK_IMAGE
+ARG BUILD_IMAGE
 ARG RUNTIME_IMAGE
-FROM ${KEYCLOAK_IMAGE} AS builder
+ARG JAVA_VERSION
+FROM ${KEYCLOAK_IMAGE} AS distribution
+
+FROM ${BUILD_IMAGE} AS builder
+ARG JAVA_VERSION
+COPY --from=distribution /opt/keycloak /opt/keycloak
 ENV KC_DB=postgres KC_HEALTH_ENABLED=true KC_METRICS_ENABLED=true
-RUN /opt/keycloak/bin/kc.sh build
+RUN java -version 2>&1 | grep -F "version \"${JAVA_VERSION}." && /opt/keycloak/bin/kc.sh build
 USER 0
 RUN rm -rf /opt/keycloak/bin && mkdir -p /opt/keycloak/data && chmod -R a+rX /opt/keycloak
 

@@ -3,6 +3,7 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 image=${IMAGE_TAG:-localhost/rambow-keycloak:test}
 version=$(node -p "require('./images.lock.json').keycloakVersion")
+java_version=$(node -p "require('./images.lock.json').javaVersion")
 postgres=$(node -p "require('./images.lock.json').postgres")
 run_id="kc-verify-${RANDOM}-${RANDOM}"
 network="$run_id-net"
@@ -14,6 +15,10 @@ cleanup() {
 }
 trap cleanup EXIT
 [[ "$(podman image inspect --format '{{.Config.User}}' "$image")" == '65532:65532' ]]
+java_output=$(podman run --rm --read-only --cap-drop=ALL --security-opt=no-new-privileges \
+  --entrypoint /usr/bin/java "$image" -version 2>&1)
+printf '%s\n' "$java_output"
+grep -F "version \"$java_version." <<< "$java_output"
 podman run --rm --read-only --cap-drop=ALL --security-opt=no-new-privileges "$image" --version | tee /tmp/"$run_id-version.log"
 grep -F "Keycloak $version" /tmp/"$run_id-version.log"
 rm /tmp/"$run_id-version.log"
@@ -57,4 +62,4 @@ podman stop --time 30 "$server" >/dev/null
 exit_code=$(podman inspect --format '{{.State.ExitCode}}' "$server")
 [[ "$exit_code" == 0 || "$exit_code" == 143 ]] || { echo "Unexpected shutdown: $exit_code" >&2; exit 1; }
 podman logs "$server" 2>&1 | grep -Eq 'stopped in|Shutdown complete'
-echo 'Verified: version, UID, shell-free rootfs, read-only PostgreSQL startup and graceful SIGTERM shutdown.'
+echo 'Verified: Keycloak and Java versions, UID, shell-free rootfs, read-only PostgreSQL startup and graceful SIGTERM shutdown.'

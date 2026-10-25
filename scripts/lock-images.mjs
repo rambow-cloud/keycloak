@@ -4,9 +4,12 @@ import { createHash } from 'node:crypto';
 
 const version = process.argv[2];
 if (!/^\d+\.\d+\.\d+$/.test(version ?? '')) throw new Error('Usage: node scripts/lock-images.mjs <x.y.z>');
+// Latest LTS explicitly supported by Keycloak 26.8.1; verify official support before changing.
+const javaVersion = 25;
 const images = {
   keycloak: `quay.io/keycloak/keycloak:${version}`,
-  runtime: 'gcr.io/distroless/java21-debian13:nonroot',
+  builder: `docker.io/library/eclipse-temurin:${javaVersion}-jdk-noble`,
+  runtime: `gcr.io/distroless/java${javaVersion}-debian13:nonroot`,
   postgres: 'docker.io/library/postgres:17-bookworm',
 };
 async function resolve(reference) {
@@ -36,5 +39,5 @@ async function resolve(reference) {
   return `${reference}@${digest}`;
 }
 const resolved = Object.fromEntries(await Promise.all(Object.entries(images).map(async ([key, ref]) => [key, await resolve(ref)])));
-await writeFile(new URL('../images.lock.json', import.meta.url), JSON.stringify({ keycloakVersion: version, platform: 'linux/amd64', ...resolved }, null, 2) + '\n');
+await writeFile(new URL('../images.lock.json', import.meta.url), JSON.stringify({ keycloakVersion: version, javaVersion, platform: 'linux/amd64', ...resolved }, null, 2) + '\n');
 console.log('Updated images.lock.json; review digests and verify the resulting image before merging.');
