@@ -1,13 +1,14 @@
 # Rambow Cloud Keycloak
 
-Keycloak OCI images built with **Buildah**, with **distroless Java 21** and **non-root UID 65532** by default. This project uses issue-driven development and English throughout.
+Keycloak OCI images built with **Buildah**, with **distroless Java 25 LTS** and **non-root UID 65532** by default. This project uses issue-driven development and English throughout.
 
 ## Initial supported configuration
 
 - Keycloak 26.8.1, optimized at build time for PostgreSQL, with health and metrics enabled.
+- Java 25 LTS for both build optimization (Temurin JDK) and the final distroless runtime. Select the latest LTS explicitly supported by the pinned Keycloak release, rather than copying the upstream container's default JDK. [Keycloak recommends Java 25](https://www.keycloak.org/server/supported-configurations); its upstream container remains on Java 21. Build tools and the JDK are excluded from the final image.
 - Linux amd64. Keycloak, distroless, and the verification database are pinned by digest in [images.lock.json](images.lock.json).
 - Buildah for builds; Podman for verification/runtime; Skopeo for OCI inspection. No Docker daemon, Docker CLI, Docker-in-Docker, or Docker-based build actions are required. The `docker.io` registry and Skopeo's `docker://` registry transport are names, not Docker tooling.
-- A multi-stage [Containerfile](Containerfile) copies the optimized Keycloak distribution into a shell-free distroless runtime. Java runs directly as PID 1. Application files are root-owned; only the data directory is owned by UID 65532.
+- A multi-stage [Containerfile](Containerfile) takes the official Keycloak distribution, optimizes it using a pinned Temurin 25 JDK, and copies it into a shell-free distroless Java 25 runtime. Java runs directly as PID 1. Application files are root-owned; only the data directory is owned by UID 65532.
 
 ## Issue-driven workflow
 
@@ -30,7 +31,7 @@ bash scripts/verify-image.sh
 
 On Windows, use a separate Linux host or Linux WSL distribution; Docker Desktop is not needed. Rootless Buildah/Podman require working user namespaces and subordinate UID/GID mappings.
 
-CI builds with Buildah, checks the shell-free filesystem, verifies the version/non-root configuration, starts Keycloak against temporary PostgreSQL on a read-only root filesystem, and checks graceful SIGTERM shutdown. It then uploads an OCI archive, its SHA-256 checksum, and the input lock file. CI does not publish registry images. Download the artifact from [Actions](https://github.com/rambow-cloud/keycloak/actions/workflows/ci.yml) and load it with:
+CI builds with Buildah, checks the build JDK major and shell-free filesystem, verifies the locked Keycloak and runtime Java versions/non-root configuration, starts Keycloak against temporary PostgreSQL on a read-only root filesystem, and checks graceful SIGTERM shutdown. It then uploads an OCI archive, its SHA-256 checksum, and the input lock file. CI does not publish registry images. Download the artifact from [Actions](https://github.com/rambow-cloud/keycloak/actions/workflows/ci.yml) and load it with:
 
 ```sh
 sha256sum -c keycloak.oci.tar.sha256

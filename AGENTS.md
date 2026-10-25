@@ -15,6 +15,7 @@ Build Keycloak OCI images for Rambow Cloud. Prefer distroless Java, a non-root u
 
 ## Image requirements
 
+- Use the latest LTS Java version explicitly supported by the selected Keycloak release for both build optimization and runtime. Verify against official Keycloak documentation on upgrades; do not infer the supported maximum from the upstream container's default JDK. Currently this is Java 25 for Keycloak 26.8.1. Record the major in `images.lock.json` and verify it in CI.
 - `images.lock.json` is the source of truth for the Keycloak version and immutable base image digests. Do not use floating base images or publish a `latest` tag.
 - Default to distroless nonroot with UID/GID 65532. The final image must have no shell, package manager, or build tool. Do not add a shell to fix startup.
 - The direct Java entrypoint supports prebuilt `start --optimized`. On every Keycloak upgrade, compare JVM properties, module access options, and the launcher class against the matching upstream `kc.sh`, then verify graceful shutdown. Changes to build-time options, providers, or database vendor require a rebuild.
