@@ -20,4 +20,4 @@ bash scripts/build.sh
 bash scripts/verify-image.sh
 ```
 
-Image checks require Linux, Buildah, Podman, Skopeo, and Node.js 22+. The verification script creates temporary PostgreSQL and Keycloak containers, checks the shell-free rootfs, non-root configuration, startup on a read-only root filesystem, and SIGTERM shutdown, then removes its resources. Do not run it against production instances.
+Image checks require Linux, Buildah, Podman, Skopeo, OpenSSL, and Node.js 22+. The verification script creates temporary PostgreSQL and Keycloak containers, checks the shell-free rootfs, non-root configuration, verified database TLS, startup on a read-only root filesystem, protocol authentication, and SIGTERM shutdown, then removes its resources. Set `BUILD_PROFILE=aws` for the AWS image; the default is `core`. Do not run the external verifier against production instances.

@@ -22,11 +22,11 @@ Issue #1 covers the one-time bootstrap commit. All subsequent changes go through
 
 ## Build and verify
 
-Use Linux with Node.js 22+, Buildah, Podman, and Skopeo. Ubuntu 24.04:
+Use Linux with Node.js 22+, Buildah, Podman, Skopeo, and OpenSSL. Ubuntu 24.04:
 
 ```sh
 sudo apt-get update
-sudo apt-get install --no-install-recommends -y buildah podman skopeo
+sudo apt-get install --no-install-recommends -y buildah podman skopeo openssl
 bash scripts/build.sh
 bash scripts/verify-image.sh
 
