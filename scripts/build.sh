@@ -13,7 +13,7 @@ for image in "$keycloak" "$builder" "$runtime"; do
 done
 buildah build --format oci --platform "$(read_lock platform)" \
   --build-arg "KEYCLOAK_IMAGE=$keycloak" --build-arg "BUILD_IMAGE=$builder" \
-  --build-arg "RUNTIME_IMAGE=$runtime" --build-arg "JAVA_VERSION=$java_version" \
+  --build-arg "RUNTIME_IMAGE=$runtime" --build-arg "KEYCLOAK_JAVA_MAJOR=$java_version" \
   --label "org.opencontainers.image.title=Rambow Cloud Keycloak" \
   --label "org.opencontainers.image.source=https://github.com/rambow-cloud/keycloak" \
   --label "org.opencontainers.image.version=$(read_lock keycloakVersion)" \
