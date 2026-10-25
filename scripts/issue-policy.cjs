@@ -34,4 +34,14 @@ async function checkPullRequest({ github, context }) {
     console.log('Validated issue #' + issue_number + ': ' + issue.title);
   }
 }
-module.exports = { issueNumbers, validateIssue, checkPullRequest };
+async function checkDispatchedPullRequest({ github, context, number }) {
+  if (!/^[1-9][0-9]*$/.test(String(number))) throw new Error('A valid pull request number is required.');
+  const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: Number(number) });
+  if (pr.state !== 'open' || pr.head.repo?.full_name !== context.repo.owner + '/' + context.repo.repo ||
+      pr.head.sha !== context.sha || context.ref !== 'refs/heads/' + pr.head.ref ||
+      pr.base.ref !== context.payload.repository.default_branch) {
+    throw new Error('Dispatched policy must run on the open local PR head targeting the default branch.');
+  }
+  await checkPullRequest({ github, context: { ...context, payload: { ...context.payload, pull_request: pr } } });
+}
+module.exports = { issueNumbers, validateIssue, checkPullRequest, checkDispatchedPullRequest };
