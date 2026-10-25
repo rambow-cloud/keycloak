@@ -2,6 +2,8 @@
 !Containerfile
 !config
 !config/java.options
+!tests
+!tests/AwsHttpTransport.java
 !.cache
 !.cache/aws
 !.cache/aws/providers

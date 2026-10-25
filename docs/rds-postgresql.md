@@ -2,6 +2,8 @@
 
 The `core` profile supports password authentication with the PostgreSQL driver bundled by Keycloak. The `aws` profile adds AWS Advanced JDBC Wrapper 4.5.0 and SDK 2.46.10 for task-role IAM authentication. Both remain Java 25, distroless, and UID 65532 images built with Buildah. The AWS image includes a checksum-pinned **public** RDS CA bundle and defaults to verified database TLS; no credentials are baked in.
 
+The AWS dependency graph explicitly pins Apache HttpClient 5.6.4 and HttpCore/HTTP2 5.4.4 to remediate CVE-2026-54399, CVE-2026-54428 and CVE-2026-64607. These stable patch overrides are recorded in the POM and SHA-256 lock. The AWS build exercises the real SDK Apache HTTP transport against a loopback fixture before optimization; it uses no cloud credentials. Both resulting images must pass the [Trivy gate](vulnerability-scanning.md).
+
 The initial reference is PostgreSQL 17 on a standard RDS PostgreSQL instance, including ordinary Multi-AZ instance endpoint reconnection. Aurora, RDS Proxy, and Multi-AZ DB clusters require separate validation. Local CI verifies both drivers with PostgreSQL/TLS fixtures and exercises IAM signing with fake credentials, expecting PostgreSQL to reject the generated token. Real RDS IAM and Fargate certification remains pending staging results.
 
 ## Password authentication

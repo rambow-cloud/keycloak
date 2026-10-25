@@ -1,5 +1,5 @@
 {
-  "pomSha256": "0f31e880b07448d9197b08e4639a00e06f6d6ea8b00c83ef85b55396b5c9020c",
+  "pomSha256": "c0279c08310b598b481110dbce47392fb7e10b0336b664c582ee9648f9e366d0",
   "artifacts": [
     {
       "file": "annotations-2.46.10.jar",
@@ -77,19 +77,19 @@
       "sha256": "67dc8ad4d8d4402cdc11430d639418ee22b9c4439406ae76e1360e277a7c4877"
     },
     {
-      "file": "httpclient5-5.6.1.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.6.1/httpclient5-5.6.1.jar",
-      "sha256": "1e3d8444c3c27772e4b9d42a790f06b3345a8ece4fd16d00981f2f2460e1e772"
+      "file": "httpclient5-5.6.4.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/apache/httpcomponents/client5/httpclient5/5.6.4/httpclient5-5.6.4.jar",
+      "sha256": "bdef5f8841145cd76c4c605ff301bc840eea0d5292332b7b892a93316c0d8ee1"
     },
     {
-      "file": "httpcore5-5.4.2.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.4.2/httpcore5-5.4.2.jar",
-      "sha256": "7c34a25506e7207b6748cef9e91163ed03081bee805cef930d82e1d8761d62f1"
+      "file": "httpcore5-5.4.4.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5/5.4.4/httpcore5-5.4.4.jar",
+      "sha256": "b08e3c3a440fec2029e89980134c7c787dd6796454641ad1eafb81478d7e8b0b"
     },
     {
-      "file": "httpcore5-h2-5.4.jar",
-      "url": "https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.4/httpcore5-h2-5.4.jar",
-      "sha256": "2e0f4ace15db2d1609c2b06eca6012e7582afe4a99ad8d15073f62dd8edb3460"
+      "file": "httpcore5-h2-5.4.4.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/apache/httpcomponents/core5/httpcore5-h2/5.4.4/httpcore5-h2-5.4.4.jar",
+      "sha256": "9a61441889f9b222ce99581977cc549b4dfca7ac9d2841582c1e57a31fa65b48"
     },
     {
       "file": "identity-spi-2.46.10.jar",
