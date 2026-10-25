@@ -6,6 +6,7 @@ Keycloak OCI images built with **Buildah**, with **distroless Java 25 LTS** and 
 
 - Keycloak 26.8.1, optimized at build time for PostgreSQL, with health and metrics enabled.
 - Two build profiles: `core` (default, native PostgreSQL driver) and `aws` (AWS JDBC Wrapper 4.5.0, AWS SDK 2.46.10, XA disabled, checksum-pinned public RDS CA bundle, and verified database TLS by default). See [RDS configuration](docs/rds-postgresql.md) and the [ECS/Fargate task example](examples/ecs-rds.task-definition.json). Live cloud certification is pending dedicated staging tests.
+- [PolarDB PostgreSQL configuration](docs/polardb-postgresql.md) uses the core profile, private primary endpoint, mounted CA, and native verified TLS. Compatibility is experimental until actual PolarDB schema, migration, and authentication checks pass; no Alibaba-specific SDK or JDBC driver is added.
 - Java 25 LTS for both build optimization (Temurin JDK) and the final distroless runtime. Select the latest LTS explicitly supported by the pinned Keycloak release, rather than copying the upstream container's default JDK. [Keycloak recommends Java 25](https://www.keycloak.org/server/supported-configurations); its upstream container remains on Java 21. Build tools and the JDK are excluded from the final image.
 - Linux amd64. Keycloak, distroless, and the verification database are pinned by digest in [images.lock.json](images.lock.json).
 - Buildah for builds; Podman for verification/runtime; Skopeo for OCI inspection. No Docker daemon, Docker CLI, Docker-in-Docker, or Docker-based build actions are required. The `docker.io` registry and Skopeo's `docker://` registry transport are names, not Docker tooling.
@@ -21,11 +22,11 @@ Issue #1 covers the one-time bootstrap commit. All subsequent changes go through
 
 ## Build and verify
 
-Use Linux with Node.js 22+, Buildah, Podman, and Skopeo. Ubuntu 24.04:
+Use Linux with Node.js 22+, Buildah, Podman, Skopeo, and OpenSSL. Ubuntu 24.04:
 
 ```sh
 sudo apt-get update
-sudo apt-get install --no-install-recommends -y buildah podman skopeo
+sudo apt-get install --no-install-recommends -y buildah podman skopeo openssl
 bash scripts/build.sh
 bash scripts/verify-image.sh
 
