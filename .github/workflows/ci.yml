@@ -24,6 +24,8 @@ jobs:
           node --check scripts/aws-dependencies.mjs
           node --check scripts/verify-external.mjs
           node --check tests/keycloak-protocol.mjs
+          node --check scripts/upstream-update.mjs
+          node scripts/check-upstream-compatibility.mjs
           shellcheck scripts/*.sh
           git show --format= --check HEAD
   build:

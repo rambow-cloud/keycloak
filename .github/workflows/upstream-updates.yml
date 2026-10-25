@@ -1,0 +1,38 @@
+name: Upstream updates
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Detect updates without writing Issues, branches or PRs
+        type: boolean
+        default: false
+  repository_dispatch:
+    types: [upstream-update]
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+concurrency:
+  group: upstream-updates
+  cancel-in-progress: false
+jobs:
+  update:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          DRY_RUN: ${{ inputs.dry_run || false }}
+        with:
+          script: |
+            const { runUpstreamUpdate } = await import(process.cwd() + '/scripts/upstream-update.mjs');
+            const result = await runUpstreamUpdate({ github, context, core, dryRun: process.env.DRY_RUN === 'true' });
+            await core.summary.addHeading('Upstream update result').addCodeBlock(JSON.stringify(result, null, 2), 'json').write();

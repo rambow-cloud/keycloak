@@ -46,7 +46,9 @@ podman load -i keycloak.oci.tar
 
 Archive checksums detect transfer corruption; they are not a signature or provenance attestation. Artifacts expire after seven days. Registry publication, SBOM generation, vulnerability scanning, signing, and multi-architecture support are follow-up work requiring their own issues before production releases.
 
-To refresh immutable inputs:
+The [automatic upstream updater](docs/upstream-updates.md) checks Keycloak, distroless and the current Temurin image family hourly. It creates an Issue-linked PR, runs both image profiles, and auto-merges patch/digest updates after required checks. Larger or compatibility-changing upgrades require review.
+
+To refresh immutable inputs manually:
 
 ```sh
 node scripts/lock-images.mjs 26.8.1

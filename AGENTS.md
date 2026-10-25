@@ -12,6 +12,7 @@ Build Keycloak OCI images for Rambow Cloud. Prefer distroless Java, a non-root u
 4. Use the PR template. Include a standalone `Closes #<issue>` line for each issue. Only issues in this repository are accepted; a PR cannot substitute for an issue. CI checks that every referenced issue exists, is open, and conforms to its template.
 5. Merge only after acceptance criteria, relevant checks, and review are complete. Let the merge close the issue. Do not push directly to main or bypass required checks. The only bootstrap exception is the initial setup tracked by issue #1; enable branch protection immediately afterward.
 6. After changing an issue's scope or body, rerun the PR's `Issue policy` check. Follow SECURITY.md for sensitive vulnerabilities; fixes may reference a sanitized maintenance issue without public exploit details.
+7. The upstream updater may enable native auto-merge for patch/digest changes within reviewed image families after required checks, as authorized by the project owner. Larger upgrades and compatibility warnings require maintainer review. Do not broaden auto-merge eligibility or weaken checks. See `docs/upstream-updates.md`.
 
 ## Image requirements
 
@@ -22,10 +23,11 @@ Build Keycloak OCI images for Rambow Cloud. Prefer distroless Java, a non-root u
 - Do not claim compatibility with `kc.sh`, `kcadm.sh`, `kcreg.sh`, `start-dev`, runtime reaugmentation, FIPS, additional architectures, or untested extensions.
 - Inject credentials at runtime. Never put secrets into image layers, build arguments, issues, logs, or Git. Do not disable TLS verification or require privileged containers as the normal solution.
 - Distroless reduces attack surface; it does not eliminate vulnerabilities. Update the base image, JVM, and Keycloak through issues.
+- The hourly updater never changes `config/upstream-compatibility.json`. Review changed upstream `kc.sh` and supported Java LTS before updating that baseline; never update the hash simply to make CI pass.
 
 ## Validation and delivery
 
-- Static checks: `node --test tests/issue-policy.test.cjs`, `git diff --check`, and ShellCheck in CI.
+- Static checks: `node --test tests/*.test.cjs`, `node scripts/check-upstream-compatibility.mjs`, whitespace checks, and ShellCheck in CI.
 - Linux image validation: `bash scripts/build.sh`, then `bash scripts/verify-image.sh`. CI uses Buildah/Podman on Ubuntu. On Windows, use an independent Linux/WSL environment without requiring Docker Desktop.
 - Run each relevant verification once. Repeat only after a newly understood failure or a meaningful state change. Test behavior and boundaries; avoid tests that merely mirror implementation.
 - If a result can be verified in a browser, provide the exact URL and checks instead of probing the page with curl or similar commands. For DNS, use server-side CloudFormation status and outputs; do not perform local DNS validation.
