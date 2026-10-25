@@ -13,7 +13,7 @@ export async function verifyKeycloak({ baseUrl, managementUrl, username, passwor
   let expires = 0;
   let created = false;
   async function request(path, options = {}) {
-    const response = await fetch(base + path, { ...options, signal: AbortSignal.timeout(15000) });
+    const response = await fetch(base + path, { ...options, redirect: 'error', signal: AbortSignal.timeout(15000) });
     // Do not print response bodies, tokens, or credential-bearing request data.
     if (!response.ok) throw new Error('Keycloak request failed: ' + options.method + ' ' + path + ' (' + response.status + ')');
     return response;
