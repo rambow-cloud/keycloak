@@ -62,4 +62,3 @@ body:
       description: "Explain how to reproduce the failure and verify the fix."
     validations:
       required: true
-

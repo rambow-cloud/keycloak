@@ -32,4 +32,3 @@ test('API integration checks every referenced issue in the current repository', 
   github.rest.issues.get = async () => { throw new Error('Not found'); };
   await assert.rejects(checkPullRequest({ github, context }), /Not found/);
 });
-

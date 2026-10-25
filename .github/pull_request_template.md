@@ -20,4 +20,3 @@ Describe runtime, permissions, base image, JVM, and compatibility impact. Explai
 - [ ] The change satisfies the linked acceptance criteria.
 - [ ] Relevant validation passed and documentation is current.
 - [ ] No secrets were included; the build does not require Docker tooling.
-

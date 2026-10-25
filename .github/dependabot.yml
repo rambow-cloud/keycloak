@@ -6,4 +6,3 @@ updates:
       interval: weekly
     open-pull-requests-limit: 0
 # Action updates must be initiated through an issue; automatic PRs are disabled.
-

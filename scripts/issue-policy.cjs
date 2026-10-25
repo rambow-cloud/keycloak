@@ -35,4 +35,3 @@ async function checkPullRequest({ github, context }) {
   }
 }
 module.exports = { issueNumbers, validateIssue, checkPullRequest };
-

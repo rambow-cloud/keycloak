@@ -24,4 +24,3 @@ jobs:
           script: |
             const { checkPullRequest } = require(process.cwd() + '/scripts/issue-policy.cjs');
             await checkPullRequest({ github, context });
-

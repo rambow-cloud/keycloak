@@ -41,4 +41,3 @@ body:
       description: "Describe the checks that demonstrate the intended behavior."
     validations:
       required: true
-

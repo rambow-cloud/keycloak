@@ -76,4 +76,3 @@ The image supports the default `start --optimized` command with build-time optio
 The direct launcher tracks the [upstream 26.8.1 startup script](https://github.com/keycloak/keycloak/blob/26.8.1/quarkus/dist/src/main/content/bin/kc.sh). Upgrade reviews must compare its JVM flags and launcher requirements. Shell-specific `JAVA_OPTS*` variables are not interpreted; use standard JVM `JAVA_TOOL_OPTIONS` for additional options. Replacing it also replaces the default heap percentages, so include your desired heap settings and always set a container memory limit.
 
 Distroless reduces attack surface; it does not guarantee zero CVEs. This initial setup does not certify FIPS, LDAP/Kerberos integrations, custom providers, or additional architectures. See [SECURITY.md](SECURITY.md), [Keycloak containers](https://www.keycloak.org/server/containers), and [distroless Java](https://github.com/GoogleContainerTools/distroless/blob/main/java/README.md).
-
