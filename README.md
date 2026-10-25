@@ -59,7 +59,7 @@ To refresh AWS dependencies and the public RDS CA bundle, use Maven 3.9+ and Jav
 node scripts/aws-dependencies.mjs lock
 ```
 
-Review and commit the POM, JAR lock, and updated image lock together. Normal AWS builds only download the locked JARs and CA bundle and verify their SHA-256 hashes; they do not require Maven. The asynchronous Netty client and duplicate PostgreSQL/SLF4J JARs are excluded. See [external staging verification](docs/rds-postgresql.md#external-staging-verification) for opt-in cloud tests.
+Review and commit the POM, JAR lock, and updated image lock together. Normal AWS builds only download the locked JARs and CA bundle and verify their SHA-256 hashes; they do not require Maven. The asynchronous Netty client and duplicate PostgreSQL/SLF4J JARs are excluded. The AWS fixture also exercises IAM token signing with deliberately fake credentials; PostgreSQL must reject that token. This is not live RDS IAM certification. See [external staging verification](docs/rds-postgresql.md#external-staging-verification) for opt-in cloud tests.
 
 ## Run locally against existing PostgreSQL
 

@@ -2,7 +2,7 @@
 
 The `core` profile supports password authentication with the PostgreSQL driver bundled by Keycloak. The `aws` profile adds AWS Advanced JDBC Wrapper 4.5.0 and SDK 2.46.10 for task-role IAM authentication. Both remain Java 25, distroless, and UID 65532 images built with Buildah. The AWS image includes a checksum-pinned **public** RDS CA bundle and defaults to verified database TLS; no credentials are baked in.
 
-The initial reference is PostgreSQL 17 on a standard RDS PostgreSQL instance, including ordinary Multi-AZ instance endpoint reconnection. Aurora, RDS Proxy, and Multi-AZ DB clusters require separate validation. Local CI verifies both drivers with PostgreSQL/TLS fixtures; real RDS IAM and Fargate certification remains pending staging results.
+The initial reference is PostgreSQL 17 on a standard RDS PostgreSQL instance, including ordinary Multi-AZ instance endpoint reconnection. Aurora, RDS Proxy, and Multi-AZ DB clusters require separate validation. Local CI verifies both drivers with PostgreSQL/TLS fixtures and exercises IAM signing with fake credentials, expecting PostgreSQL to reject the generated token. Real RDS IAM and Fargate certification remains pending staging results.
 
 ## Password authentication
 

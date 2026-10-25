@@ -79,12 +79,18 @@ url_suffix=''
 if [[ "$profile" == aws ]]; then url_prefix=jdbc:aws-wrapper:postgresql; url_suffix='?wrapperPlugins='; fi
 
 start_server() {
-  local host=$1 ca=$2
+  local host=$1 ca=$2 iam=${3:-false} suffix=$url_suffix
+  local -a aws_env=()
+  if [[ "$iam" == true ]]; then
+    suffix='?wrapperPlugins=iam&iamRegion=us-east-1&iamHost=fixture.abc123.us-east-1.rds.amazonaws.com'
+    # Offline signing only: these are deliberately fake credentials, never sent to AWS.
+    aws_env=(-e AWS_REGION=us-east-1 -e AWS_ACCESS_KEY_ID=fixture-not-real -e AWS_SECRET_ACCESS_KEY=fixture-not-real -e AWS_EC2_METADATA_DISABLED=true)
+  fi
   podman run -d --name "$server" --network "$network" --read-only --cap-drop=ALL \
     --security-opt=no-new-privileges --memory=2g \
     --volume /tmp --volume /opt/keycloak/data \
     -v "$fixture:/tls:ro,Z" -p 127.0.0.1::8080 -p 127.0.0.1::9000 \
-    -e "KC_DB_URL=$url_prefix://$host:5432/keycloak$url_suffix" -e KC_DB_USERNAME=keycloak \
+    "${aws_env[@]}" -e "KC_DB_URL=$url_prefix://$host:5432/keycloak$suffix" -e KC_DB_USERNAME=keycloak \
     -e "KC_DB_PASSWORD=$db_password" -e KC_DB_TLS_MODE=verify-server -e "KC_DB_TLS_TRUST_STORE_FILE=/tls/$ca" \
     -e KC_BOOTSTRAP_ADMIN_USERNAME=ci-admin -e "KC_BOOTSTRAP_ADMIN_PASSWORD=$admin_password" \
     -e KC_HOSTNAME_STRICT=false -e KC_HTTP_ENABLED=true "$image" >/dev/null
@@ -105,9 +111,24 @@ expect_tls_failure() {
 }
 expect_tls_failure database wrong-ca.pem
 expect_tls_failure wrong-host ca.pem
+if [[ "$profile" == aws ]]; then
+  # A normal PostgreSQL fixture must reject the generated IAM token, not accept its password.
+  # This exercises plugin loading, SDK credential resolution, signing, TLS, and driver delegation.
+  start_server database ca.pem true
+  iam_rejected=false
+  for ((attempt=0; attempt<60; attempt++)); do
+    if podman logs "$server" 2>&1 | grep -q 'password authentication failed'; then iam_rejected=true; break; fi
+    [[ "$(podman inspect --format '{{.State.Running}}' "$server")" == true ]] || break
+    sleep 2
+  done
+  [[ "$iam_rejected" == true ]] || { podman logs "$server"; echo 'Offline IAM signing/delegation failed' >&2; exit 1; }
+  podman rm -fv "$server" >/dev/null
+  echo 'Offline IAM token reached PostgreSQL and was rejected as expected.'
+fi
 start_server database ca.pem
-export VERIFY_BASE_URL="http://$(podman port "$server" 8080/tcp)"
-export VERIFY_MANAGEMENT_URL="http://$(podman port "$server" 9000/tcp)"
+VERIFY_BASE_URL="http://$(podman port "$server" 8080/tcp)"
+VERIFY_MANAGEMENT_URL="http://$(podman port "$server" 9000/tcp)"
+export VERIFY_BASE_URL VERIFY_MANAGEMENT_URL
 export VERIFY_ADMIN_USERNAME=ci-admin VERIFY_ADMIN_PASSWORD="$admin_password"
 if ! node tests/keycloak-protocol.mjs; then podman logs "$server"; exit 1; fi
 podman exec "$db" psql -U keycloak -d keycloak -Atc "SELECT count(*) FROM databasechangelog" | grep -Eq '^[1-9][0-9]*$'
