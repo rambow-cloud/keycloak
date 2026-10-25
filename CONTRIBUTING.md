@@ -11,6 +11,8 @@ This project uses issue-driven development. See [AGENTS.md](AGENTS.md) for the f
 
 The policy workflow reads trusted rules from the default branch. It never executes PR code. PR image builds have no publication permissions. Do not weaken these checks through template or workflow changes.
 
+Issue policy validates open PRs. Editing a closed or merged PR skips the policy job: its linked Issues may have correctly closed on merge. Manual candidate checks still require an open local PR at the exact dispatched head commit. Keep completed Issues closed when adding final validation details to merged PRs.
+
 ## Validation
 
 ```sh
