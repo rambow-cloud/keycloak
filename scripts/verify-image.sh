@@ -40,8 +40,8 @@ done
 [[ "$db_ready" == true ]] || { podman logs "$db"; exit 1; }
 podman run -d --name "$server" --network "$network" --read-only --cap-drop=ALL \
   --security-opt=no-new-privileges --memory=2g \
-  --tmpfs /tmp:rw,noexec,nosuid,size=256m,uid=65532,gid=65532 \
-  --tmpfs /opt/keycloak/data:rw,nosuid,size=256m,uid=65532,gid=65532 \
+  --tmpfs /tmp:rw,noexec,nosuid,size=256m,mode=1777 \
+  --tmpfs /opt/keycloak/data:rw,nosuid,size=256m,mode=1777 \
   -e KC_DB_URL=jdbc:postgresql://database:5432/keycloak -e KC_DB_USERNAME=keycloak \
   -e "KC_DB_PASSWORD=$db_password" -e KC_HOSTNAME=https://localhost -e KC_HTTP_ENABLED=true \
   "$image" >/dev/null

@@ -55,13 +55,13 @@ Provide the variables below in your shell or secret manager. Replace `KC_DB_URL`
 export KC_DB_URL=jdbc:postgresql://database.example.internal:5432/keycloak
 export KC_DB_USERNAME=keycloak
 read -r -s -p 'Database password: ' KC_DB_PASSWORD; export KC_DB_PASSWORD
-podman run --rm --name keycloak --read-only --cap-drop=ALL \\
-  --security-opt=no-new-privileges --memory=2g \\
-  --tmpfs /tmp:rw,noexec,nosuid,size=256m,uid=65532,gid=65532 \\
-  --tmpfs /opt/keycloak/data:rw,nosuid,size=256m,uid=65532,gid=65532 \\
-  -p 127.0.0.1:8080:8080 -p 127.0.0.1:9000:9000 \\
-  -e KC_DB_URL -e KC_DB_USERNAME -e KC_DB_PASSWORD \\
-  -e KC_HOSTNAME=http://localhost:8080 -e KC_HTTP_ENABLED=true \\
+podman run --rm --name keycloak --read-only --cap-drop=ALL \
+  --security-opt=no-new-privileges --memory=2g \
+  --tmpfs /tmp:rw,noexec,nosuid,size=256m,mode=1777 \
+  --tmpfs /opt/keycloak/data:rw,nosuid,size=256m,mode=1777 \
+  -p 127.0.0.1:8080:8080 -p 127.0.0.1:9000:9000 \
+  -e KC_DB_URL -e KC_DB_USERNAME -e KC_DB_PASSWORD \
+  -e KC_HOSTNAME=http://localhost:8080 -e KC_HTTP_ENABLED=true \
   localhost/rambow-keycloak:test
 ```
 
