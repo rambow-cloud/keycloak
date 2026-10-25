@@ -24,6 +24,8 @@ Build Keycloak OCI images for Rambow Cloud. Prefer distroless Java, a non-root u
 - Inject credentials at runtime. Never put secrets into image layers, build arguments, issues, logs, or Git. Do not disable TLS verification or require privileged containers as the normal solution.
 - Distroless reduces attack surface; it does not eliminate vulnerabilities. Update the base image, JVM, and Keycloak through issues.
 - The hourly updater never changes `config/upstream-compatibility.json`. Review changed upstream `kc.sh` and supported Java LTS before updating that baseline; never update the hash simply to make CI pass.
+- Scan both built profiles with the checksum-pinned native Trivy in CI. Fixable HIGH/CRITICAL vulnerabilities and scan/coverage errors fail the required check. Keep all findings visible; never add blanket ignores or weaken the gate to merge an update. Scanner/policy upgrades and remediation require reviewed Issues.
+- The PR comment reporter must execute only trusted default-branch code. Never run PR code or artifact content with a comment-writing token; validate run/head/profile/attempt associations and escape report data. See `docs/vulnerability-scanning.md`.
 
 ## Validation and delivery
 

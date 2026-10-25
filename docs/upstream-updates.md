@@ -9,6 +9,7 @@ The updater selects the latest stable Keycloak release without downgrading, and 
 When inputs change, the workflow creates a complete Maintenance Issue before creating a branch or changing files. It opens one bot-managed PR and refreshes that PR when more updates arrive. Each candidate explicitly starts both CI and Issue policy using the short-lived `GITHUB_TOKEN`. This avoids relying on token-created PR events, which can require workflow approval. No personal access token, GitHub App secret, Docker build tooling, registry publication or deployment is added.
 
 - Digest updates within the reviewed image families and Keycloak patch updates within the same major/minor line enable GitHub's native squash auto-merge. Both required checks, `Issue policy` and `Build and verify`, must pass. The latter includes static compatibility checks and both core/aws image profiles. Branch protection remains enforced, including any future required reviews.
+- Both image profiles also pass the [Trivy vulnerability gate](vulnerability-scanning.md): fixable HIGH/CRITICAL findings block auto-merge. All findings remain available in JSON artifacts and a maintained PR comment.
 - Keycloak minor/major upgrades and candidates with compatibility warnings open as drafts and never enable auto-merge. A maintainer must complete the upgrade review, resolve checks and mark the PR ready before merging.
 - A Java-major or family change requires review and an explicit lock/baseline change. The hourly updater does not switch those families automatically.
 

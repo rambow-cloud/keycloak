@@ -18,6 +18,9 @@ RUN rm -rf /opt/keycloak/bin && mkdir -p /opt/keycloak/data && chmod -R a+rX /op
 
 FROM source AS aws-builder
 COPY .cache/aws/providers/ /opt/keycloak/providers/
+COPY tests/AwsHttpTransport.java /tmp/AwsHttpTransport.java
+RUN javac -cp '/opt/keycloak/providers/*:/opt/keycloak/lib/lib/main/*' -d /tmp /tmp/AwsHttpTransport.java \
+    && java -cp '/tmp:/opt/keycloak/providers/*:/opt/keycloak/lib/lib/main/*' AwsHttpTransport
 ENV KC_DB_DRIVER=software.amazon.jdbc.Driver KC_TRANSACTION_XA_ENABLED=false
 RUN /opt/keycloak/bin/kc.sh build
 RUN rm -rf /opt/keycloak/bin && mkdir -p /opt/keycloak/data && chmod -R a+rX /opt/keycloak

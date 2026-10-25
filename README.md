@@ -44,7 +44,9 @@ sha256sum -c keycloak.oci.tar.sha256
 podman load -i keycloak.oci.tar
 ```
 
-Archive checksums detect transfer corruption; they are not a signature or provenance attestation. Artifacts expire after seven days. Registry publication, SBOM generation, vulnerability scanning, signing, and multi-architecture support are follow-up work requiring their own issues before production releases.
+CI also scans both built images with checksum-pinned native Trivy, reports findings in one maintained PR comment, and uploads full JSON reports. Fixable HIGH/CRITICAL vulnerabilities block the required check and upstream auto-merge; unfixed findings remain visible. See [vulnerability scanning and PR reports](docs/vulnerability-scanning.md) for policy, coverage and recovery.
+
+Archive checksums detect transfer corruption; they are not a signature or provenance attestation. Artifacts expire after seven days. Registry publication, SBOM generation, signing, and multi-architecture support are follow-up work requiring their own issues before production releases.
 
 The [automatic upstream updater](docs/upstream-updates.md) checks Keycloak, distroless and the current Temurin image family hourly. It creates an Issue-linked PR, runs both image profiles, and auto-merges patch/digest updates after required checks. Larger or compatibility-changing upgrades require review.
 
