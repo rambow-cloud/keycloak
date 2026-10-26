@@ -172,6 +172,19 @@ test('freeze requires both exact artifact scan evidences and is immutable across
   assert.deepEqual(retry.calls, []);
 });
 
+test('duplicate release events do not automatically retry an earlier failed publication', async () => {
+  const { prepareRelease } = await orchestration;
+  const f = await apiFixture();
+  f.release.created_at = '2026-10-26T01:00:00Z';
+  f.context.eventName = 'release'; f.context.runId = 2001; f.context.payload.release = { id: 42 };
+  const paginate = f.github.paginate;
+  f.github.paginate = async (method, args) => args.workflow_id === 'release.yml'
+    ? [{ id: 2000, head_branch: f.tag, head_sha: sha, created_at: '2026-10-26T01:00:01Z', conclusion: 'failure' }]
+    : paginate(method, args);
+  assert.equal((await prepareRelease(f)).skipped, true);
+  assert.deepEqual(f.calls, []);
+});
+
 test('publication rejects all immutable conflicts before copying and never moves aliases early', async () => {
   const { publishImages } = await publishing;
   const plan = await planFixture({ aliases: [{ tag: 'extention-v26.8.1', profile: 'aws', keycloakVersion: '26.8.1' }], previousAliases: { 'extention-v26.8.1': null } });

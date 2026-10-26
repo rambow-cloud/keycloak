@@ -68,6 +68,17 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
     sourceCommit = commit.sha;
     const { data: comparison } = await github.rest.repos.compareCommits({ ...repo, base: sourceCommit, head: toolsCommit });
     if (comparison.merge_base_commit.sha !== sourceCommit) throw new Error('Release commit is not in main history.');
+    if (context.eventName === 'release') {
+      // Stable publication can emit both published and released. A failed first event
+      // must not cause its duplicate to retry unchanged scans/uploads automatically.
+      const events = await github.paginate(github.rest.actions.listWorkflowRuns, { ...repo, workflow_id: 'release.yml',
+        event: 'release', head_sha: sourceCommit, per_page: 100 });
+      if (events.some(r => r.id < context.runId && r.head_branch === tag && r.head_sha === sourceCommit &&
+          r.created_at >= release.created_at)) {
+        core.info('Duplicate event for this Release; use manual recovery for a failed first attempt.');
+        return { skipped: true };
+      }
+    }
   }
   const lockText = await readText(github, repo, 'images.lock.json', sourceCommit);
   const imageLock = JSON.parse(lockText);
