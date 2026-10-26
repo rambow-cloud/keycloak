@@ -6,7 +6,7 @@ const sha256 = value => createHash('sha256').update(value).digest('hex');
 const ordered = value => Array.isArray(value) ? value.map(ordered) : value && typeof value === 'object'
   ? Object.fromEntries(Object.entries(value).sort(([a],[b]) => a.localeCompare(b)).map(([k,v]) => [k,ordered(v)])) : value;
 const stringify = value => JSON.stringify(ordered(value));
-const metadata = /^(?:docs\/|releases\/|changes\/|\.github\/(?:ISSUE_TEMPLATE\/|pull_request_template\.md|issue-policy\.json)|[^/]+\.md$|LICENSE(?:\..*)?$|\.gitignore$)/;
+const metadata = /^(?:docs\/|releases\/|changes\/|\.github\/(?:ISSUE_TEMPLATE\/|pull_request_template\.md|issue-policy\.json)|.*\.md$|LICENSE(?:\..*)?$|\.gitignore$)/;
 const bookkeeping = /^scripts\/(?:quay-release|release-catalog|releases|upstream-update|lock-images|issue-policy|trivy-comment)\.(?:mjs|cjs)$|^scripts\/lib\/(?:releases|quay-publish|quay-auth|upstream)\.mjs$|^\.github\/workflows\/(?!ci\.yml$)[^/]+\.yml$|^tests\/[^/]+\.test\.cjs$/;
 const validation = /^scripts\/(?:verify-|scan-image|trivy-gate|release-image|check-upstream-compatibility)|^scripts\/lib\/(?:trivy|oci|image-changes)\.mjs$|^config\/(?:trivy|upstream-compatibility)\.json$|^\.github\/workflows\/ci\.yml$|^tests\//;
 export function sourceProfiles(path) {

@@ -31,7 +31,7 @@ function fixture(current, previous = source()) {
 test('semantic fingerprints and CI scope distinguish metadata, AWS-only inputs, shared inputs and validation', async () => {
   const { classifyCI, fingerprint } = await lib;
   const base = source();
-  const docs = source(newSha, { 'README.md': 'new docs', 'releases/records/a.json': 'metadata', 'changes/30.json': '{}' });
+  const docs = source(newSha, { 'README.md': 'new docs', 'dependencies/aws/README.md': 'provider documentation', 'releases/records/a.json': 'metadata', 'changes/30.json': '{}' });
   assert.deepEqual(classifyCI(base, docs).profiles, []);
   assert.equal(fingerprint(base, 'core'), fingerprint(docs, 'core'));
   const nested = source(oldSha, {}, {...lock,awsDependencies:{sdkVersion:'2',wrapperVersion:'4'}});
