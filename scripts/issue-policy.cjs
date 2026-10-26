@@ -33,6 +33,14 @@ async function checkPullRequest({ github, context }) {
     validateIssue(issue);
     console.log('Validated issue #' + issue_number + ': ' + issue.title);
   }
+  if (/^chore\/[1-9]\d*-record-release-/.test(pr.head?.ref || '')) {
+    const { checkCatalogPullRequest } = await import('./release-catalog.mjs');
+    const { data: current } = await github.rest.pulls.get({ ...context.repo, pull_number: pr.number });
+    await checkCatalogPullRequest({ github, context, pr: current });
+  } else if (pr.head?.sha) {
+    const { checkRecordChanges } = await import('./release-catalog.mjs');
+    await checkRecordChanges({ github, context, pr });
+  }
 }
 async function checkDispatchedPullRequest({ github, context, number }) {
   if (!/^[1-9][0-9]*$/.test(String(number))) throw new Error('A valid pull request number is required.');

@@ -28,6 +28,10 @@ jobs:
           node --check scripts/scan-image.mjs
           node --check scripts/trivy-comment.mjs
           node --check scripts/trivy-gate.mjs
+          node --check scripts/quay-release.mjs
+          node --check scripts/release-catalog.mjs
+          node --check scripts/release-image.mjs
+          node scripts/releases.mjs render --check
           node scripts/check-upstream-compatibility.mjs
           shellcheck scripts/*.sh
           git show --format= --check HEAD

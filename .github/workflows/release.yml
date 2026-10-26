@@ -1,0 +1,255 @@
+name: Quay release
+on:
+  release:
+    types: [published, released]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Formal release tag, for example v26.8.1-r1
+        type: string
+        required: true
+      preview:
+        description: Inspect and freshly scan current main only; no release/registry/catalog writes
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: quay-release
+  cancel-in-progress: false
+jobs:
+  prepare:
+    if: github.event_name == 'workflow_dispatch' || (!github.event.release.draft && !github.event.release.prerelease)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+      actions: write
+    outputs:
+      prepared: ${{ steps.prepare.outputs.prepared }}
+      active: ${{ steps.prepare.outputs.active }}
+      record_only: ${{ steps.prepare.outputs.record_only }}
+      tools_commit: ${{ steps.prepare.outputs.tools_commit }}
+      source_commit: ${{ steps.prepare.outputs.source_commit }}
+      source_run: ${{ steps.prepare.outputs.source_run }}
+      artifact_ids: ${{ steps.prepare.outputs.artifact_ids }}
+      preview: ${{ steps.prepare.outputs.preview }}
+    steps:
+      - id: tools
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - id: prepare
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+          PREVIEW: ${{ inputs.preview || false }}
+          TOOLS_COMMIT: ${{ steps.tools.outputs.commit }}
+        with:
+          script: |
+            const { prepareRelease } = await import(process.cwd() + '/scripts/quay-release.mjs');
+            const p = await prepareRelease({ github, context, core, tag: process.env.RELEASE_TAG,
+              preview: process.env.PREVIEW === 'true', trustedToolsCommit: process.env.TOOLS_COMMIT });
+            core.setOutput('prepared', JSON.stringify(p));
+            core.setOutput('active', !p.skipped && !p.complete);
+            core.setOutput('record_only', !!p.recordOnly);
+            core.setOutput('preview', !!p.preview);
+            core.setOutput('tools_commit', p.toolsCommit ?? '');
+            core.setOutput('source_commit', p.sourceCommit ?? '');
+            core.setOutput('source_run', p.sourceRun?.id ?? '');
+            core.setOutput('artifact_ids', p.images?.map(i => i.artifactId).join(',') ?? '');
+            await core.summary.addHeading('Quay release preparation').addCodeBlock(JSON.stringify(p, null, 2), 'json').write();
+  scan:
+    needs: prepare
+    if: needs.prepare.outputs.active == 'true' && needs.prepare.outputs.record_only != 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [core, aws]
+    env:
+      BUILD_PROFILE: ${{ matrix.profile }}
+      SCAN_HEAD_SHA: ${{ needs.prepare.outputs.source_commit }}
+      PREPARED: ${{ needs.prepare.outputs.prepared }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.tools_commit }}
+          persist-credentials: false
+      - id: input
+        run: |
+          mkdir -p .cache/release-scan
+          node --input-type=module -e 'import fs from "node:fs"; const p=JSON.parse(process.env.PREPARED); fs.writeFileSync(".cache/prepared.json",JSON.stringify(p)); fs.appendFileSync(process.env.GITHUB_OUTPUT,"artifact_id="+p.images.find(i=>i.profile===process.env.BUILD_PROFILE).artifactId+"\n");'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ steps.input.outputs.artifact_id }}
+          path: .cache/release-input
+          merge-multiple: false
+          github-token: ${{ github.token }}
+          run-id: ${{ needs.prepare.outputs.source_run }}
+      - name: Install native image inspection tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y skopeo
+      - name: Verify exact CI artifact and prepare OCI layout
+        run: node scripts/release-image.mjs inspect .cache/prepared.json .cache/release-input "$BUILD_PROFILE" .cache/release-scan/evidence.json .cache/release-layout
+      - name: Fresh Trivy scan with current policy and databases
+        run: node scripts/scan-image.mjs .cache/release-layout .cache/release-scan
+      - name: Retain release scan evidence before the gate
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-scan-${{ matrix.profile }}-${{ github.run_attempt }}
+          path: .cache/release-scan/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Require current vulnerability policy
+        if: ${{ !cancelled() }}
+        run: node scripts/trivy-gate.mjs .cache/release-scan/summary.json
+  freeze:
+    needs: [prepare, scan]
+    if: needs.prepare.outputs.preview != 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    outputs:
+      plan: ${{ steps.freeze.outputs.plan }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.tools_commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: release-scan-*-${{ github.run_attempt }}
+          path: .cache/release-scans
+      - id: freeze
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PREPARED: ${{ needs.prepare.outputs.prepared }}
+        with:
+          script: |
+            const fs = require('node:fs/promises');
+            const { freezeRelease } = await import(process.cwd() + '/scripts/quay-release.mjs');
+            const scans = await Promise.all(['core','aws'].map(async profile => JSON.parse(await fs.readFile('.cache/release-scans/release-scan-'+profile+'-'+process.env.GITHUB_RUN_ATTEMPT+'/evidence.json','utf8'))));
+            const plan = await freezeRelease({ github, context, prepared: JSON.parse(process.env.PREPARED), scans });
+            core.setOutput('plan', JSON.stringify(plan));
+  publish:
+    needs: [prepare, freeze]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    environment: quay-release
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.tools_commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.prepare.outputs.artifact_ids }}
+          path: .cache/release-input
+          merge-multiple: false
+          github-token: ${{ github.token }}
+          run-id: ${{ needs.prepare.outputs.source_run }}
+      - name: Install native registry client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y skopeo
+      - name: Preserve frozen digests while publishing both profiles
+        env:
+          PLAN: ${{ needs.freeze.outputs.plan }}
+          VALIDATION_TOOLS_COMMIT: ${{ needs.prepare.outputs.tools_commit }}
+          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
+          QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
+        run: |
+          mkdir -p .cache/publication
+          node --input-type=module -e 'import fs from "node:fs"; fs.writeFileSync(".cache/publication/plan.json",process.env.PLAN);'
+          node scripts/release-image.mjs publish .cache/publication/plan.json .cache/release-input .cache/publication
+      - name: Retain successful or partial publication state
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: quay-publication-${{ github.run_attempt }}
+          path: .cache/publication/
+          retention-days: 7
+          if-no-files-found: error
+  audit:
+    needs: [prepare, publish]
+    if: >-
+      !cancelled() && needs.prepare.outputs.active == 'true' && needs.prepare.outputs.preview != 'true' &&
+      needs.prepare.outputs.record_only != 'true' && needs.publish.result != 'skipped'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.tools_commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: quay-publication-${{ github.run_attempt }}
+          path: .cache/publication
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PREPARED: ${{ needs.prepare.outputs.prepared }}
+          PUBLISH_RESULT: ${{ needs.publish.result }}
+        with:
+          script: |
+            const fs = require('node:fs/promises');
+            const { putImmutableAsset } = await import(process.cwd() + '/scripts/quay-release.mjs');
+            const { validateRecord } = await import(process.cwd() + '/scripts/lib/releases.mjs');
+            const p = JSON.parse(process.env.PREPARED);
+            const {data:release} = await github.rest.repos.getReleaseByTag({...context.repo,tag:p.tag});
+            let attempt;
+            try { attempt = JSON.parse(await fs.readFile('.cache/publication/attempt.json','utf8')); }
+            catch(error) { if(error.code!=='ENOENT') throw error; attempt={schemaVersion:1,tag:p.tag,status:'failed',completedTags:[],runId:context.runId}; }
+            await putImmutableAsset(github,context.repo,release,'publication-attempt-'+context.runId+'-'+process.env.GITHUB_RUN_ATTEMPT+'.json',attempt);
+            if(process.env.PUBLISH_RESULT==='success') {
+              const record=validateRecord(JSON.parse(await fs.readFile('.cache/publication/record.json','utf8')));
+              await putImmutableAsset(github,context.repo,release,'publication-record.json',record);
+            }
+  record:
+    needs: [prepare, freeze, publish, audit]
+    if: >-
+      !cancelled() && needs.prepare.outputs.active == 'true' && needs.prepare.outputs.preview != 'true' &&
+      (needs.prepare.outputs.record_only == 'true' || (needs.publish.result == 'success' && needs.audit.result == 'success'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.tools_commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: needs.prepare.outputs.record_only != 'true'
+        with:
+          name: quay-publication-${{ github.run_attempt }}
+          path: .cache/publication
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PREPARED: ${{ needs.prepare.outputs.prepared }}
+        with:
+          script: |
+            const { recordRelease } = await import(process.cwd() + '/scripts/release-catalog.mjs');
+            const p = JSON.parse(process.env.PREPARED);
+            const record = p.recordOnly ? p.record : JSON.parse(await require('node:fs/promises').readFile('.cache/publication/record.json','utf8'));
+            const result = await recordRelease({ github, context, core, record });
+            await core.summary.addHeading('Quay publication complete').addCodeBlock(JSON.stringify({tag:record.plan.tag,images:record.plan.images,catalog:result},null,2),'json').write();

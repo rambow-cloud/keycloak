@@ -182,7 +182,7 @@ test('dispatched Issue policy accepts only the exact local open PR head', async 
   const { issueBody } = await lib;
   const context = { repo: { owner: 'rambow-cloud', repo: 'keycloak' }, sha: headSha, ref: 'refs/heads/update', payload: { repository: { default_branch: 'main' } } };
   const pr = { state: 'open', body: 'Closes #11', head: { sha: headSha, ref: 'update', repo: { full_name: 'rambow-cloud/keycloak' } }, base: { ref: 'main' } };
-  const github = { rest: { pulls: { get: async () => ({ data: pr }) }, issues: { get: async () => ({ data: { number: 11, state: 'open', title: '[Maintenance]: Refresh', body: issueBody() } }) } } };
+  const github = { rest: { pulls: { get: async () => ({ data: pr }), listFiles() {} }, issues: { get: async () => ({ data: { number: 11, state: 'open', title: '[Maintenance]: Refresh', body: issueBody() } }) } }, paginate: async () => [] };
   await checkDispatchedPullRequest({ github, context, number: '12' });
   await assert.rejects(checkDispatchedPullRequest({ github, context: { ...context, sha: mainSha }, number: '12' }), /exact head|open local PR head/);
   pr.head.repo.full_name = 'fork/keycloak';
