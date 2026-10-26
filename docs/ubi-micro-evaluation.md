@@ -4,7 +4,7 @@ This experiment belongs to Issue #32. It must remain on its experimental branch/
 
 ## Inputs and construction
 
-Keep Keycloak 26.8.1, Java 25, Temurin build optimization and Linux amd64. `images.lock.json` pins UBI 9.7 Micro and the matching UBI standard build stage. Only `ubi-9-baseos-rpms` and `ubi-9-appstream-rpms` may supply runtime RPMs; subscription-manager is disabled. Install the headless Java runtime, locale, certificates and time zones into an isolated root, then erase installation-only shell/package-manager packages from both the filesystem and RPM database. Retain RPM records and licenses for actual runtime libraries. Copy the root into UBI Micro and keep direct Java startup and UID/GID 65532.
+Keep Keycloak 26.8.1, Java 25, Temurin build optimization and Linux amd64. `images.lock.json` pins UBI 9.8 Micro and the matching UBI standard build stage, matching the current public UBI 9 repository minor version. Only `ubi-9-baseos-rpms` and `ubi-9-appstream-rpms` may supply runtime RPMs; subscription-manager is disabled. Copy the Micro root into the build stage, install the headless Java runtime, locale, certificates and time zones, then erase installation-only shell/package-manager/Python packages from both the filesystem and RPM database. Retain RPM records and licenses for actual runtime libraries. Flatten that pruned UBI Micro root into a scratch final stage and keep direct Java startup and UID/GID 65532. This is a customized UBI-derived image, not an unmodified Red Hat runtime image.
 
 The base image digests are immutable. The public RPM repositories are rolling: the exact installed NEVRA/vendor/license inventory is preserved at `/usr/share/rambow/ubi-runtime-packages.tsv`. Before any production adoption, review a reproducible RPM snapshot/lock and the license inventory; do not claim that pinning the two OCI bases also pins future RPM transactions.
 
@@ -15,6 +15,8 @@ Use the existing read-only CI for core/aws Buildah builds, OCI export, Podman ro
 The published AWS baseline is `quay.io/rambow-cloud/keycloak@sha256:0771ae5db0bc40e057ce51d2609d50a56a0d867a66411e411179ecf12f9608a7`. Its release scan (run 40260151709, Trivy 0.76.1, 2026-10-26) reported 64 package findings: 0 critical, 4 high, 39 medium, 20 low, 1 unknown; none had an available fix. These were 39 unique CVEs, all in Debian OS packages; the Java result contained 526 packages and no vulnerability findings. This historical baseline uses a different vendor advisory source and is not a matched-time proof of security improvement.
 
 Results are pending the experimental branch CI. Live AWS RDS/PolarDB tests are out of scope; no production certification or zero-CVE claim is made.
+
+The initial 9.7-base attempt exposed two construction issues: the Micro base itself contained bash/sh, and the public RPM transaction selected current RHEL 9.8 packages including installation-only Python helpers. The rootfs gate correctly failed (run 40285166527), even though Java/Keycloak version checks and full RHEL/Java scanning completed. That unpruned attempt reported 291 findings per profile (13 high, 196 medium, 82 low, none fixable); it is not the final candidate. The revised construction uses 9.8 inputs and removes actual installation-only packages before flattening, rather than hiding their records or weakening the gate.
 
 ## Licensing and support
 

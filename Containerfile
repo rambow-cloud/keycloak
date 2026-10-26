@@ -6,8 +6,11 @@ ARG UBI_BUILD_IMAGE
 ARG KEYCLOAK_JAVA_MAJOR
 FROM ${KEYCLOAK_IMAGE} AS distribution
 
+FROM ${RUNTIME_IMAGE} AS ubi-micro
+
 FROM ${UBI_BUILD_IMAGE} AS ubi-runtime-builder
 USER 0
+COPY --from=ubi-micro / /opt/ubi-root/
 COPY scripts/prepare-ubi-runtime.sh /tmp/prepare-ubi-runtime.sh
 RUN bash /tmp/prepare-ubi-runtime.sh
 
@@ -31,7 +34,9 @@ ENV KC_DB_DRIVER=software.amazon.jdbc.Driver KC_TRANSACTION_XA_ENABLED=false
 RUN /opt/keycloak/bin/kc.sh build
 RUN rm -rf /opt/keycloak/bin && mkdir -p /opt/keycloak/data && chmod -R a+rX /opt/keycloak
 
-FROM ${RUNTIME_IMAGE} AS runtime
+# Flatten the pruned UBI Micro root: copying over an existing UBI base would
+# leave the base layer's bash/sh executable files behind.
+FROM scratch AS runtime
 COPY --from=ubi-runtime-builder /opt/ubi-root/ /
 COPY licenses/UBI-EULA.pdf /licenses/UBI-EULA.pdf
 COPY --chown=0:0 config/java.options /opt/keycloak/java.options

@@ -46,6 +46,7 @@ fi
 rm "$rootfs"
 rootfs=''
 if grep -Eq '(^|/)(sh|bash|dash|ash|busybox|apt|apt-get|dpkg|rpm|dnf|microdnf|apk|javac|jshell)$' <<< "$entries"; then
+  grep -E '(^|/)(sh|bash|dash|ash|busybox|apt|apt-get|dpkg|rpm|dnf|microdnf|apk|javac|jshell)$' <<< "$entries" >&2
   echo 'Unexpected shell, package manager or development tool in final image' >&2; exit 1
 fi
 if [[ "$profile" == aws ]]; then

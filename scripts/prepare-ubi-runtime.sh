@@ -17,7 +17,8 @@ dnf --disableplugin=subscription-manager --disablerepo='*' \
 # accurate RHEL scanning. Do not hide vulnerable libraries or remove RPM records
 # while leaving the corresponding files behind.
 for package in bash coreutils coreutils-single rpm microdnf dnf dnf-data \
-  python3-dnf yum java-25-openjdk-devel; do
+  python3-dnf yum java-25-openjdk-devel copy-jdk-configs crypto-policies-scripts \
+  python3 python3-libs python3-pip-wheel python3-setuptools-wheel; do
   if rpm --root "$rootfs" -q "$package" >/dev/null 2>&1; then
     rpm --root "$rootfs" --erase --nodeps --noscripts --notriggers "$package"
   fi
