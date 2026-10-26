@@ -1,0 +1,67 @@
+name: Certificate chain regression
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: certificate-regression-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  regression:
+    if: github.head_ref == 'chore/37-emudhra-regression'
+    name: Published ${{ matrix.profile }} certificate chains
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [core, aws]
+    env:
+      PROFILE: ${{ matrix.profile }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Install native OCI tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y podman unzip
+      - name: Prepare verified public fixtures
+        run: node docs/certificate-regression/prepare.mjs
+      - name: Compile probe and run the actual published JVM
+        run: |
+          set -euo pipefail
+          output=.cache/certificate-regression
+          mkdir -p "$output/classes"
+          builder=$(node -p "require('./images.lock.json').builder")
+          image=$(node -p "const r=require('./releases/records/v26.8.1-r1.json'); 'quay.io/rambow-cloud/keycloak@'+r.plan.images.find(i=>i.profile===process.env.PROFILE).digest")
+          podman run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges \
+            --user 0 --memory=512m -v "$PWD/docs/certificate-regression:/source:ro" \
+            -v "$PWD/$output/classes:/classes:rw" --entrypoint /opt/java/openjdk/bin/javac \
+            "$builder" --release 21 -d /classes /source/CertificateChains.java
+          incident_time=$(node -p "require('./$output/fixtures.json').validationTime")
+          positive_time=$(node -p "require('./$output/fixtures.json').positiveTime")
+          podman run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges \
+            --memory=512m -v "$PWD/$output:/fixtures:ro" -v "$PWD/$output/classes:/classes:ro" \
+            --entrypoint /usr/bin/java "$image" -Dcom.sun.security.enableAIAcaIssuers=false \
+            -cp /classes CertificateChains /fixtures "$incident_time" "$positive_time" > "$output/result.json"
+          podman image inspect "$image" > "$output/image.json"
+          node docs/certificate-regression/report.mjs "$image"
+      - name: Retain evidence even after a test failure
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: certificate-regression-${{ matrix.profile }}-${{ github.run_attempt }}
+          path: |
+            .cache/certificate-regression/*.json
+            .cache/certificate-regression/*.crt
+            .cache/certificate-regression/chains.zip
+            .cache/certificate-regression/chains/
+          retention-days: 7
+          if-no-files-found: error
