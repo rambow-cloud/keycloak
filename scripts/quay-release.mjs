@@ -73,7 +73,7 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
       // must not cause its duplicate to retry unchanged scans/uploads automatically.
       const events = await github.paginate(github.rest.actions.listWorkflowRuns, { ...repo, workflow_id: 'release.yml',
         event: 'release', head_sha: sourceCommit, per_page: 100 });
-      if (events.some(r => r.id < context.runId && r.head_branch === tag && r.head_sha === sourceCommit &&
+      if (events.some(r => r.id < context.runId && r.conclusion !== 'skipped' && r.head_branch === tag && r.head_sha === sourceCommit &&
           r.created_at >= release.created_at)) {
         core.info('Duplicate event for this Release; use manual recovery for a failed first attempt.');
         return { skipped: true };

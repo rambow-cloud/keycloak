@@ -183,6 +183,10 @@ test('duplicate release events do not automatically retry an earlier failed publ
     : paginate(method, args);
   assert.equal((await prepareRelease(f)).skipped, true);
   assert.deepEqual(f.calls, []);
+  f.github.paginate = async (method, args) => args.workflow_id === 'release.yml'
+    ? [{ id: 2000, head_branch: f.tag, head_sha: sha, created_at: '2026-10-26T01:00:01Z', conclusion: 'skipped' }]
+    : paginate(method, args);
+  assert.equal((await prepareRelease(f)).sourceRun.id, 1000);
 });
 
 test('publication rejects all immutable conflicts before copying and never moves aliases early', async () => {
