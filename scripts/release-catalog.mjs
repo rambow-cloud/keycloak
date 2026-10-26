@@ -1,5 +1,5 @@
 import { registry, repository, json, hash, equal, validateRecord, validateCatalog, renderCatalog } from './lib/releases.mjs';
-import { readText, readCatalog, readAsset, putImmutableAsset, assertTagSource } from './quay-release.mjs';
+import { readText, readCatalog, readAsset, putImmutableAsset, assertTagSource, completionAsset } from './quay-release.mjs';
 import { dispatchMissingChecks, configureAutoMerge } from './upstream-update.mjs';
 import policy from './issue-policy.cjs';
 
@@ -170,6 +170,12 @@ export async function ensureCatalogPR({ github, context, core, record }) {
   return { number: pr.number, url: pr.html_url, baseSha };
 }
 
+export function selectCatalogCI(runs, pr) {
+  return runs.filter(r => r.event === 'workflow_dispatch' && r.path === '.github/workflows/ci.yml' &&
+    r.head_sha === pr.head.sha && r.head_branch === pr.head.ref && r.repository?.full_name === repository &&
+    r.head_repository?.full_name === repository).sort((a, b) => b.id - a.id)[0];
+}
+
 export async function recordRelease({ github, context, core, record,
   pause = ms => new Promise(resolve => setTimeout(resolve, ms)), maxPolls = 100 }) {
   validateRecord(record);
@@ -188,7 +194,7 @@ export async function recordRelease({ github, context, core, record,
       await assertCatalogOwned({ github, context, pr });
       if (!pr.auto_merge) throw new Error('Catalog auto-merge was disabled; inspect the PR before recovery.');
       const runs = await github.paginate(github.rest.actions.listWorkflowRuns, { ...repo, workflow_id: 'ci.yml', head_sha: pr.head.sha, per_page: 100 });
-      const latest = runs.filter(r => r.head_branch === pr.head.ref).sort((a, b) => b.id - a.id)[0];
+      const latest = selectCatalogCI(runs, pr);
       if (latest?.status === 'completed' && latest.conclusion !== 'success') throw new Error('Catalog CI failed; published images remain intact. Inspect the PR before recovery.');
       const { data: head } = await github.rest.git.getRef({ ...repo, ref: 'heads/' + pr.base.ref });
       if (head.object.sha !== pending.baseSha) {
@@ -205,8 +211,7 @@ export async function recordRelease({ github, context, core, record,
   const { data: main } = await github.rest.repos.get(repo);
   const text = await readText(github, repo, pathFor(record), main.default_branch);
   if (!equal(JSON.parse(text), record)) throw new Error('Catalog merge did not retain the expected record.');
-  await putImmutableAsset(github, repo, release, 'publication-complete.json', { schemaVersion: 1, tag: record.plan.tag,
-    recordSha256: hash(json(record)), catalog: 'https://github.com/' + repository + '/blob/main/releases/README.md' });
+  await putImmutableAsset(github, repo, release, 'publication-complete.json', completionAsset(record));
   core.info('Publication and catalog merge complete for ' + registry + ' ' + record.plan.tag);
   return pending;
 }

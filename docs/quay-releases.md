@@ -51,6 +51,8 @@ The implementation's first release is `v26.8.1-r1` if the verified source still 
 
 Open [Quay release Actions](https://github.com/rambow-cloud/keycloak/actions/workflows/release.yml), choose **Run workflow** on **main**, set `release_tag`, and leave `preview` false to recover an existing stable Release. If images already have a saved publication record, recovery skips downloads, scans and registry writes and only finishes Git recording. Duplicate events for a fully recorded release exit without work. Runs are serialized; after a replaced/cancelled queued event, use this same recovery entry point.
 
+The catalog waiter follows the newest exact-head, same-repository, explicitly dispatched CI rather than automatic PR runs that GitHub might hold for approval. A failed explicit run still stops recovery. GitHub can require maintainer approval for the first automatic robot PR workflow; review the guarded generated diff before approving that run, and preserve required checks. If the catalog merged after an interrupted waiter, recovery validates the existing record and completes a missing `publication-complete.json` without rebuilding or registry access. A conflicting completion attachment fails closed.
+
 Enable **preview** to inspect and freshly scan an existing successful current-main CI without creating a Release, dispatching a build, freezing assets, requesting OIDC, uploading images or creating catalog PRs. It reports what the selected version would publish; it does not certify federation configuration or write permissions.
 
 ## Catalog and queries
