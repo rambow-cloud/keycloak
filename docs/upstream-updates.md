@@ -4,6 +4,8 @@ The [Upstream updates workflow](https://github.com/rambow-cloud/keycloak/actions
 
 The updater selects the latest stable Keycloak release without downgrading, and resolves immutable digests for that release, the existing distroless nonroot Java/Debian family, and the existing Temurin JDK family. It preserves PostgreSQL test images, AWS JARs and the RDS CA lock. Java majors, Debian families, AWS dependencies and test-database upgrades require separate maintenance Issues and review.
 
+An upstream update merge does not itself publish a registry image. [Quay publication](quay-releases.md) requires a separate formal GitHub Release and a new image revision when rebuilding the same Keycloak version.
+
 ## Issue-first updates and merge policy
 
 When inputs change, the workflow creates a complete Maintenance Issue before creating a branch or changing files. It opens one bot-managed PR and refreshes that PR when more updates arrive. Each candidate explicitly starts both CI and Issue policy using the short-lived `GITHUB_TOKEN`. This avoids relying on token-created PR events, which can require workflow approval. No personal access token, GitHub App secret, Docker build tooling, registry publication or deployment is added.

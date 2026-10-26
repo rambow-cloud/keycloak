@@ -11,7 +11,8 @@ on:
 permissions:
   contents: read
   issues: read
-  pull-requests: read
+  # Trusted policy code can revoke catalog auto-merge when a bot PR is edited.
+  pull-requests: write
 concurrency:
   group: issue-policy-${{ github.event.pull_request.number || inputs.pull_request_number }}
   cancel-in-progress: true

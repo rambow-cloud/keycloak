@@ -28,6 +28,10 @@ jobs:
           node --check scripts/scan-image.mjs
           node --check scripts/trivy-comment.mjs
           node --check scripts/trivy-gate.mjs
+          node --check scripts/quay-release.mjs
+          node --check scripts/release-catalog.mjs
+          node --check scripts/release-image.mjs
+          node scripts/releases.mjs render --check
           node scripts/check-upstream-compatibility.mjs
           shellcheck scripts/*.sh
           git show --format= --check HEAD
@@ -82,6 +86,9 @@ jobs:
         if: ${{ !cancelled() && steps.export_image.outcome == 'success' }}
         working-directory: dist
         run: sha256sum keycloak.oci.tar > keycloak.oci.tar.sha256
+      - name: Verify the exported release archive contract
+        if: ${{ !cancelled() && steps.export_image.outcome == 'success' }}
+        run: node scripts/release-image.mjs inspect-ci dist
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() && steps.export_image.outcome == 'success' }}
         with:

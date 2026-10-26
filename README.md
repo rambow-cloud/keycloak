@@ -46,7 +46,9 @@ podman load -i keycloak.oci.tar
 
 CI also scans both built images with checksum-pinned native Trivy, reports findings in one maintained PR comment, and uploads full JSON reports. Fixable HIGH/CRITICAL vulnerabilities block the required check and upstream auto-merge; unfixed findings remain visible. See [vulnerability scanning and PR reports](docs/vulnerability-scanning.md) for policy, coverage and recovery.
 
-Archive checksums detect transfer corruption; they are not a signature or provenance attestation. Artifacts expire after seven days. Registry publication, SBOM generation, signing, and multi-architecture support are follow-up work requiring their own issues before production releases.
+Formal releases publish both profiles to `quay.io/rambow-cloud/keycloak` after fresh vulnerability gates. Use `v26.8.1-r1`-style GitHub Releases and `26.8.1-r1-core` / `26.8.1-r1-aws` registry tags. See the [published image catalog](releases/README.md) and [Quay release setup/recovery](docs/quay-releases.md). Main updates alone do not publish, and no `latest` or implicit custom alias is created.
+
+Archive checksums detect transfer corruption; they are not a signature or provenance attestation. Artifacts expire after seven days. SBOM generation, signing, and multi-architecture support remain follow-up work requiring their own issues.
 
 The [automatic upstream updater](docs/upstream-updates.md) checks Keycloak, distroless and the current Temurin image family hourly. It creates an Issue-linked PR, runs both image profiles, and auto-merges patch/digest updates after required checks. Larger or compatibility-changing upgrades require review.
 

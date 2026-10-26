@@ -13,6 +13,7 @@ Build Keycloak OCI images for Rambow Cloud. Prefer distroless Java, a non-root u
 5. Merge only after acceptance criteria, relevant checks, and review are complete. Let the merge close the issue. Do not push directly to main or bypass required checks. The only bootstrap exception is the initial setup tracked by issue #1; enable branch protection immediately afterward.
 6. After changing an issue's scope or body, rerun the PR's `Issue policy` check. Follow SECURITY.md for sensitive vulnerabilities; fixes may reference a sanitized maintenance issue without public exploit details.
 7. The upstream updater may enable native auto-merge for patch/digest changes within reviewed image families after required checks, as authorized by the project owner. Larger upgrades and compatibility warnings require maintainer review. Do not broaden auto-merge eligibility or weaken checks. See `docs/upstream-updates.md`.
+8. The project owner also authorizes native auto-merge for bot-owned Quay publication-record PRs limited to a new `releases/records/<release>.json` and generated `releases/README.md`. They must match the immutable Release attachment, pass the required guarded Issue policy and CI, and preserve human edits. Alias configuration, code, workflows and existing records are excluded. Never push catalog updates directly to main.
 
 ## Image requirements
 
@@ -26,6 +27,7 @@ Build Keycloak OCI images for Rambow Cloud. Prefer distroless Java, a non-root u
 - The hourly updater never changes `config/upstream-compatibility.json`. Review changed upstream `kc.sh` and supported Java LTS before updating that baseline; never update the hash simply to make CI pass.
 - Scan both built profiles with the checksum-pinned native Trivy in CI. Fixable HIGH/CRITICAL vulnerabilities and scan/coverage errors fail the required check. Keep all findings visible; never add blanket ignores or weaken the gate to merge an update. Scanner/policy upgrades and remediation require reviewed Issues.
 - The PR comment reporter must execute only trusted default-branch code. Never run PR code or artifact content with a comment-writing token; validate run/head/profile/attempt associations and escape report data. See `docs/vulnerability-scanning.md`.
+- Formal Quay publication uses `v<Keycloak>-r<N>` Releases and fixed core/aws tags. Freeze source artifacts/digests before pushing, freshly scan both profiles, never overwrite formal tag conflicts, and finish the Git JSON/Markdown record before marking publication complete. Keep Quay Secrets isolated in the publisher Environment. See `docs/quay-releases.md`.
 
 ## Validation and delivery
 
