@@ -68,7 +68,7 @@ test('missing coverage, malformed data, mismatched provenance and scanner failur
 test('RHEL coverage requires nonempty RPM and Java results while unsupported OS scans remain blocked', async () => {
   const { summarize, gateSummary } = await lib;
   const data = report([vuln('CVE-2026-12345', 'HIGH', '2.0')]);
-  data.Metadata.OS = { Family: 'redhat', Name: '10.2' };
+  data.Metadata.OS = { Family: 'redhat', Name: '9.8' };
   data.Results[0].Type = 'redhat';
   data.Results[0].Packages = [{ Name: 'glibc' }];
   data.Results[1].Packages = [{ Name: 'org.keycloak:keycloak-services' }];
@@ -81,6 +81,12 @@ test('RHEL coverage requires nonempty RPM and Java results while unsupported OS 
     assert.throws(() => summarize(missing, context), /coverage/);
   }
   assert.throws(() => summarize(data, { ...context, expectedOS: 'alpaquita' }), /Unsupported/);
+  for (const name of ['10', '10.2', '11', '']) {
+    const unsupported = structuredClone(data);
+    unsupported.Metadata.OS.Name = name;
+    unsupported.Results.forEach(result => { result.Vulnerabilities = []; });
+    assert.throws(() => summarize(unsupported, context), /Unsupported RHEL vulnerability coverage/);
+  }
 });
 
 test('experimental runtime inputs reject floating images, unapproved sources and executable path injection', async () => {

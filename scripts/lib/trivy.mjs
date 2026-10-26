@@ -16,6 +16,12 @@ export function summarize(report, { profile, headSha, runId, runAttempt, policy,
   validatePolicy(policy);
   if (!profiles.includes(profile) || !/^[a-f0-9]{40}$/.test(headSha) || !Number.isSafeInteger(runId) || !Number.isSafeInteger(runAttempt)) throw new Error('Invalid scan context');
   if (!['debian', 'redhat'].includes(expectedOS)) throw new Error('Unsupported expected OS coverage: ' + expectedOS);
+  // RPM enumeration is not proof of advisory coverage. The pinned Trivy's
+  // RHEL 10 support is SBOM-only; its detector can silently return no findings.
+  // Review upstream coverage before expanding these experimental RHEL families.
+  if (expectedOS === 'redhat' && !/^[89](?:\.|$)/.test(report.Metadata?.OS?.Name ?? '')) {
+    throw new Error('Unsupported RHEL vulnerability coverage for Trivy ' + policy.version + ': ' + (report.Metadata?.OS?.Name ?? 'unknown'));
+  }
   if (report.SchemaVersion !== 2 || report.ArtifactType !== 'container_image' || !Array.isArray(report.Results) ||
       report.Metadata?.OS?.Family !== expectedOS || !report.Results.some(r => r.Class === 'os-pkgs' && r.Type === expectedOS &&
         (expectedOS !== 'redhat' || r.Packages?.length > 0)) ||
