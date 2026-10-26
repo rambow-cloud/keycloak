@@ -69,4 +69,6 @@ node scripts/releases.mjs history extention-v26.8.1
 
 CI rejects malformed records, broken alias history, duplicate releases and stale Markdown. Generated-record auto-merge never includes alias configuration, workflow, code, image-lock or existing-record modifications. Human edits stop automatic maintenance rather than being overwritten. Quay credentials never enter the catalog job.
 
+The installed Codesmith App appends a description footer. The catalog guard can exclude only this bounded footer from the generated-body hash after GraphQL proves the exact current body/head, its latest editor is the pinned Codesmith Bot, and the complete edit history contains only the pinned GitHub Actions and Codesmith Bot identities. Human/unknown/deleted editors, incomplete history, extra content and generated-body/file changes still block automatic maintenance. The footer does not expand the two-file catalog allowlist or bypass required checks.
+
 After publication, open the [Quay tag page](https://quay.io/repository/rambow-cloud/keycloak?tab=tags) and verify both formal tags and their displayed digests against the [catalog](../releases/README.md). Use its digest-pinned Podman pull commands on the target deployment network.

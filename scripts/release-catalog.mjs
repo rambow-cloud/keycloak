@@ -4,6 +4,8 @@ import { dispatchMissingChecks, configureAutoMerge } from './upstream-update.mjs
 import policy from './issue-policy.cjs';
 
 const marker = '<!-- quay-catalog:v1 -->';
+const actionsBot = 'MDM6Qm90NDE4OTgyODI=';
+const codesmithBot = 'BOT_kgDOCWWZcg';
 const pathFor = record => 'releases/records/' + record.plan.tag + '.json';
 const filesHash = files => hash(json(Object.entries(files).sort(([a], [b]) => a.localeCompare(b))));
 function bodyFor(issue, record, sha, files) {
@@ -34,13 +36,39 @@ export async function checkRecordChanges({ github, context, pr }) {
   }
 }
 
+export async function canonicalCatalogBody({ github, context, pr }) {
+  const body = pr.body ?? '';
+  if (!body.includes('<!-- codesmith:footer -->')) return body;
+  const parts = /^(.*<!-- catalog-body:[a-f0-9]{64} -->\n)\n(<!-- codesmith:footer -->\n[\s\S]*\n<!-- \/codesmith:footer -->)\n?$/s.exec(body);
+  if (!parts || parts[2].length > 8192 || (body.match(/<!-- codesmith:footer -->/g) ?? []).length !== 1 ||
+      (body.match(/<!-- \/codesmith:footer -->/g) ?? []).length !== 1 || parts[2].includes('<!-- catalog-') ||
+      !parts[2].startsWith('<!-- codesmith:footer -->\n---\n<a href="https://app.blacksmith.sh/rambow-cloud/codesmith/keycloak/pr/' + pr.number + '?')) {
+    throw new Error('Unexpected catalog footer; refusing automatic maintenance/merge.');
+  }
+  const { repository: result } = await github.graphql(`query($owner:String!,$name:String!,$number:Int!){
+    repository(owner:$owner,name:$name){pullRequest(number:$number){body headRefOid
+      editor{__typename ... on Bot{id}}
+      userContentEdits(first:100){totalCount pageInfo{hasNextPage} nodes{editor{__typename ... on Bot{id}}}}
+    }}}`, { owner: context.repo.owner, name: context.repo.repo, number: pr.number });
+  const current = result?.pullRequest;
+  const edits = current?.userContentEdits;
+  if (current?.body !== body || current?.headRefOid !== pr.head.sha || current?.editor?.__typename !== 'Bot' ||
+      current.editor.id !== codesmithBot || !edits?.totalCount || edits.totalCount !== edits.nodes?.length ||
+      edits.pageInfo?.hasNextPage !== false || edits.nodes.some(e => e?.editor?.__typename !== 'Bot' ||
+        ![actionsBot, codesmithBot].includes(e.editor.id))) {
+    throw new Error('Catalog footer edit history is not exclusively attributable to the pinned automation bots.');
+  }
+  return parts[1];
+}
+
 export async function assertCatalogOwned({ github, context, pr }) {
   const repo = context.repo;
   if (pr.user?.login !== 'github-actions[bot]' || pr.head.repo?.full_name !== repository ||
       !/^chore\/[1-9]\d*-record-release-v\d+\.\d+\.\d+-r\d+$/.test(pr.head.ref) || !pr.body?.startsWith(marker)) throw new Error('Catalog PR is not bot-owned.');
-  const expectedHead = pr.body.match(/<!-- catalog-head:([a-f0-9]{40}) -->/)?.[1];
-  const expectedBody = pr.body.match(/<!-- catalog-body:([a-f0-9]{64}) -->\n?$/)?.[1];
-  const clean = pr.body.replace(/<!-- catalog-body:[a-f0-9]{64} -->\n?$/, '');
+  const body = await canonicalCatalogBody({ github, context, pr });
+  const expectedHead = body.match(/<!-- catalog-head:([a-f0-9]{40}) -->/)?.[1];
+  const expectedBody = body.match(/<!-- catalog-body:([a-f0-9]{64}) -->\n?$/)?.[1];
+  const clean = body.replace(/<!-- catalog-body:[a-f0-9]{64} -->\n?$/, '');
   if (expectedHead !== pr.head.sha || !expectedBody || hash(clean) !== expectedBody) throw new Error('Catalog PR was edited; refusing automatic maintenance/merge.');
   const { data: commit } = await github.rest.repos.getCommit({ ...repo, ref: pr.head.sha });
   if (commit.author?.login !== 'github-actions[bot]') throw new Error('Catalog branch has human/unknown commits.');

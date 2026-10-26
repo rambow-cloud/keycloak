@@ -237,6 +237,14 @@ test('catalog guard validates real bot ownership, allowlisted diff, published as
   const oldPaginate = f.github.paginate;
   f.github.paginate = async (method, args) => method === f.github.rest.pulls.listFiles ? changed : oldPaginate(method, args);
   await assertCatalogOwned({ ...f, pr });
+  const appended = { ...pr, body: pr.body + '\n<!-- codesmith:footer -->\n---\n<a href="https://app.blacksmith.sh/rambow-cloud/codesmith/keycloak/pr/12?ref=test">Review</a>\n<!-- /codesmith:footer -->' };
+  let auditedBody = appended.body;
+  const knownEditor = { __typename: 'Bot', id: 'BOT_kgDOCWWZcg' };
+  f.github.graphql = async () => ({ repository: { pullRequest: { body: auditedBody, headRefOid: sha, editor: knownEditor,
+    userContentEdits: { totalCount: 1, pageInfo: { hasNextPage: false }, nodes: [{ editor: knownEditor }] } } } });
+  await assertCatalogOwned({ ...f, pr: appended });
+  auditedBody = appended.body.replace('No alias configuration', 'Altered alias configuration');
+  await assert.rejects(assertCatalogOwned({ ...f, pr: { ...appended, body: auditedBody } }), /edited/);
   await assert.rejects(assertCatalogOwned({ ...f, pr: { ...pr, body: pr.body + 'human edit' } }), /edited/);
   await assert.rejects(assertCatalogOwned({ ...f, pr: { ...pr, user: { login: 'maintainer' } } }), /bot-owned/);
   changed = [...changed, { filename: 'releases/aliases.json', status: 'modified' }];
