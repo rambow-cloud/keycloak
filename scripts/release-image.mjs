@@ -4,8 +4,10 @@ import { resolve, join, basename, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 import { json, hash, profiles, validatePlan, isDigest } from './lib/releases.mjs';
 import { publishImages } from './lib/quay-publish.mjs';
+import { federatedQuayCredentials } from './lib/quay-auth.mjs';
 
 function run(args, options = {}) {
   const r = spawnSync('skopeo', args, { encoding: 'utf8', maxBuffer: 5000000, timeout: 600000, ...options });
@@ -33,38 +35,16 @@ async function inspectSource(directory, prepared, image) {
   return { path, digest: info.Digest, archiveSha256: actual };
 }
 
-const [mode, ...args] = process.argv.slice(2);
-if (mode === 'inspect-ci') {
-  const directory = resolve(args[0] ?? 'dist');
-  const profile = process.env.BUILD_PROFILE ?? 'core';
-  if (!profiles.includes(profile)) throw new Error('Invalid profile');
-  const lockBytes = await readFile(join(directory, 'images.lock.json'), 'utf8');
-  const prepared = { sourceCommit: process.env.GITHUB_SHA, imageLock: JSON.parse(lockBytes), lockSha256: hash(lockBytes) };
-  const image = { profile, artifactName: basename(directory) };
-  const source = await inspectSource(dirname(directory), prepared, image);
-  await writeFile(join(directory, 'release-evidence.json'), json({ schemaVersion: 1, profile, sourceCommit: prepared.sourceCommit,
-    digest: source.digest, archiveSha256: source.archiveSha256, lockSha256: prepared.lockSha256 }));
-  console.log('Verified the exported OCI archive contract for release publication.');
-} else if (mode === 'inspect') {
-  const [preparedFile, directory, profile, evidenceFile, layout] = args;
-  if (!profiles.includes(profile)) throw new Error('Invalid profile');
-  const prepared = JSON.parse(await readFile(preparedFile, 'utf8'));
-  const image = prepared.images.find(i => i.profile === profile);
-  const source = await inspectSource(directory, prepared, image);
-  run(['copy', '--all', '--preserve-digests', 'oci-archive:' + source.path, 'oci:' + resolve(layout)]);
-  await writeFile(evidenceFile, json({ profile, sourceCommit: prepared.sourceCommit, sourceRunId: prepared.sourceRun.id,
-    artifactId: image.artifactId, lockSha256: prepared.lockSha256, digest: source.digest, archiveSha256: source.archiveSha256 }));
-} else if (mode === 'publish') {
-  const [planFile, directory, output] = args;
-  const plan = validatePlan(JSON.parse(await readFile(planFile, 'utf8')));
-  // Verify all downloaded inputs before any credential is passed to a subprocess.
+export async function publishReleaseImages(plan, directory, output, { context, getIDToken, mask }) {
+  validatePlan(plan);
+  // Verify all downloaded inputs before requesting either transient token.
   const sources = {};
   for (const image of plan.images) sources[image.profile] = await inspectSource(directory, plan, image);
-  if (!process.env.QUAY_USERNAME || !process.env.QUAY_TOKEN) throw new Error('Configure QUAY_USERNAME and QUAY_TOKEN in the quay-release Environment.');
+  const credentials = await federatedQuayCredentials({ username: process.env.QUAY_USERNAME, context, getIDToken, mask });
   const work = await mkdtemp(join(tmpdir(), 'rambow-quay-'));
   const auth = join(work, 'auth.json');
   try {
-    run(['login', '--authfile', auth, '--username', process.env.QUAY_USERNAME, '--password-stdin', 'quay.io'], { input: process.env.QUAY_TOKEN });
+    run(['login', '--authfile', auth, '--username', credentials.username, '--password-stdin', 'quay.io'], { input: credentials.token });
     const adapter = {
       inspect: async reference => {
         const result = spawnSync('skopeo', ['inspect', '--authfile', auth, '--format', '{{.Digest}}', 'docker://' + reference], { encoding: 'utf8', timeout: 120000 });
@@ -87,4 +67,30 @@ if (mode === 'inspect-ci') {
   } finally {
     try { await unlink(auth); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
-} else throw new Error('Usage: release-image.mjs inspect-ci [dist] | inspect <prepared> <artifacts> <profile> <evidence> <layout> | publish <plan> <artifacts> <output>');
+}
+
+async function main() {
+  const [mode, ...args] = process.argv.slice(2);
+  if (mode === 'inspect-ci') {
+    const directory = resolve(args[0] ?? 'dist');
+    const profile = process.env.BUILD_PROFILE ?? 'core';
+    if (!profiles.includes(profile)) throw new Error('Invalid profile');
+    const lockBytes = await readFile(join(directory, 'images.lock.json'), 'utf8');
+    const prepared = { sourceCommit: process.env.GITHUB_SHA, imageLock: JSON.parse(lockBytes), lockSha256: hash(lockBytes) };
+    const image = { profile, artifactName: basename(directory) };
+    const source = await inspectSource(dirname(directory), prepared, image);
+    await writeFile(join(directory, 'release-evidence.json'), json({ schemaVersion: 1, profile, sourceCommit: prepared.sourceCommit,
+      digest: source.digest, archiveSha256: source.archiveSha256, lockSha256: prepared.lockSha256 }));
+    console.log('Verified the exported OCI archive contract for release publication.');
+  } else if (mode === 'inspect') {
+    const [preparedFile, directory, profile, evidenceFile, layout] = args;
+    if (!profiles.includes(profile)) throw new Error('Invalid profile');
+    const prepared = JSON.parse(await readFile(preparedFile, 'utf8'));
+    const image = prepared.images.find(i => i.profile === profile);
+    const source = await inspectSource(directory, prepared, image);
+    run(['copy', '--all', '--preserve-digests', 'oci-archive:' + source.path, 'oci:' + resolve(layout)]);
+    await writeFile(evidenceFile, json({ profile, sourceCommit: prepared.sourceCommit, sourceRunId: prepared.sourceRun.id,
+      artifactId: image.artifactId, lockSha256: prepared.lockSha256, digest: source.digest, archiveSha256: source.archiveSha256 }));
+  } else throw new Error('Usage: release-image.mjs inspect-ci [dist] | inspect <prepared> <artifacts> <profile> <evidence> <layout>');
+}
+if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) await main();
