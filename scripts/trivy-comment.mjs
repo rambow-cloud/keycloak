@@ -2,6 +2,15 @@ import { readFile, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { profiles, commentMarker, validateSummary, renderReport } from './lib/trivy.mjs';
 
+export function plannedScanProfiles(jobs, conclusion) {
+  if (!jobs.some(j => j.name === 'Image impact' && j.conclusion === 'success')) return profiles;
+  const active = profiles.filter(p => jobs.some(j => j.name === 'Build ' + p && j.conclusion !== 'skipped'));
+  if (active.length) return active;
+  if (conclusion === 'success' && jobs.some(j => j.name === 'Build and verify' && j.conclusion === 'success') &&
+      jobs.some(j => /^Build(?: (?:core|aws))?$/.test(j.name) && j.conclusion === 'skipped')) return [];
+  return profiles; // Missing/failed planning evidence must never turn missing scans into skips.
+}
+
 // This module is loaded only from the trusted default branch by the write-enabled reporter.
 export async function prepareReport({ github, context, runId, core }) {
   if (!/^[1-9][0-9]*$/.test(String(runId))) throw new Error('A CI run ID is required.');
@@ -27,8 +36,13 @@ export async function prepareReport({ github, context, runId, core }) {
     core.info('A newer CI run exists for this head; older results skipped.'); return null;
   }
   const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, { ...repo, run_id: run.id, per_page: 100 });
+  let expectedProfiles = profiles;
+  if (github.rest.actions.listJobsForWorkflowRunAttempt) {
+    const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRunAttempt, { ...repo, run_id: run.id, attempt_number: run.run_attempt, per_page: 100 });
+    expectedProfiles = plannedScanProfiles(jobs, run.conclusion);
+  }
   const selected = [];
-  for (const profile of profiles) {
+  for (const profile of expectedProfiles) {
     const name = 'trivy-' + profile + '-' + run.run_attempt;
     const matches = artifacts.filter(a => a.name === name && !a.expired);
     if (matches.length > 1) throw new Error('Ambiguous scan artifacts for ' + profile);
@@ -37,7 +51,7 @@ export async function prepareReport({ github, context, runId, core }) {
   }
   return { run: { id: run.id, run_attempt: run.run_attempt, head_sha: run.head_sha, head_branch: run.head_branch,
     head_repository: { full_name: run.head_repository.full_name }, conclusion: run.conclusion, workflow_id: run.workflow_id },
-  prs: prs.map(pr => pr.number), artifacts: selected };
+  prs: prs.map(pr => pr.number), artifacts: selected, expectedProfiles };
 }
 
 export async function publishReport({ github, context, prepared, directory, core, loadSummary }) {
@@ -60,7 +74,7 @@ export async function publishReport({ github, context, prepared, directory, core
   }
   const repo = context.repo;
   const body = renderReport(summaries, { runUrl: 'https://github.com/' + repo.owner + '/' + repo.repo + '/actions/runs/' + run.id,
-    headSha: run.head_sha, runId: run.id, runAttempt: run.run_attempt, conclusion: run.conclusion ?? 'unknown' });
+    headSha: run.head_sha, runId: run.id, runAttempt: run.run_attempt, conclusion: run.conclusion ?? 'unknown', expectedProfiles: prepared.expectedProfiles ?? profiles });
   for (const number of prepared.prs) {
     // Re-check immediately before writing; the PR might have advanced while artifacts downloaded.
     const { data: pr } = await github.rest.pulls.get({ ...repo, pull_number: number });

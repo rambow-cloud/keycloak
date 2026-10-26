@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
 export const marker = '<!-- rambow-upstream-updates:v1 -->';
-export const managedPaths = ['images.lock.json', 'README.md', 'AGENTS.md', 'config/java.options'];
+export const managedPaths = ['images.lock.json', 'README.md', 'AGENTS.md', 'config/java.options', 'changes/upstream.json'];
 export const sha256 = value => createHash('sha256').update(value).digest('hex');
 export const formatJson = value => JSON.stringify(value, null, 2) + '\n';
 export const filesHash = files => sha256(JSON.stringify(managedPaths.map(path => [path, files[path]])));
@@ -38,12 +38,21 @@ export async function inspectCompatibility(version, javaMajor, baseline, fetcher
   return { startupHash, supported, warnings };
 }
 
-export function candidateFiles(currentFiles, nextLock, warnings) {
+export function candidateFiles(currentFiles, nextLock, warnings, issue) {
   const old = JSON.parse(currentFiles['images.lock.json']);
   const result = { ...currentFiles, 'images.lock.json': formatJson(nextLock) };
   if (old.keycloakVersion !== nextLock.keycloakVersion) {
     for (const path of ['README.md', 'AGENTS.md']) result[path] = result[path].replaceAll(old.keycloakVersion, nextLock.keycloakVersion);
     if (!warnings.length) result['config/java.options'] = result['config/java.options'].replaceAll(old.keycloakVersion, nextLock.keycloakVersion);
+  }
+  if (issue && ['keycloak', 'runtime', 'builder'].some(k => old[k] !== nextLock[k])) {
+    const details = ['keycloak', 'runtime', 'builder'].filter(k => old[k] !== nextLock[k]).map(k =>
+      k === 'keycloak' && old.keycloakVersion !== nextLock.keycloakVersion ? 'Upgrade Keycloak from ' + old.keycloakVersion + ' to ' + nextLock.keycloakVersion :
+        'Refresh ' + k + ' digest from ' + old[k].split('@sha256:')[1].slice(0, 16) + ' to ' + nextLock[k].split('@sha256:')[1].slice(0, 16));
+    result['changes/upstream.json'] = formatJson({ schemaVersion: 1, changes: [{
+      type: old.keycloakVersion.split('.').slice(0, 2).join('.') === nextLock.keycloakVersion.split('.').slice(0, 2).join('.') ? 'fix' : 'feature',
+      summary: details.join('; ') + '.', issues: [issue], profiles: ['core', 'aws'],
+    }] });
   }
   return result;
 }
@@ -57,7 +66,7 @@ export function autoMergeEligible(previous, next, warnings) {
 
 export function issueBody() {
   return '### Maintenance goal\nKeep the pinned Keycloak release, distroless nonroot runtime, and current Temurin build-image family current through a reviewed, tested PR.\n\n' +
-    '### Scope\nRefresh only the managed upstream image locks and associated version references. Preserve PostgreSQL fixtures, AWS dependencies, Java major and Debian family. The PR contains the current detected changes and source links.\n\n' +
+    '### Scope\nRefresh only the managed upstream image locks, associated version references and Issue-linked fix/feature change fragment. Preserve PostgreSQL fixtures, AWS dependencies, Java major and Debian family. The PR contains the current detected changes and source links.\n\n' +
     '### Security and compatibility\nKeep immutable digests, distroless UID 65532, Buildah and protected main. Changed startup code or supported Java LTS blocks compatibility checks until reviewed. Native auto-merge is limited to patch/digest updates after required checks; larger upgrades need review. No deployment, registry publication, review approval or persistent token.\n\n' +
     '### Acceptance criteria\n- [ ] Confirm patch/digest eligibility or review larger/compatibility-changing upgrades\n- [ ] Confirm Issue policy and both core/aws image checks pass\n- [ ] Merge only after the required checks and any required review\n\n' +
     '### Validation plan\nRun the required Issue policy and CI workflows on the update branch. Verify startup-source/Java compatibility, locked inputs, both image profiles, TLS failures, authentication, offline IAM signing and graceful shutdown. Live cloud validation remains separate.\n';

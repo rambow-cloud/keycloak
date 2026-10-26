@@ -13,6 +13,7 @@ const lock = { keycloakVersion: '26.8.1', javaVersion: 25, platform: 'linux/amd6
   builder: pinned('docker.io/library/eclipse-temurin:25-jdk-noble'), postgres: pinned('docker.io/library/postgres:17-bookworm'),
   awsDependencies: { wrapperVersion: '4.5.0', lockFile: 'dependencies/aws/dependencies.lock.json' } };
 const baseFiles = { 'images.lock.json': JSON.stringify(lock, null, 2) + '\n', 'README.md': 'Keycloak 26.8.1\n',
+  'changes/upstream.json': JSON.stringify({ schemaVersion: 1, changes: [] }) + '\n',
   'AGENTS.md': 'Keycloak 26.8.1\n', 'config/java.options': '# Aligned with Keycloak 26.8.1\n',
   'config/upstream-compatibility.json': JSON.stringify({ javaMajor: 25 }) };
 
@@ -85,7 +86,7 @@ async function fixture({ changed = true, existing = false, edited = false, runs 
   const { candidateFiles, pullBody, issueBody } = await lib;
   const calls = [];
   const next = { ...lock, keycloakVersion: releaseVersion, ...(changed ? { runtime: lock.runtime.split('@')[0] + '@sha256:' + 'c'.repeat(64) } : {}) };
-  const branchFiles = candidateFiles(baseFiles, next, warnings);
+  const branchFiles = candidateFiles(baseFiles, next, warnings, 11);
   const pr = { number: 12, node_id: 'PR_test', state: 'open', user: bot, html_url: 'https://example.test/pull/12',
     head: { sha: headSha, ref: 'chore/11-upstream-images', repo: { full_name: 'rambow-cloud/keycloak' } },
     body: pullBody(11, lock, next, branchFiles, warnings, headSha) + (edited ? 'human note' : '') };
@@ -139,6 +140,11 @@ test('new updates create an Issue first, dispatch both checks and enable protect
   const f = await fixture();
   await runUpstreamUpdate(f.args);
   assert.deepEqual(f.calls.map(c => c.name), ['issue', 'tree', 'commit', 'branch', 'pr', 'dispatch', 'dispatch', 'enable-auto-merge']);
+  const tree = f.calls.find(c => c.name === 'tree');
+  const note = JSON.parse(tree.args.tree.find(e => e.path === 'changes/upstream.json').content);
+  assert.equal(note.changes[0].type,'fix');
+  assert.deepEqual(note.changes[0].issues,[11]);
+  assert.ok(note.changes[0].summary.includes('runtime digest'));
   validateIssue({ ...f.calls[0].args, number: 11, state: 'open' });
   assert.equal(f.calls.find(c => c.name === 'enable-auto-merge').args.sha, headSha);
   assert.equal(f.calls.filter(c => c.name === 'dispatch')[1].args.inputs.pull_request_number, '12');

@@ -1,5 +1,6 @@
 import { registry, repository, profiles, json, hash, equal, parseRelease, canonicalTag, validateAliases,
   validatePlan, validateRecord, validateCatalog, priorAliasDigest, assertNewRevision, selectRun, chooseArtifacts } from './lib/releases.mjs';
+import { assessRelease as assessImageRelease, readJSON } from './lib/image-changes.mjs';
 
 export async function readText(github, repo, path, ref) {
   const { data } = await github.rest.repos.getContent({ ...repo, path, ref });
@@ -16,6 +17,10 @@ export async function readCatalog(github, repo, ref) {
     return record;
   }));
   return validateCatalog(records);
+}
+export async function readHistory(github, repo, ref, records) {
+  const tags = [...new Set(records.flatMap(r => r.plan.images.filter(i => !i.changes).map(i => i.tag)))];
+  return Object.fromEntries(await Promise.all(tags.map(async tag => [tag, await readJSON(github, repo, 'releases/history/' + tag + '.json', ref)])));
 }
 export async function readAsset(github, repo, release, name) {
   const assets = await github.paginate(github.rest.repos.listReleaseAssets, { ...repo, release_id: release.id, per_page: 100 });
@@ -49,6 +54,7 @@ export function completionAsset(record) {
 
 export async function prepareRelease({ github, context, core, tag, preview = false,
   trustedToolsCommit,
+  assessRelease = assessImageRelease,
   pause = ms => new Promise(resolve => setTimeout(resolve, ms)), maxPolls = 100 }) {
   const repo = context.repo;
   if (repo.owner + '/' + repo.repo !== repository) throw new Error('Unexpected publishing repository.');
@@ -117,6 +123,13 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
       return { tag, toolsCommit, sourceCommit, releaseId: release.id, recordOnly: true, plan: frozen, record: published };
     }
   }
+  const intent = frozen ? { images: frozen.images, profiles: frozen.images.map(i => i.profile) }
+    : await assessRelease({ github, repo, sourceCommit, records });
+  if (!intent.profiles.length) {
+    core.info('No image fix/feature since the published input fingerprints; skipping builds, scans and publication.');
+    return { skipped: true, preview, tag, toolsCommit, sourceCommit, reason: 'No changed image inputs or new profile feature/fix.' };
+  }
+  const activeAliases = (frozen?.aliases ?? aliases).filter(a => intent.profiles.includes(a.profile));
   let run;
   let dispatched = false;
   let dispatchedAfterId = 0;
@@ -133,7 +146,7 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
         if (run.conclusion !== 'success') throw new Error('Latest source CI failed/cancelled; investigate it before release recovery.');
         const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, { ...repo, run_id: run.id, per_page: 100 });
         let selected;
-        try { selected = chooseArtifacts(frozen ? artifacts.filter(a => frozen.images.some(i => i.artifactId === a.id)) : artifacts, sourceCommit); }
+        try { selected = chooseArtifacts(frozen ? artifacts.filter(a => frozen.images.some(i => i.artifactId === a.id)) : artifacts, sourceCommit, intent.profiles); }
         catch (error) {
           if (frozen) throw new Error('Frozen OCI artifacts are unavailable. Restore the original artifacts or use a new revision.');
           if (dispatched || preview) throw error;
@@ -141,9 +154,9 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
         if (selected) {
           if (frozen && selected.some(i => !frozen.images.some(f => f.profile === i.profile && f.artifactId === i.artifactId))) throw new Error('Frozen artifact IDs changed.');
           return { ...version, preview, toolsCommit, sourceCommit, releaseId: release.id,
-            imageLock, lockSha256: hash(lockText), aliases: frozen?.aliases ?? aliases,
-            previousAliases: frozen?.previousAliases ?? previousAliases,
-            sourceRun: { id: run.id, attempt: run.run_attempt }, images: selected, frozen };
+            imageLock, lockSha256: hash(lockText), aliases: activeAliases,
+            previousAliases: Object.fromEntries(activeAliases.map(a => [a.tag, (frozen?.previousAliases ?? previousAliases)[a.tag]])),
+            sourceRun: { id: run.id, attempt: run.run_attempt }, images: selected.map(i => ({ ...intent.images.find(n => n.profile === i.profile), ...i })), frozen };
         }
         dispatchedAfterId = run.id;
         run = null;
@@ -168,7 +181,7 @@ export function makeFrozenPlan(prepared, scans) {
         scan.artifactId !== image.artifactId || scan.lockSha256 !== prepared.lockSha256) throw new Error('Scan evidence does not match source artifact.');
     return { ...image, tag: canonicalTag(prepared.tag, image.profile), digest: scan.digest, archiveSha256: scan.archiveSha256 };
   });
-  const plan = { schemaVersion: 1, registry, tag: prepared.tag, releaseId: prepared.releaseId,
+  const plan = { schemaVersion: prepared.frozen?.schemaVersion ?? 2, registry, tag: prepared.tag, releaseId: prepared.releaseId,
     keycloakVersion: prepared.keycloakVersion, revision: prepared.revision, sourceCommit: prepared.sourceCommit,
     toolsCommit: prepared.frozen?.toolsCommit ?? prepared.toolsCommit, sourceRun: prepared.sourceRun,
     lockSha256: prepared.lockSha256, imageLock: prepared.imageLock, aliases: prepared.aliases,

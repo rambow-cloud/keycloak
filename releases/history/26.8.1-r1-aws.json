@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "tag": "26.8.1-r1-aws",
+  "profile": "aws",
+  "changes": [
+    { "type": "feature", "summary": "Add the AWS Advanced JDBC Wrapper, RDS PostgreSQL password and task-role IAM authentication, and a pinned RDS CA bundle.", "issues": [5] },
+    { "type": "fix", "summary": "Remediate vulnerable HTTPComponents dependencies with locked httpclient5 5.6.4 and httpcore5 5.4.4 before the first publication.", "issues": [13] }
+  ]
+}

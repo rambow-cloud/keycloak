@@ -41,12 +41,13 @@ jobs:
             core.setOutput('prepared', JSON.stringify(prepared));
             core.setOutput('artifact_ids', prepared?.artifacts.map(a => a.id).join(',') ?? '');
             core.setOutput('run_id', prepared?.run.id ?? '');
+            core.setOutput('artifact_directory', prepared?.artifacts.length === 1 ? prepared.artifacts[0].name : '');
       # Artifacts are data only; download outside the source checkout and never execute them.
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         if: steps.prepare.outputs.artifact_ids != ''
         with:
           artifact-ids: ${{ steps.prepare.outputs.artifact_ids }}
-          path: ${{ runner.temp }}/trivy-reports
+          path: ${{ runner.temp }}/trivy-reports/${{ steps.prepare.outputs.artifact_directory }}
           merge-multiple: false
           github-token: ${{ github.token }}
           run-id: ${{ steps.prepare.outputs.run_id }}

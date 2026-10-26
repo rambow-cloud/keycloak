@@ -4,6 +4,18 @@ const assert = require('node:assert/strict');
 const { createHash } = require('node:crypto');
 const lib = import('../scripts/lib/trivy.mjs');
 const reporter = import('../scripts/trivy-comment.mjs');
+
+test('planned scan profiles distinguish an intentional skip from a failed or missing required scan', async () => {
+  const { plannedScanProfiles } = await reporter;
+  const impact = { name:'Image impact', conclusion:'success' };
+  assert.deepEqual(plannedScanProfiles([impact, {name:'Build aws',conclusion:'failure'}], 'failure'), ['aws']);
+  assert.deepEqual(plannedScanProfiles([impact, {name:'Build core',conclusion:'skipped'}, {name:'Build and verify',conclusion:'success'}], 'success'), []);
+  assert.deepEqual(plannedScanProfiles([impact], 'failure'), ['core','aws']);
+  assert.deepEqual(plannedScanProfiles([{...impact,conclusion:'failure'},{name:'Build aws',conclusion:'skipped'}], 'failure'), ['core','aws']);
+  const { renderReport } = await lib;
+  const body = renderReport({}, {runUrl:'https://github.com/rambow-cloud/keycloak/actions/runs/1',headSha:'a'.repeat(40),runId:1,runAttempt:1,conclusion:'success',expectedProfiles:[]});
+  assert.match(body,/SKIPPED/); assert.doesNotMatch(body,/FAILED \/ missing/);
+});
 const headSha = 'a'.repeat(40);
 const policy = { version: '0.76.1', linuxAmd64Sha256: 'a'.repeat(64), blockingSeverities: ['HIGH', 'CRITICAL'], blockUnfixed: false };
 const scanContext = { profile: 'core', headSha, runId: 100, runAttempt: 1, policy };

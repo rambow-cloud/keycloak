@@ -13,7 +13,8 @@ const lockText = JSON.stringify(lock) + '\n';
 const bot = { login: 'github-actions[bot]' };
 const profileImages = () => ['core', 'aws'].map((profile, i) => ({ profile, artifactId: i + 1,
   artifactName: 'keycloak-oci-' + profile + '-amd64-' + sha, tag: '26.8.1-r1-' + profile,
-  digest: digest(i ? 'd' : 'c'), archiveSha256: 'e'.repeat(64) }));
+  digest: digest(i ? 'd' : 'c'), archiveSha256: 'e'.repeat(64), inputSha256: '9'.repeat(64),
+  changes: [{ type: 'fix', summary: 'Correct the reviewed image startup configuration.', issues: [1] }] }));
 async function planFixture(overrides = {}) {
   const { hash } = await lib;
   return { schemaVersion: 1, registry: 'quay.io/rambow-cloud/keycloak', tag: 'v26.8.1-r1', releaseId: 42,
@@ -104,7 +105,8 @@ async function apiFixture({ records = [], runs, assets = {}, ancestor = true, pr
     throw new Error('Unexpected API');
   } };
   return { github, context: { repo: { owner: 'rambow-cloud', repo: 'keycloak' }, eventName: 'workflow_dispatch', ref: 'refs/heads/main', payload: {} },
-    core: { info() {} }, tag: release.tag_name, maxPolls: 2, pause: async () => {}, calls, release };
+    core: { info() {} }, tag: release.tag_name, maxPolls: 2, pause: async () => {}, calls, release,
+    assessRelease: async () => ({ profiles: ['core','aws'], images: profileImages().map(({profile,inputSha256,changes}) => ({profile,inputSha256,changes})) }) };
 }
 
 test('preparation enforces release/main/lock identity and skips prereleases/duplicates without writes', async () => {
@@ -148,6 +150,49 @@ test('catalog waiter follows the newest exact-head trusted dispatch rather than 
   const running = { ...base, id: 8, status: 'in_progress', conclusion: null };
   assert.equal(selectCatalogCI([base, failed, running, ...others], pr), running);
   assert.equal(selectCatalogCI(others, pr), undefined);
+});
+
+test('no-op release stops before CI lookup/dispatch and creates no publication state', async () => {
+  const { prepareRelease } = await orchestration;
+  const f = await apiFixture();
+  const paginate = f.github.paginate;
+  f.github.paginate = async (method, args) => { assert.notEqual(method, f.github.rest.actions.listWorkflowRuns); return paginate(method, args); };
+  const result = await prepareRelease({ ...f, assessRelease: async () => ({ images: [], profiles: [] }) });
+  assert.equal(result.skipped, true);
+  assert.deepEqual(f.calls, []);
+});
+
+test('one changed profile freezes/publishes its notes and aliases without requiring or copying core', async () => {
+  const { prepareRelease, makeFrozenPlan } = await orchestration;
+  const { validatePlan, hash, tagHistory } = await lib;
+  const { publishImages } = await publishing;
+  const f = await apiFixture();
+  const aws = profileImages().find(i => i.profile === 'aws');
+  const ready = await prepareRelease({ ...f, assessRelease: async () => ({ profiles: ['aws'], images: [{ profile:'aws', inputSha256:aws.inputSha256, changes:aws.changes }] }) });
+  assert.equal(ready.images.length, 1);
+  const plan = makeFrozenPlan(ready, [{ ...aws, sourceCommit: sha, sourceRunId: 1000, lockSha256: hash(lockText) }]);
+  assert.equal(plan.schemaVersion, 2);
+  assert.equal(plan.images[0].tag, '26.8.1-r1-aws');
+  assert.throws(() => validatePlan({ ...plan, images: [{ ...plan.images[0], changes: [] }] }), /nonempty/);
+  plan.aliases = [{ tag:'aws-stable', profile:'aws', keycloakVersion:'26.8.1' }]; plan.previousAliases = { 'aws-stable':null };
+  const copies = [];
+  const record = await publishImages(plan, { inspect: async () => null, copy: async (image, reference) => { copies.push(reference); return image.digest; } }, { runId: 2000 });
+  assert.equal(copies.length, 2);
+  assert.ok(copies.every(ref => !ref.includes('core')));
+  assert.deepEqual(record.aliasChanges[0].changes, aws.changes);
+  assert.deepEqual(tagHistory([record], 'aws-stable')[0].changes, aws.changes);
+});
+
+test('every legacy image tag requires substantive supplemental history without changing its publication JSON', async () => {
+  const { renderCatalog, tagHistory } = await lib;
+  const record = await recordFixture();
+  const notes = Object.fromEntries(record.plan.images.map(i => [i.tag, { schemaVersion:1, tag:i.tag, profile:i.profile, changes:i.changes }]));
+  for (const image of record.plan.images) delete image.changes;
+  const before = JSON.stringify(record);
+  assert.throws(() => renderCatalog([record]), /Missing change history/);
+  assert.match(renderCatalog([record], notes), /Correct the reviewed image startup configuration/);
+  assert.equal(tagHistory([record], '26.8.1-r1-core', notes)[0].changes.length, 1);
+  assert.equal(JSON.stringify(record), before);
 });
 
 test('missing CI is dispatched once, failures stop, and frozen inputs never drift or rebuild', async () => {

@@ -63,7 +63,7 @@ export async function publishReleaseImages(plan, directory, output, { context, g
       validationToolsCommit: process.env.VALIDATION_TOOLS_COMMIT,
       progress: state => writeFileSync(resolve(output, 'attempt.json'), json(state)) });
     await writeFile(resolve(output, 'record.json'), json(record));
-    console.log('Both profiles published with their frozen digests; catalog recording follows.');
+    console.log('Changed profiles published with frozen digests and nonempty change history; catalog recording follows.');
   } finally {
     try { await unlink(auth); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }

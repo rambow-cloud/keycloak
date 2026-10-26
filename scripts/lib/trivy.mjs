@@ -91,12 +91,17 @@ export function escapeCell(value) {
   return escaped.length > 240 ? escaped.slice(0, 240).replace(/\\$/, '') + '…' : escaped;
 }
 
-export function renderReport(summaries, { runUrl, headSha, runId, runAttempt, conclusion }) {
+export function renderReport(summaries, { runUrl, headSha, runId, runAttempt, conclusion, expectedProfiles = profiles }) {
+  if (!Array.isArray(expectedProfiles) || expectedProfiles.some(p => !profiles.includes(p)) || new Set(expectedProfiles).size !== expectedProfiles.length) throw new Error('Invalid planned scan profiles.');
   if (!/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/actions\/runs\/\d+$/.test(runUrl) || !/^[a-f0-9]{40}$/.test(headSha)) throw new Error('Invalid report link/commit');
   let body = commentMarker + '\n<!-- run-order:' + runId + ':' + runAttempt + ' -->\n## Trivy image vulnerability scan\n\n' +
     'Commit: `' + headSha + '` · [CI run and full JSON artifacts](' + runUrl + ') · CI conclusion: **' + escapeCell(conclusion) + '**\n\n' +
     '| Profile | CRITICAL | HIGH | MEDIUM | LOW | UNKNOWN | Blocking | Scan |\n| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |\n';
   for (const profile of profiles) {
+    if (!expectedProfiles.includes(profile)) {
+      body += '| ' + profile + ' | — | — | — | — | — | — | SKIPPED (no image work planned) |\n';
+      continue;
+    }
     const summary = summaries[profile];
     if (!summary || summary.status !== 'complete') {
       body += '| ' + profile + ' | — | — | — | — | — | — | **FAILED / missing report** |\n';
@@ -107,6 +112,7 @@ export function renderReport(summaries, { runUrl, headSha, runId, runAttempt, co
   }
   body += '\nCounts are deduplicated vulnerability/package/version/target findings, not unique CVE IDs. All severities and unfixed findings remain in the JSON artifacts.\n';
   for (const profile of profiles) {
+    if (!expectedProfiles.includes(profile)) continue;
     const summary = summaries[profile];
     if (!summary || summary.status !== 'complete') continue;
     body += '\n### ' + profile + '\n\nTrivy ' + summary.scannerVersion + '. Gate: ' + summary.policy.blockingSeverities.join('/') +
