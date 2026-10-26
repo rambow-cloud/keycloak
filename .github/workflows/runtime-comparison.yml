@@ -1,0 +1,67 @@
+name: Runtime comparison
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: runtime-comparison-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  experiment:
+    if: startsWith(github.head_ref, 'chore/34-runtime-comparison')
+    name: Compare ${{ matrix.runtime }} ${{ matrix.profile }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [dhi, bellsoft, ubi10]
+        profile: [core, aws]
+    env:
+      EXPERIMENT_RUNTIME: ${{ matrix.runtime }}
+      BUILD_PROFILE: ${{ matrix.profile }}
+      SCAN_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      REPORT_DIRECTORY: .cache/runtime-comparison/${{ matrix.runtime }}-${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install open-source OCI tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y buildah podman skopeo openssl
+      - name: Freeze public candidate inputs
+        id: input
+        run: node experiments/runtime-comparison.mjs "$EXPERIMENT_RUNTIME" "$BUILD_PROFILE"
+      - name: Build and inspect candidate
+        id: build
+        run: bash experiments/build-runtime.sh 2>&1 | tee "$REPORT_DIRECTORY/build.log"
+      - name: Verify runtime and rootfs policy
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          EXPERIMENTAL_DEFER_ROOTFS_FAILURE: '1'
+          EXPERIMENTAL_ROOTFS_REPORT: ${{ env.REPORT_DIRECTORY }}/rootfs-policy.json
+        run: bash scripts/verify-image.sh 2>&1 | tee "$REPORT_DIRECTORY/runtime.log"
+      - name: Scan candidate with pinned Trivy
+        id: scan
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          SCAN_EXPECTED_OS: ${{ steps.input.outputs.expected_os }}
+        run: node scripts/scan-image.mjs .cache/trivy-image "$REPORT_DIRECTORY"
+      - name: Upload complete evidence before enforcing policy
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: comparison-${{ matrix.runtime }}-${{ matrix.profile }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.REPORT_DIRECTORY }}/
+            !${{ env.REPORT_DIRECTORY }}/anonymous-auth.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Enforce unchanged vulnerability policy
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node scripts/trivy-gate.mjs "$REPORT_DIRECTORY/summary.json"

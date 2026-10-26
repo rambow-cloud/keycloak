@@ -10,11 +10,13 @@ const metadata = /^(?:docs\/|releases\/|changes\/|\.github\/(?:ISSUE_TEMPLATE\/|
 const bookkeeping = /^scripts\/(?:quay-release|release-catalog|releases|upstream-update|lock-images|issue-policy|trivy-comment)\.(?:mjs|cjs)$|^scripts\/lib\/(?:releases|quay-publish|quay-auth|upstream)\.mjs$|^\.github\/workflows\/(?!ci\.yml$)[^/]+\.yml$|^tests\/[^/]+\.test\.cjs$/;
 const validation = /^scripts\/(?:verify-|scan-image|trivy-gate|release-image|check-upstream-compatibility)|^scripts\/lib\/(?:trivy|oci|image-changes)\.mjs$|^config\/(?:trivy|upstream-compatibility)\.json$|^\.github\/workflows\/ci\.yml$|^tests\//;
 export function sourceProfiles(path) {
+  if (path.startsWith('experiments/')) return [];
   if (metadata.test(path) || bookkeeping.test(path) || validation.test(path)) return [];
   if (/^dependencies\/aws\/|^scripts\/aws-dependencies\.mjs$/.test(path)) return ['aws'];
   return imageProfiles;
 }
 export function validationProfiles(path) {
+  if (path.startsWith('experiments/')) return imageProfiles;
   if (bookkeeping.test(path) || metadata.test(path)) return [];
   if (path === 'tests/AwsHttpTransport.java') return ['aws'];
   return validation.test(path) ? imageProfiles : [];

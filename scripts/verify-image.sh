@@ -37,11 +37,24 @@ podman export "$probe" > "$rootfs"
 podman rm -v "$probe" >/dev/null
 probe=''
 entries=$(tar -tf "$rootfs")
+if [[ -n "${EXPERIMENTAL_ROOTFS_REPORT:-}" ]]; then
+  mkdir -p "$(dirname "$EXPERIMENTAL_ROOTFS_REPORT")"
+  if grep -q '^usr/share/rambow/ubi-runtime-packages.tsv$' <<< "$entries"; then
+    tar -xOf "$rootfs" usr/share/rambow/ubi-runtime-packages.tsv > "$(dirname "$EXPERIMENTAL_ROOTFS_REPORT")/ubi-runtime-packages.tsv"
+  fi
+fi
 rm "$rootfs"
 rootfs=''
+rootfs_valid=true
 if grep -Eq '(^|/)(sh|bash|dash|ash|busybox|apt|apt-get|dpkg|rpm|dnf|microdnf|apk|javac|jshell)$' <<< "$entries"; then
-  echo 'Unexpected shell, package manager or development tool in final image' >&2; exit 1
+  rootfs_valid=false
+  grep -E '(^|/)(sh|bash|dash|ash|busybox|apt|apt-get|dpkg|rpm|dnf|microdnf|apk|javac|jshell)$' <<< "$entries" >&2
+  echo 'Unexpected shell, package manager or development tool in final image' >&2
 fi
+if [[ -n "${EXPERIMENTAL_ROOTFS_REPORT:-}" ]]; then printf '{"passed":%s}\n' "$rootfs_valid" > "$EXPERIMENTAL_ROOTFS_REPORT"; fi
+# Experimental comparisons may collect protocol evidence after a rootfs failure,
+# but they must still fail at the end. Normal CI retains immediate failure.
+if [[ "$rootfs_valid" != true && "${EXPERIMENTAL_DEFER_ROOTFS_FAILURE:-}" != 1 ]]; then exit 1; fi
 if [[ "$profile" == aws ]]; then
   grep -q '/providers/aws-advanced-jdbc-wrapper-' <<< "$entries"
   if grep -Eq '/providers/(netty-|postgresql-|slf4j-api-)' <<< "$entries"; then echo 'Conflicting provider JAR found' >&2; exit 1; fi
@@ -136,4 +149,8 @@ podman stop --time 30 "$server" >/dev/null
 exit_code=$(podman inspect --format '{{.State.ExitCode}}' "$server")
 [[ "$exit_code" == 0 || "$exit_code" == 143 ]] || { echo "Unexpected shutdown: $exit_code" >&2; exit 1; }
 podman logs "$server" 2>&1 | grep -E 'stopped in|Shutdown complete' >/dev/null
+if [[ "$rootfs_valid" != true ]]; then
+  echo "Protocol checks passed for $profile, but rootfs hardening FAILED; candidate is not acceptable." >&2
+  exit 1
+fi
 echo "Verified $profile: Java/Keycloak versions, UID, shell-free rootfs, verified TLS, schema, authentication and graceful shutdown."

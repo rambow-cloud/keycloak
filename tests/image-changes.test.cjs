@@ -43,6 +43,10 @@ test('semantic fingerprints and CI scope distinguish metadata, AWS-only inputs, 
   assert.deepEqual(classifyCI(base, source(newSha, {}, { ...lock, postgres: 'pg@new' })).imageChanges, []);
   assert.deepEqual(classifyCI(base, source(newSha, {}, { ...lock, postgres: 'pg@new' })).profiles, ['core','aws']);
   assert.deepEqual(classifyCI(base, source(newSha, { 'scripts/verify-image.sh': 'new-check' })).profiles, ['core','aws']);
+  const experiment = source(newSha, { 'experiments/images.lock.json': 'candidate pins', 'experiments/runtime-comparison.mjs': 'validation runner' });
+  assert.deepEqual(classifyCI(base, experiment).profiles, ['core','aws']);
+  assert.deepEqual(classifyCI(base, experiment).imageChanges, []);
+  assert.equal(fingerprint(base, 'core'), fingerprint(experiment, 'core'));
   assert.deepEqual(classifyCI(base, source(newSha, { 'tests/AwsHttpTransport.java': 'new-check' })).profiles, ['aws']);
   assert.deepEqual(classifyCI(base, source(newSha, { 'unknown-runtime-source': 'new' })).profiles, ['core','aws']);
 });

@@ -65,6 +65,32 @@ test('missing coverage, malformed data, mismatched provenance and scanner failur
   assert.throws(() => gateSummary({ ...summary, osEosl: true }), /end-of-life/);
 });
 
+test('RHEL coverage requires nonempty RPM and Java results while unsupported OS scans remain blocked', async () => {
+  const { summarize, gateSummary } = await lib;
+  const data = report([vuln('CVE-2026-12345', 'HIGH', '2.0')]);
+  data.Metadata.OS = { Family: 'redhat', Name: '10.2' };
+  data.Results[0].Type = 'redhat';
+  data.Results[0].Packages = [{ Name: 'glibc' }];
+  data.Results[1].Packages = [{ Name: 'org.keycloak:keycloak-services' }];
+  const context = { ...scanContext, expectedOS: 'redhat' };
+  assert.throws(() => summarize(data, scanContext), /coverage/);
+  assert.throws(() => gateSummary(summarize(data, context)), /blocked/);
+  for (const index of [0, 1]) {
+    const missing = structuredClone(data);
+    missing.Results[index].Packages = [];
+    assert.throws(() => summarize(missing, context), /coverage/);
+  }
+  assert.throws(() => summarize(data, { ...context, expectedOS: 'alpaquita' }), /Unsupported/);
+});
+
+test('experimental runtime inputs reject floating images, unapproved sources and executable path injection', async () => {
+  const { validateCandidate } = await import('../experiments/runtime-comparison.mjs');
+  const candidate = { runtime: 'dhi.io/eclipse-temurin:25-debian13@sha256:' + 'a'.repeat(64), javaPath: '/opt/java/openjdk/25-jre/bin/java', expectedOS: 'debian' };
+  validateCandidate(candidate);
+  for (const patch of [{runtime:'dhi.io/eclipse-temurin:25-debian13'}, {runtime:'untrusted.example/jre@sha256:'+'a'.repeat(64)},
+    {javaPath:'/tmp/java;exit'}, {javaPath:'/usr/../tmp/java'}, {expectedOS:'unknown'}]) assert.throws(() => validateCandidate({...candidate,...patch}), /Invalid/);
+});
+
 test('comments escape artifact content, remain bounded and show failed/missing profiles', async () => {
   const { summarize, renderReport, commentMarker } = await lib;
   const malicious = '<script>@team\n![link](https://attacker.example) | `';

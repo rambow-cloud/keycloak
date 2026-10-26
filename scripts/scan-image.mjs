@@ -32,11 +32,15 @@ try {
   { stdio: 'inherit', timeout: 660000 });
   if (scan.status !== 0) throw new Error('Trivy failed; see scanner/database logs above.');
   const report = JSON.parse(await readFile(join(output, 'trivy.json'), 'utf8'));
-  summary = summarize(report, { profile, headSha, runId, runAttempt, policy });
   for (const name of ['db', 'java-db']) {
     try { await writeFile(join(output, name + '-metadata.json'), await readFile(join(work, 'cache', name, 'metadata.json'))); }
     catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
+  const expectedOS = process.env.SCAN_EXPECTED_OS ?? 'debian';
+  await writeFile(join(output, 'coverage.json'), JSON.stringify({ expectedOS, actualOS: report.Metadata?.OS ?? null,
+    results: report.Results?.map(r => ({ target: r.Target, class: r.Class, type: r.Type, packages: r.Packages?.length ?? 0,
+      findings: r.Vulnerabilities?.length ?? 0 })) ?? [] }, null, 2) + '\n');
+  summary = summarize(report, { profile, headSha, runId, runAttempt, policy, expectedOS });
 } catch (error) {
   console.error(error.message);
   summary = { schemaVersion: 1, profile, headSha, runId, runAttempt, status: 'error' };

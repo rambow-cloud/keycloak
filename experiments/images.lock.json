@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "candidates": {
+    "ubi10": {
+      "runtime": "registry.access.redhat.com/ubi10/ubi-micro@sha256:1c105e547de5d9e0bc20d06ebabee73b20bc6bba994c50ae3e207684fd8bef2b",
+      "runtimeBuilder": "registry.access.redhat.com/ubi10/ubi@sha256:7495bfa53ae7a81a58aeface0bb4858d12741832c542c29dc690d67b183b73b0",
+      "javaPath": "/usr/bin/java",
+      "expectedOS": "redhat",
+      "version": "10.2"
+    },
+    "bellsoft": {
+      "runtime": "ghcr.io/bell-sw/hardened-liberica-runtime-container:jre-25-nonroot-glibc@sha256:6fdffbd4d0c67591ade625bd225a558715696c566c523470603ab419dbec3f3f",
+      "javaPath": "/usr/lib/jvm/liberica25-container-jre/bin/java",
+      "expectedOS": "alpaquita"
+    },
+    "dhi": {
+      "publicProbe": "dhi.io/eclipse-temurin:25-debian13",
+      "javaPath": "/opt/java/openjdk/25-jre/bin/java",
+      "expectedOS": "debian",
+      "localProbeResult": "Anonymous token exchange returned HTTP 401. CI must independently establish public pull access before freezing a digest and building; no credentials are supplied."
+    }
+  }
+}

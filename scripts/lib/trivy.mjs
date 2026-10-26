@@ -12,12 +12,15 @@ export function validatePolicy(policy) {
       policy.blockingSeverities.some(s => !severities.includes(s)) || typeof policy.blockUnfixed !== 'boolean') throw new Error('Invalid Trivy policy');
 }
 
-export function summarize(report, { profile, headSha, runId, runAttempt, policy }) {
+export function summarize(report, { profile, headSha, runId, runAttempt, policy, expectedOS = 'debian' }) {
   validatePolicy(policy);
   if (!profiles.includes(profile) || !/^[a-f0-9]{40}$/.test(headSha) || !Number.isSafeInteger(runId) || !Number.isSafeInteger(runAttempt)) throw new Error('Invalid scan context');
+  if (!['debian', 'redhat'].includes(expectedOS)) throw new Error('Unsupported expected OS coverage: ' + expectedOS);
   if (report.SchemaVersion !== 2 || report.ArtifactType !== 'container_image' || !Array.isArray(report.Results) ||
-      report.Metadata?.OS?.Family !== 'debian' || !report.Results.some(r => r.Class === 'os-pkgs') ||
-      !report.Results.some(r => r.Class === 'lang-pkgs' && r.Type === 'jar')) throw new Error('Missing expected Debian or Java scan coverage');
+      report.Metadata?.OS?.Family !== expectedOS || !report.Results.some(r => r.Class === 'os-pkgs' && r.Type === expectedOS &&
+        (expectedOS !== 'redhat' || r.Packages?.length > 0)) ||
+      !report.Results.some(r => r.Class === 'lang-pkgs' && r.Type === 'jar' &&
+        (expectedOS !== 'redhat' || r.Packages?.length > 0))) throw new Error('Missing expected ' + expectedOS + ' or Java scan coverage');
   const unique = new Map();
   for (const result of report.Results) {
     if (result.Vulnerabilities !== undefined && !Array.isArray(result.Vulnerabilities)) throw new Error('Invalid vulnerability list');

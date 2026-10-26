@@ -62,9 +62,10 @@ jobs:
           node --check scripts/release-image.mjs
           node --check scripts/lib/quay-auth.mjs
           node --check scripts/lib/image-changes.mjs
+          node --check experiments/runtime-comparison.mjs
           node scripts/releases.mjs render --check
           node scripts/check-upstream-compatibility.mjs
-          shellcheck scripts/*.sh
+          shellcheck scripts/*.sh experiments/*.sh
           git show --format= --check HEAD
   build:
     name: Build ${{ matrix.profile }}

@@ -1,0 +1,16 @@
+*
+!Containerfile
+!config
+!config/java.options
+!tests
+!tests/AwsHttpTransport.java
+!.cache
+!.cache/aws
+!.cache/aws/providers
+!.cache/aws/providers/*.jar
+!.cache/aws/certs
+!.cache/aws/certs/rds-ca-bundle.pem
+!experiments
+!experiments/prepare-ubi10-runtime.sh
+!experiments/licenses
+!experiments/licenses/UBI-EULA.pdf
