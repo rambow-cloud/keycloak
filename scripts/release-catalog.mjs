@@ -124,6 +124,7 @@ export async function ensureCatalogPR({ github, context, core, record }) {
     await github.rest.pulls.update({ ...repo, pull_number: pr.number, body });
     pr = { ...pr, head: { ...pr.head, sha: commit.sha }, body };
   } else {
+    await github.rest.git.createRef({ ...repo, ref: 'refs/heads/' + branch, sha: commit.sha });
     ({ data: pr } = await github.rest.pulls.create({ ...repo, base: main, head: branch,
       title: 'chore: record Quay release ' + record.plan.tag, body }));
   }

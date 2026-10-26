@@ -27,7 +27,7 @@ Build Keycloak OCI images for Rambow Cloud. Prefer distroless Java, a non-root u
 - The hourly updater never changes `config/upstream-compatibility.json`. Review changed upstream `kc.sh` and supported Java LTS before updating that baseline; never update the hash simply to make CI pass.
 - Scan both built profiles with the checksum-pinned native Trivy in CI. Fixable HIGH/CRITICAL vulnerabilities and scan/coverage errors fail the required check. Keep all findings visible; never add blanket ignores or weaken the gate to merge an update. Scanner/policy upgrades and remediation require reviewed Issues.
 - The PR comment reporter must execute only trusted default-branch code. Never run PR code or artifact content with a comment-writing token; validate run/head/profile/attempt associations and escape report data. See `docs/vulnerability-scanning.md`.
-- Formal Quay publication uses `v<Keycloak>-r<N>` Releases and fixed core/aws tags. Freeze source artifacts/digests before pushing, freshly scan both profiles, never overwrite formal tag conflicts, and finish the Git JSON/Markdown record before marking publication complete. Keep Quay Secrets isolated in the publisher Environment. See `docs/quay-releases.md`.
+- Formal Quay publication uses `v<Keycloak>-r<N>` Releases and fixed core/aws tags. Freeze source artifacts/digests before pushing, freshly scan both profiles, never overwrite formal tag conflicts, and finish the Git JSON/Markdown record before marking publication complete. Only the protected publisher may request GitHub OIDC with audience `https://quay.io` for short-lived Quay robot authentication. Never add a long-lived-token fallback or persist transient credentials in outputs/artifacts. See `docs/quay-releases.md`.
 
 ## Validation and delivery
 

@@ -150,6 +150,7 @@ jobs:
     permissions:
       contents: read
       actions: read
+      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -167,15 +168,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y skopeo
       - name: Preserve frozen digests while publishing both profiles
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           PLAN: ${{ needs.freeze.outputs.plan }}
           VALIDATION_TOOLS_COMMIT: ${{ needs.prepare.outputs.tools_commit }}
-          QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
-          QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}
-        run: |
-          mkdir -p .cache/publication
-          node --input-type=module -e 'import fs from "node:fs"; fs.writeFileSync(".cache/publication/plan.json",process.env.PLAN);'
-          node scripts/release-image.mjs publish .cache/publication/plan.json .cache/release-input .cache/publication
+          QUAY_USERNAME: ${{ vars.QUAY_USERNAME }}
+        with:
+          script: |
+            const fs = require('node:fs/promises');
+            const { publishReleaseImages } = await import(process.cwd() + '/scripts/release-image.mjs');
+            const plan = JSON.parse(process.env.PLAN);
+            await fs.mkdir('.cache/publication', { recursive: true });
+            await fs.writeFile('.cache/publication/plan.json', JSON.stringify(plan));
+            await publishReleaseImages(plan, '.cache/release-input', '.cache/publication', {
+              context, getIDToken: audience => core.getIDToken(audience), mask: value => core.setSecret(value)
+            });
       - name: Retain successful or partial publication state
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

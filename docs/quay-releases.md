@@ -23,9 +23,20 @@ This example is not enabled. Aliases must specify both profile and Keycloak vers
 
 ## Setup
 
-1. Open the Quay repository **Settings** and confirm **Public** visibility. In the `rambow-cloud` organization create a dedicated Robot Account, for example `rambow-cloud+github_actions`, and grant it **Write** on this repository only. Do not use a personal password or organization-wide administrative credential.
-2. Open [GitHub Environments](https://github.com/rambow-cloud/keycloak/settings/environments), select `quay-release`, and add `QUAY_USERNAME` and `QUAY_TOKEN` as Environment Secrets. Do not paste the token into chat, Issues or Git. Environment deployment policies allow main for manual recovery and `v*-r*` tags for formal publication.
-3. Keep release creation restricted to trusted maintainers. The publisher validates main ancestry before its credential-bearing job; ordinary PR build and scan jobs have no Quay credentials. A separate trusted policy check may revoke unsafe catalog auto-merge.
+1. Open the Quay repository **Settings** and confirm **Public** visibility. Use the dedicated organization Robot Account `rambow-cloud+github_keycloak` and grant it **Write** on this repository only. Do not use a personal password or organization-wide administrative credential.
+2. In **Organizations > rambow-cloud > Robot Accounts**, open the robot's **Set robot federation** menu and configure the exact values below. Do not use a main-branch subject: the publisher references the `quay-release` Environment, so GitHub includes that environment in its subject.
+
+   | Field | Value |
+   | --- | --- |
+   | Issuer URL | `https://token.actions.githubusercontent.com` |
+   | Subject | `repo:rambow-cloud@333554680/keycloak@1433566126:environment:quay-release` |
+   | OIDC audience | `https://quay.io` |
+
+   The prefix was obtained from this repository's GitHub OIDC configuration with immutable owner/repository IDs. Repository transfers, renames or OIDC claim changes require a reviewed update of both this binding and `scripts/lib/quay-auth.mjs`.
+3. Open [GitHub Environments](https://github.com/rambow-cloud/keycloak/settings/environments), select `quay-release`, and add the **Environment variable** `QUAY_USERNAME=rambow-cloud+github_keycloak`. It is not a secret. Do not add `QUAY_TOKEN`: static-token fallback is disabled. Environment deployment policies allow main for manual recovery and `v*-r*` tags for formal publication; preserve those restrictions because the environment subject itself does not include the branch/tag.
+4. Keep release creation restricted to trusted maintainers. Only the protected publisher has `id-token: write`. After both fresh scans, the frozen plan and local artifact verification, it explicitly requests `core.getIDToken('https://quay.io')`, validates the expected issuer/subject/audience/run context locally, and exchanges the signed token at `https://quay.io/oauth2/federation/robot/token`. Quay verifies the identity and returns a short-lived robot credential, used only in memory and the temporary Skopeo auth file (removed afterward). Both tokens are masked; they are never saved in GitHub outputs, environment files, publication artifacts or Release assets. Exchange errors/redirects stop publication with sanitized messages and no automatic token retries. Ordinary build, scan, preview and catalog jobs cannot request OIDC or receive Quay credentials.
+
+See [Quay keyless authentication](https://developers.redhat.com/articles/2026/07/22/push-images-to-quay-without-a-password), [Quay audience validation](https://docs.projectquay.io/manage_quay.html#configuring-federation-audiences), and [GitHub OIDC subject rules](https://docs.github.com/en/actions/reference/security/oidc). The configured audience is an explicit project contract; GitHub's default audience is not used.
 
 The implementation's first release is `v26.8.1-r1` if the verified source still uses Keycloak 26.8.1 and that revision is unused. Create the tag/Release only after the publishing workflow is merged and the target main CI has passed. A Release created with the workflow token does not necessarily trigger another workflow: use a maintainer-published Release or the manual recovery entry point. Drafts and prereleases do not upload images.
 
@@ -40,7 +51,7 @@ The implementation's first release is `v26.8.1-r1` if the verified source still 
 
 Open [Quay release Actions](https://github.com/rambow-cloud/keycloak/actions/workflows/release.yml), choose **Run workflow** on **main**, set `release_tag`, and leave `preview` false to recover an existing stable Release. If images already have a saved publication record, recovery skips downloads, scans and registry writes and only finishes Git recording. Duplicate events for a fully recorded release exit without work. Runs are serialized; after a replaced/cancelled queued event, use this same recovery entry point.
 
-Enable **preview** to inspect and freshly scan an existing successful current-main CI without creating a Release, dispatching a build, freezing assets, accessing Quay Secrets, uploading images or creating catalog PRs. It reports what the selected version would publish; it does not certify registry credentials or write permissions.
+Enable **preview** to inspect and freshly scan an existing successful current-main CI without creating a Release, dispatching a build, freezing assets, requesting OIDC, uploading images or creating catalog PRs. It reports what the selected version would publish; it does not certify federation configuration or write permissions.
 
 ## Catalog and queries
 

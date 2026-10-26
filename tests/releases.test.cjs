@@ -263,14 +263,17 @@ test('catalog creation is Issue-first and scopes native auto-merge to generated 
   const head = 'f'.repeat(40);
   let files = {};
   let pr;
+  let branch;
   const write = (name, value) => async args => { f.calls.push({ name, args }); return { data: typeof value === 'function' ? value(args) : value }; };
   f.github.rest.issues = { create: write('issue', { number: 77 }) };
   f.github.rest.git.getCommit = async () => ({ data: { tree: { sha: 'base-tree' } } });
   f.github.rest.git.createTree = write('tree', args => { files = Object.fromEntries(args.tree.map(e => [e.path, e.content])); return { sha: 'new-tree' }; });
   f.github.rest.git.createCommit = write('commit', { sha: head });
-  f.github.rest.git.createRef = write('branch', {});
+  f.github.rest.git.createRef = write('branch', args => { branch = args; return {}; });
   f.github.rest.repos.getCommit = async () => ({ data: { sha: head, author: bot, parents: [{ sha: tools }] } });
   f.github.rest.pulls = { list() {}, listFiles() {}, create: write('pr', args => {
+    assert.equal(branch?.ref, 'refs/heads/' + args.head, 'PR head must already exist');
+    assert.equal(branch?.sha, head, 'PR branch must point to the generated commit');
     pr = { number: 78, user: bot, body: args.body, head: { sha: head, ref: args.head, repo: { full_name: 'rambow-cloud/keycloak' } }, html_url: 'https://github.com/rambow-cloud/keycloak/pull/78' };
     return pr;
   }) };
@@ -291,6 +294,8 @@ test('catalog creation is Issue-first and scopes native auto-merge to generated 
   const result = await ensureCatalogPR({ ...f, record });
   assert.equal(result.number, 78);
   assert.equal(f.calls[0].name, 'issue');
+  assert.ok(f.calls.findIndex(c => c.name === 'commit') < f.calls.findIndex(c => c.name === 'branch'));
+  assert.ok(f.calls.findIndex(c => c.name === 'branch') < f.calls.findIndex(c => c.name === 'pr'));
   validateIssue({ ...f.calls[0].args, state: 'open', number: 77 });
   assert.deepEqual(Object.keys(files).sort(), ['releases/README.md', 'releases/records/v26.8.1-r1.json']);
   assert.equal(f.calls.filter(c => c.name === 'dispatch').length, 2);
