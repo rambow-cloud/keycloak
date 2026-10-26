@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "status": "published",
+  "publishedAt": "2026-10-26T02:41:36.090Z",
+  "publishRunId": 40260151709,
+  "validationToolsCommit": "a6bca23dd39652b70c38db10953a2e2a18ac3360",
+  "plan": {
+    "schemaVersion": 1,
+    "registry": "quay.io/rambow-cloud/keycloak",
+    "tag": "v26.8.1-r1",
+    "releaseId": 423808206,
+    "keycloakVersion": "26.8.1",
+    "revision": 1,
+    "sourceCommit": "a6bca23dd39652b70c38db10953a2e2a18ac3360",
+    "toolsCommit": "a6bca23dd39652b70c38db10953a2e2a18ac3360",
+    "sourceRun": {
+      "id": 40259705547,
+      "attempt": 1
+    },
+    "lockSha256": "636da1eaf818d41c6d87110943977b0a4924aa6dc758ecbf02dd35ad4c252abf",
+    "imageLock": {
+      "keycloakVersion": "26.8.1",
+      "javaVersion": 25,
+      "platform": "linux/amd64",
+      "keycloak": "quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b",
+      "builder": "docker.io/library/eclipse-temurin:25-jdk-noble@sha256:ba0f0e1a33864105e1d454e88105c617ab40f71062db1f306bf58be32a3f8e5e",
+      "runtime": "gcr.io/distroless/java25-debian13:nonroot@sha256:5d3177252775d4b01603470fe21c015393019089904f68724bd37242e4bc6e6d",
+      "postgres": "docker.io/library/postgres:17-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+      "awsDependencies": {
+        "wrapperVersion": "4.5.0",
+        "sdkVersion": "2.46.10",
+        "lockFile": "dependencies/aws/dependencies.lock.json",
+        "rdsCa": {
+          "url": "https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem",
+          "sha256": "90a6f1a7978a1b1b096dca6c57511ca48d3b8cf052f8e704baf358f34ea2f21b"
+        }
+      }
+    },
+    "aliases": [],
+    "previousAliases": {},
+    "images": [
+      {
+        "profile": "core",
+        "artifactId": 12624217256,
+        "artifactName": "keycloak-oci-core-amd64-a6bca23dd39652b70c38db10953a2e2a18ac3360",
+        "tag": "26.8.1-r1-core",
+        "digest": "sha256:e0975379e3f2080cc4b9a4e852ce3341c54041e8a733a529b01cca2922beaa32",
+        "archiveSha256": "3eef475a47c106322705da43597fe861dc7c7e760f29298cdbf61e0831bc7f4d"
+      },
+      {
+        "profile": "aws",
+        "artifactId": 12623962850,
+        "artifactName": "keycloak-oci-aws-amd64-a6bca23dd39652b70c38db10953a2e2a18ac3360",
+        "tag": "26.8.1-r1-aws",
+        "digest": "sha256:0771ae5db0bc40e057ce51d2609d50a56a0d867a66411e411179ecf12f9608a7",
+        "archiveSha256": "d1f9ed5586192dc4c4fc275e8f16c9b379dfa9e6dad90501f6506a5a107b2e9c"
+      }
+    ]
+  },
+  "aliasChanges": []
+}
