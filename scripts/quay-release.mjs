@@ -41,6 +41,11 @@ export async function assertTagSource(github, repo, tag, sourceCommit) {
   const { data } = await github.rest.repos.getCommit({ ...repo, ref: 'refs/tags/' + tag });
   if (data.sha !== sourceCommit) throw new Error('Release tag moved after validation. Use a new revision.');
 }
+export function completionAsset(record) {
+  validateRecord(record);
+  return { schemaVersion: 1, tag: record.plan.tag, recordSha256: hash(json(record)),
+    catalog: 'https://github.com/' + repository + '/blob/main/releases/README.md' };
+}
 
 export async function prepareRelease({ github, context, core, tag, preview = false,
   trustedToolsCommit,
@@ -87,8 +92,14 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
   const existingRecord = records.find(r => r.plan.tag === tag);
   if (existingRecord) {
     if (existingRecord.plan.releaseId !== release.id || existingRecord.plan.sourceCommit !== sourceCommit) throw new Error('Recorded release identity conflict.');
-    core.info('Release already published and recorded; duplicate event skipped.');
-    return { complete: true, tag };
+    const completed = await readAsset(github, repo, release, 'publication-complete.json');
+    if (completed) {
+      if (!equal(completed, completionAsset(existingRecord))) throw new Error('Completion attachment conflicts with the recorded publication.');
+      core.info('Release already published, recorded and complete; duplicate event skipped.');
+      return { complete: true, tag };
+    }
+    core.info('Catalog already merged; recovering the missing completion attachment only.');
+    return { tag, toolsCommit, sourceCommit, releaseId: release.id, recordOnly: true, plan: existingRecord.plan, record: existingRecord };
   }
   const config = validateAliases(JSON.parse(await readText(github, repo, 'releases/aliases.json', toolsCommit)));
   const aliases = config.aliases.filter(a => a.keycloakVersion === version.keycloakVersion);

@@ -108,18 +108,46 @@ async function apiFixture({ records = [], runs, assets = {}, ancestor = true, pr
 }
 
 test('preparation enforces release/main/lock identity and skips prereleases/duplicates without writes', async () => {
-  const { prepareRelease } = await orchestration;
+  const { prepareRelease, completionAsset } = await orchestration;
   for (const options of [{ ancestor: false }, { badLock: true }]) await assert.rejects(prepareRelease(await apiFixture(options)), /main history|image lock/);
   const pre = await apiFixture({ prerelease: true });
   assert.equal((await prepareRelease(pre)).skipped, true);
   assert.deepEqual(pre.calls, []);
-  const done = await apiFixture({ records: [await recordFixture()] });
+  const record = await recordFixture();
+  const done = await apiFixture({ records: [record], assets: { 'publication-complete.json': completionAsset(record) } });
   assert.equal((await prepareRelease(done)).complete, true);
   assert.deepEqual(done.calls, []);
   const f = await apiFixture();
   await assert.rejects(prepareRelease({ ...f, context: { ...f.context, ref: 'refs/heads/untrusted' } }), /from main/);
   const ready = await prepareRelease(f);
   assert.equal(ready.sourceRun.id, 1000);
+});
+
+test('a merged record recovers missing completion without source artifacts; conflicting completion fails', async () => {
+  const { prepareRelease, completionAsset } = await orchestration;
+  const record = await recordFixture();
+  const missing = await apiFixture({ records: [record], runs: [], expired: true });
+  const prepared = await prepareRelease(missing);
+  assert.equal(prepared.recordOnly, true);
+  assert.deepEqual(prepared.record, record);
+  assert.deepEqual(missing.calls, []);
+  const bad = await apiFixture({ records: [record], assets: { 'publication-complete.json': { ...completionAsset(record), recordSha256: 'f'.repeat(64) } } });
+  await assert.rejects(prepareRelease(bad), /Completion attachment conflicts/);
+});
+
+test('catalog waiter follows the newest exact-head trusted dispatch rather than automatic approval status', async () => {
+  const { selectCatalogCI } = await catalog;
+  const pr = { head: { sha, ref: 'chore/22-record-release-v26.8.1-r1' } };
+  const base = { id: 1, event: 'workflow_dispatch', path: '.github/workflows/ci.yml', head_sha: sha, head_branch: pr.head.ref,
+    repository: { full_name: 'rambow-cloud/keycloak' }, head_repository: { full_name: 'rambow-cloud/keycloak' }, conclusion: 'success' };
+  const failed = { ...base, id: 2, status: 'completed', conclusion: 'failure' };
+  const others = [{ ...base, id: 3, event: 'pull_request', conclusion: 'action_required' },
+    { ...base, id: 4, head_sha: tools }, { ...base, id: 5, head_branch: 'main' },
+    { ...base, id: 6, head_repository: { full_name: 'fork/keycloak' } }, { ...base, id: 7, path: '.github/workflows/other.yml' }];
+  assert.equal(selectCatalogCI([base, failed, ...others], pr), failed);
+  const running = { ...base, id: 8, status: 'in_progress', conclusion: null };
+  assert.equal(selectCatalogCI([base, failed, running, ...others], pr), running);
+  assert.equal(selectCatalogCI(others, pr), undefined);
 });
 
 test('missing CI is dispatched once, failures stop, and frozen inputs never drift or rebuild', async () => {
