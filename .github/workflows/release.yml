@@ -84,11 +84,12 @@ jobs:
       - id: input
         run: |
           mkdir -p .cache/release-scan
-          node --input-type=module -e 'import fs from "node:fs"; const p=JSON.parse(process.env.PREPARED); fs.writeFileSync(".cache/prepared.json",JSON.stringify(p)); fs.appendFileSync(process.env.GITHUB_OUTPUT,"artifact_id="+p.images.find(i=>i.profile===process.env.BUILD_PROFILE).artifactId+"\n");'
+          node --input-type=module -e 'import fs from "node:fs"; const p=JSON.parse(process.env.PREPARED); fs.writeFileSync(".cache/prepared.json",JSON.stringify(p)); const i=p.images.find(i=>i.profile===process.env.BUILD_PROFILE); fs.appendFileSync(process.env.GITHUB_OUTPUT,"artifact_id="+i.artifactId+"\nartifact_name="+i.artifactName+"\n");'
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           artifact-ids: ${{ steps.input.outputs.artifact_id }}
-          path: .cache/release-input
+          # download-artifact extracts a single ID directly into path.
+          path: .cache/release-input/${{ steps.input.outputs.artifact_name }}
           merge-multiple: false
           github-token: ${{ github.token }}
           run-id: ${{ needs.prepare.outputs.source_run }}

@@ -1,6 +1,6 @@
 import { readFile, writeFile, mkdtemp, unlink } from 'node:fs/promises';
 import { writeFileSync, createReadStream } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { resolve, join, basename, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
@@ -34,7 +34,18 @@ async function inspectSource(directory, prepared, image) {
 }
 
 const [mode, ...args] = process.argv.slice(2);
-if (mode === 'inspect') {
+if (mode === 'inspect-ci') {
+  const directory = resolve(args[0] ?? 'dist');
+  const profile = process.env.BUILD_PROFILE ?? 'core';
+  if (!profiles.includes(profile)) throw new Error('Invalid profile');
+  const lockBytes = await readFile(join(directory, 'images.lock.json'), 'utf8');
+  const prepared = { sourceCommit: process.env.GITHUB_SHA, imageLock: JSON.parse(lockBytes), lockSha256: hash(lockBytes) };
+  const image = { profile, artifactName: basename(directory) };
+  const source = await inspectSource(dirname(directory), prepared, image);
+  await writeFile(join(directory, 'release-evidence.json'), json({ schemaVersion: 1, profile, sourceCommit: prepared.sourceCommit,
+    digest: source.digest, archiveSha256: source.archiveSha256, lockSha256: prepared.lockSha256 }));
+  console.log('Verified the exported OCI archive contract for release publication.');
+} else if (mode === 'inspect') {
   const [preparedFile, directory, profile, evidenceFile, layout] = args;
   if (!profiles.includes(profile)) throw new Error('Invalid profile');
   const prepared = JSON.parse(await readFile(preparedFile, 'utf8'));
@@ -76,4 +87,4 @@ if (mode === 'inspect') {
   } finally {
     try { await unlink(auth); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
-} else throw new Error('Usage: release-image.mjs inspect <prepared> <artifacts> <profile> <evidence> <layout> | publish <plan> <artifacts> <output>');
+} else throw new Error('Usage: release-image.mjs inspect-ci [dist] | inspect <prepared> <artifacts> <profile> <evidence> <layout> | publish <plan> <artifacts> <output>');
