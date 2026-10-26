@@ -2,6 +2,10 @@
 !Containerfile
 !config
 !config/java.options
+!scripts
+!scripts/prepare-ubi-runtime.sh
+!licenses
+!licenses/UBI-EULA.pdf
 !tests
 !tests/AwsHttpTransport.java
 !.cache
