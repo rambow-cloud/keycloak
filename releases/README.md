@@ -24,4 +24,3 @@ aws:
 ```sh
 podman pull quay.io/rambow-cloud/keycloak@sha256:0771ae5db0bc40e057ce51d2609d50a56a0d867a66411e411179ecf12f9608a7
 ```
-

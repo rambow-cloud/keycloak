@@ -52,6 +52,7 @@ test('catalog validates bindings, preserves history and renders deterministic di
   assert.equal(resolveTag([first, second], 'extention-v26.8.1', 'v26.8.1-r1').digest, digest('d'));
   assert.equal(resolveTag([first, second], '26.8.1-r1-core').reference, 'quay.io/rambow-cloud/keycloak@' + digest('c'));
   assert.equal(renderCatalog([first, second]), renderCatalog([second, first]));
+  for (const records of [[], [first], [first, second]]) assert.match(renderCatalog(records), /[^\n]\n$/);
   assert.match(renderCatalog([first, second]), /podman pull quay\.io\/rambow-cloud\/keycloak@sha256:/);
   assert.throws(() => validateCatalog([first, first]), /Duplicate/);
   assert.throws(() => validateCatalog([second]), /continuous/);
@@ -224,7 +225,7 @@ test('partial retry reuses canonical tags, records alias history and rejects ext
 test('catalog guard validates real bot ownership, allowlisted diff, published asset and generated Markdown', async () => {
   const { assertCatalogOwned, catalogBody } = await catalog;
   const { json, renderCatalog } = await lib;
-  const record = await recordFixture();
+  const record = await recordFixture(await planFixture({ toolsCommit: 'a6bca23dd39652b70c38db10953a2e2a18ac3360' }));
   const recordPath = 'releases/records/' + record.plan.tag + '.json';
   const files = { [recordPath]: json(record), 'releases/README.md': renderCatalog([record]) };
   const f = await apiFixture({ records: [record], assets: { 'publication-record.json': record } });
@@ -237,6 +238,19 @@ test('catalog guard validates real bot ownership, allowlisted diff, published as
   const oldPaginate = f.github.paginate;
   f.github.paginate = async (method, args) => method === f.github.rest.pulls.listFiles ? changed : oldPaginate(method, args);
   await assertCatalogOwned({ ...f, pr });
+  const appended = { ...pr, body: pr.body + '\n<!-- codesmith:footer -->\n---\n<a href="https://app.blacksmith.sh/rambow-cloud/codesmith/keycloak/pr/12?ref=test">Review</a>\n<!-- /codesmith:footer -->' };
+  let auditedBody = appended.body;
+  const knownEditor = { __typename: 'Bot', id: 'BOT_kgDOCWWZcg' };
+  f.github.graphql = async () => ({ repository: { pullRequest: { body: auditedBody, headRefOid: sha, editor: knownEditor,
+    userContentEdits: { totalCount: 1, pageInfo: { hasNextPage: false }, nodes: [{ editor: knownEditor }] } } } });
+  await assertCatalogOwned({ ...f, pr: appended });
+  auditedBody = appended.body.replace('No alias configuration', 'Altered alias configuration');
+  await assert.rejects(assertCatalogOwned({ ...f, pr: { ...appended, body: auditedBody } }), /edited/);
+  files['releases/README.md'] += '\n';
+  await assertCatalogOwned({ ...f, pr: { ...pr, body: catalogBody(11, record, sha, files) } });
+  files['releases/README.md'] += '\n';
+  await assert.rejects(assertCatalogOwned({ ...f, pr: { ...pr, body: catalogBody(11, record, sha, files) } }), /Markdown/);
+  files['releases/README.md'] = renderCatalog([record]);
   await assert.rejects(assertCatalogOwned({ ...f, pr: { ...pr, body: pr.body + 'human edit' } }), /edited/);
   await assert.rejects(assertCatalogOwned({ ...f, pr: { ...pr, user: { login: 'maintainer' } } }), /bot-owned/);
   changed = [...changed, { filename: 'releases/aliases.json', status: 'modified' }];
