@@ -65,6 +65,27 @@ test('missing coverage, malformed data, mismatched provenance and scanner failur
   assert.throws(() => gateSummary({ ...summary, osEosl: true }), /end-of-life/);
 });
 
+test('UBI scans require the declared RHEL OS and nonempty RPM/Java coverage without weakening the gate', async () => {
+  const { summarize, gateSummary } = await lib;
+  const data = report([vuln('CVE-2026-12345', 'HIGH', '2.0')]);
+  data.Metadata.OS = { Family: 'redhat', Name: '9.7' };
+  data.Results[0].Type = 'redhat';
+  data.Results[0].Packages = [{ Name: 'glibc', Version: '2.34' }];
+  data.Results[1].Packages = [{ Name: 'org.keycloak:keycloak-services', Version: '26.8.1' }];
+  const context = { ...scanContext, expectedOS: 'redhat' };
+  assert.throws(() => summarize(data, scanContext), /coverage/);
+  assert.throws(() => gateSummary(summarize(data, context)), /blocked/);
+  for (const index of [0, 1]) {
+    const missing = structuredClone(data);
+    missing.Results[index].Packages = [];
+    assert.throws(() => summarize(missing, context), /coverage/);
+  }
+  const wrongOS = structuredClone(data);
+  wrongOS.Metadata.OS.Family = 'debian';
+  assert.throws(() => summarize(wrongOS, context), /coverage/);
+  assert.throws(() => summarize(data, { ...context, expectedOS: 'unknown' }), /Unsupported/);
+});
+
 test('comments escape artifact content, remain bounded and show failed/missing profiles', async () => {
   const { summarize, renderReport, commentMarker } = await lib;
   const malicious = '<script>@team\n![link](https://attacker.example) | `';

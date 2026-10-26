@@ -37,6 +37,12 @@ podman export "$probe" > "$rootfs"
 podman rm -v "$probe" >/dev/null
 probe=''
 entries=$(tar -tf "$rootfs")
+if [[ "$(node -p "require('./images.lock.json').runtimeOs || 'debian'")" == redhat ]]; then
+  mkdir -p dist
+  tar -xOf "$rootfs" usr/share/rambow/ubi-runtime-packages.tsv > dist/ubi-runtime-packages.tsv
+  test -s dist/ubi-runtime-packages.tsv
+  grep -q 'licenses/UBI-EULA.pdf' <<< "$entries"
+fi
 rm "$rootfs"
 rootfs=''
 if grep -Eq '(^|/)(sh|bash|dash|ash|busybox|apt|apt-get|dpkg|rpm|dnf|microdnf|apk|javac|jshell)$' <<< "$entries"; then

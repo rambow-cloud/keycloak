@@ -8,15 +8,17 @@ read_lock() { node -p "require('./images.lock.json').$1"; }
 keycloak=$(read_lock keycloak)
 builder=$(read_lock builder)
 runtime=$(read_lock runtime)
+ubi_builder=$(read_lock ubiBuilder)
 java_version=$(read_lock javaVersion)
 [[ "$java_version" =~ ^[0-9]+$ ]] || { echo 'Java major must be an integer' >&2; exit 1; }
-for image in "$keycloak" "$builder" "$runtime"; do
+for image in "$keycloak" "$builder" "$runtime" "$ubi_builder"; do
   [[ "$image" =~ @sha256:[a-f0-9]{64}$ ]] || { echo 'Base image must be digest-pinned' >&2; exit 1; }
 done
 if [[ "$profile" == aws ]]; then node scripts/aws-dependencies.mjs fetch; fi
 buildah build --target "$profile" --format oci --platform "$(read_lock platform)" \
   --build-arg "KEYCLOAK_IMAGE=$keycloak" --build-arg "BUILD_IMAGE=$builder" \
   --build-arg "RUNTIME_IMAGE=$runtime" --build-arg "KEYCLOAK_JAVA_MAJOR=$java_version" \
+  --build-arg "UBI_BUILD_IMAGE=$ubi_builder" \
   --label "org.opencontainers.image.title=Rambow Cloud Keycloak" \
   --label "org.opencontainers.image.source=https://github.com/rambow-cloud/keycloak" \
   --label "org.opencontainers.image.version=$(read_lock keycloakVersion)" \

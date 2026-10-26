@@ -2,8 +2,14 @@
 ARG KEYCLOAK_IMAGE
 ARG BUILD_IMAGE
 ARG RUNTIME_IMAGE
+ARG UBI_BUILD_IMAGE
 ARG KEYCLOAK_JAVA_MAJOR
 FROM ${KEYCLOAK_IMAGE} AS distribution
+
+FROM ${UBI_BUILD_IMAGE} AS ubi-runtime-builder
+USER 0
+COPY scripts/prepare-ubi-runtime.sh /tmp/prepare-ubi-runtime.sh
+RUN bash /tmp/prepare-ubi-runtime.sh
 
 FROM ${BUILD_IMAGE} AS source
 ARG KEYCLOAK_JAVA_MAJOR
@@ -26,10 +32,15 @@ RUN /opt/keycloak/bin/kc.sh build
 RUN rm -rf /opt/keycloak/bin && mkdir -p /opt/keycloak/data && chmod -R a+rX /opt/keycloak
 
 FROM ${RUNTIME_IMAGE} AS runtime
+COPY --from=ubi-runtime-builder /opt/ubi-root/ /
+COPY licenses/UBI-EULA.pdf /licenses/UBI-EULA.pdf
 COPY --chown=0:0 config/java.options /opt/keycloak/java.options
+ENV LANG=en_US.UTF-8
 ENV KC_DB=postgres KC_HEALTH_ENABLED=true KC_METRICS_ENABLED=true \
     JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=70 -XX:MinRAMPercentage=70 -XX:InitialRAMPercentage=50"
 WORKDIR /opt/keycloak
+LABEL org.opencontainers.image.description="Experimental UBI Micro Keycloak runtime; branch evaluation only" \
+    com.redhat.license_terms="https://www.redhat.com/licenses/EULA_Red_Hat_Universal_Base_Image_English_20190422.pdf"
 USER 65532:65532
 VOLUME ["/tmp", "/opt/keycloak/data"]
 EXPOSE 8080 8443 9000

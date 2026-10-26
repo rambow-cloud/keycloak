@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "changes": [{
+    "type": "feature",
+    "summary": "Evaluate UBI 9 Micro and a public OpenJDK 25 headless runtime for core and AWS images on an isolated experimental branch.",
+    "issues": [32],
+    "profiles": ["core", "aws"]
+  }]
+}

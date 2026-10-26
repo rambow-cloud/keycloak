@@ -32,7 +32,8 @@ try {
   { stdio: 'inherit', timeout: 660000 });
   if (scan.status !== 0) throw new Error('Trivy failed; see scanner/database logs above.');
   const report = JSON.parse(await readFile(join(output, 'trivy.json'), 'utf8'));
-  summary = summarize(report, { profile, headSha, runId, runAttempt, policy });
+  const lock = JSON.parse(await readFile(new URL('../images.lock.json', import.meta.url), 'utf8'));
+  summary = summarize(report, { profile, headSha, runId, runAttempt, policy, expectedOS: lock.runtimeOs ?? 'debian' });
   for (const name of ['db', 'java-db']) {
     try { await writeFile(join(output, name + '-metadata.json'), await readFile(join(work, 'cache', name, 'metadata.json'))); }
     catch (error) { if (error.code !== 'ENOENT') throw error; }

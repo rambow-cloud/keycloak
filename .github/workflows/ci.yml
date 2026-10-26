@@ -101,7 +101,7 @@ jobs:
           skopeo copy oci:.cache/trivy-image oci-archive:dist/keycloak.oci.tar
           cp images.lock.json dist/
           if [ "$BUILD_PROFILE" = aws ]; then cp dependencies/aws/dependencies.lock.json dist/; fi
-      - name: Verify distroless image against PostgreSQL
+      - name: Verify shell-free image against PostgreSQL
         run: bash scripts/verify-image.sh
       - name: Scan built image with checksum-pinned Trivy
         id: scan

@@ -4,7 +4,9 @@
   "platform": "linux/amd64",
   "keycloak": "quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b",
   "builder": "docker.io/library/eclipse-temurin:25-jdk-noble@sha256:ba0f0e1a33864105e1d454e88105c617ab40f71062db1f306bf58be32a3f8e5e",
-  "runtime": "gcr.io/distroless/java25-debian13:nonroot@sha256:5d3177252775d4b01603470fe21c015393019089904f68724bd37242e4bc6e6d",
+  "runtime": "registry.access.redhat.com/ubi9/ubi-micro:9.7@sha256:03b67880096c45fbad58a50a5710bd31c3bcfce44f75da95ee6177dc269a72ef",
+  "ubiBuilder": "registry.access.redhat.com/ubi9/ubi:9.7@sha256:e9a31af6530caffa3551f266c51a0d43b602e8f76a0dc12826dbeebceb487c92",
+  "runtimeOs": "redhat",
   "postgres": "docker.io/library/postgres:17-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
   "awsDependencies": {
     "wrapperVersion": "4.5.0",
