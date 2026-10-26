@@ -7,7 +7,7 @@ set -euo pipefail
 rootfs=/opt/ubi-root
 mkdir -p "$rootfs"
 dnf --disableplugin=subscription-manager --disablerepo='*' \
-  --enablerepo=ubi-10-baseos-rpms --enablerepo=ubi-10-appstream-rpms \
+  --enablerepo=ubi-10-for-x86_64-baseos-rpms --enablerepo=ubi-10-for-x86_64-appstream-rpms \
   --installroot="$rootfs" --releasever=10 --setopt=install_weak_deps=false \
   --setopt=keepcache=false --nodocs install -y \
   java-25-openjdk-headless glibc-langpack-en ca-certificates tzdata
