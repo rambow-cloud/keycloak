@@ -10,6 +10,10 @@ test('planned scan profiles distinguish an intentional skip from a failed or mis
   const impact = { name:'Image impact', conclusion:'success' };
   assert.deepEqual(plannedScanProfiles([impact, {name:'Build aws',conclusion:'failure'}], 'failure'), ['aws']);
   assert.deepEqual(plannedScanProfiles([impact, {name:'Build core',conclusion:'skipped'}, {name:'Build and verify',conclusion:'success'}], 'success'), []);
+  const skippedMatrix = {name:'Build ${{ matrix.profile }}',conclusion:'skipped'};
+  assert.deepEqual(plannedScanProfiles([impact, skippedMatrix, {name:'Build and verify',conclusion:'success'}], 'success'), []);
+  assert.deepEqual(plannedScanProfiles([impact, skippedMatrix, {name:'Build and verify',conclusion:'failure'}], 'failure'), ['core','aws']);
+  assert.deepEqual(plannedScanProfiles([impact, skippedMatrix], 'success'), ['core','aws']);
   assert.deepEqual(plannedScanProfiles([impact], 'failure'), ['core','aws']);
   assert.deepEqual(plannedScanProfiles([{...impact,conclusion:'failure'},{name:'Build aws',conclusion:'skipped'}], 'failure'), ['core','aws']);
   const { renderReport } = await lib;
