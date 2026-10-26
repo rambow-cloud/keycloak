@@ -27,9 +27,9 @@ export async function runUpstreamUpdate({ github, context, core, dryRun = false,
   const resolved = Object.fromEntries(await Promise.all(Object.entries(refs).map(async ([key, ref]) => [key, await resolve(ref)])));
   const next = { ...current, keycloakVersion: version, ...resolved };
   const { warnings } = await inspect(version, current.javaVersion, baseline);
-  const files = candidateFiles(currentFiles, next, warnings);
+  let files = candidateFiles(currentFiles, next, warnings);
   const eligible = autoMergeEligible(current, next, warnings);
-  const changed = managedPaths.filter(path => files[path] !== currentFiles[path]);
+  let changed = managedPaths.filter(path => files[path] !== currentFiles[path]);
   const report = message => core.info(message);
   for (const warning of warnings) core.warning(warning);
   if (!changed.length) {
@@ -58,6 +58,8 @@ export async function runUpstreamUpdate({ github, context, core, dryRun = false,
     const { data: linked } = await github.rest.issues.get({ ...repo, issue_number: issue });
     policy.validateIssue(linked);
     if (!linked.title.startsWith('[Maintenance]:')) throw new Error('Expected a maintenance Issue.');
+    files = candidateFiles(currentFiles, next, warnings, issue);
+    changed = managedPaths.filter(path => files[path] !== currentFiles[path]);
     if (filesHash(branchFiles) === filesHash(files) && commit.parents.some(parent => parent.sha === baseSha)) {
       report('Existing PR already contains this candidate: ' + pr.html_url);
       await dispatchMissingChecks(github, repo, pr, report);
@@ -68,6 +70,8 @@ export async function runUpstreamUpdate({ github, context, core, dryRun = false,
     const { data: created } = await github.rest.issues.create({ ...repo,
       title: '[Maintenance]: Refresh upstream Keycloak and Java image inputs', body: issueBody(), labels: ['maintenance'] });
     issue = created.number;
+    files = candidateFiles(currentFiles, next, warnings, issue);
+    changed = managedPaths.filter(path => files[path] !== currentFiles[path]);
   }
   const branch = pr?.head.ref ?? 'chore/' + issue + '-upstream-images';
   const { data: baseCommit } = await github.rest.git.getCommit({ ...repo, commit_sha: baseSha });

@@ -2,6 +2,8 @@
 
 Keycloak OCI images built with **Buildah**, with **distroless Java 25 LTS** and **non-root UID 65532** by default. This project uses issue-driven development and English throughout.
 
+Image work is gated per profile: no fix/feature input change means no image publication, and docs/catalog-only CI skips container builds. Every published tag has nonempty Issue-linked updates in the [catalog](releases/README.md). See [image work and change history](docs/image-change-policy.md).
+
 ## Initial supported configuration
 
 - Keycloak 26.8.1, optimized at build time for PostgreSQL, with health and metrics enabled.

@@ -9,7 +9,7 @@ export async function publishImages(plan, adapter, { runId, validationToolsCommi
     const actions = {};
     // Detect every immutable conflict before making any registry changes.
     for (const image of plan.images) actions[image.profile] = destinationAction(await inspect(image.tag), image.digest);
-    for (const profile of profiles) {
+    for (const profile of profiles.filter(p => plan.images.some(i => i.profile === p))) {
       const image = plan.images.find(i => i.profile === profile);
       if (actions[profile] === 'copy') {
         const copied = await adapter.copy(image, registry + ':' + image.tag);
@@ -28,7 +28,8 @@ export async function publishImages(plan, adapter, { runId, validationToolsCommi
       if (destinationAction(current, image.digest, true) === 'copy') {
         if (await adapter.copy(image, registry + ':' + alias.tag) !== image.digest) throw new Error('Alias copy changed digest.');
       }
-      aliasChanges.push({ tag: alias.tag, profile: alias.profile, fromDigest: previous, toDigest: image.digest });
+      aliasChanges.push({ tag: alias.tag, profile: alias.profile, fromDigest: previous, toDigest: image.digest,
+        ...(plan.schemaVersion === 2 ? { changes: image.changes } : {}) });
       state.completedTags.push(alias.tag);
       progress({ ...state });
     }

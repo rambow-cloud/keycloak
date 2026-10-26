@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { validateChanges } from './image-changes.mjs';
 export const registry = 'quay.io/rambow-cloud/keycloak';
 export const repository = 'rambow-cloud/keycloak';
 export const profiles = ['core', 'aws'];
@@ -30,7 +31,7 @@ export function validateAliases(config) {
 }
 export function validatePlan(plan) {
   const version = parseRelease(plan.tag);
-  if (plan.schemaVersion !== 1 || plan.registry !== registry || plan.releaseId < 1 || !Number.isSafeInteger(plan.releaseId) ||
+  if (![1, 2].includes(plan.schemaVersion) || plan.registry !== registry || plan.releaseId < 1 || !Number.isSafeInteger(plan.releaseId) ||
       !isSha(plan.sourceCommit) || !isSha(plan.toolsCommit) || !Number.isSafeInteger(plan.sourceRun?.id) || plan.sourceRun.id < 1 ||
       !Number.isSafeInteger(plan.sourceRun?.attempt) || plan.sourceRun.attempt < 1 ||
       plan.keycloakVersion !== version.keycloakVersion || plan.revision !== version.revision ||
@@ -40,15 +41,21 @@ export function validatePlan(plan) {
   if (plan.aliases.some(a => a.keycloakVersion !== plan.keycloakVersion)) throw new Error('Frozen alias version mismatch.');
   if (!plan.previousAliases || Object.keys(plan.previousAliases).length !== plan.aliases.length || plan.aliases.some(a =>
     !Object.hasOwn(plan.previousAliases, a.tag) || (plan.previousAliases[a.tag] !== null && !isDigest(plan.previousAliases[a.tag])))) throw new Error('Invalid previous alias bindings.');
-  if (!Array.isArray(plan.images) || plan.images.length !== 2) throw new Error('Both image profiles must be frozen.');
-  for (const profile of profiles) {
+  if (!Array.isArray(plan.images) || !plan.images.length || plan.images.length > 2 ||
+      plan.images.some(i => !profiles.includes(i.profile)) || (plan.schemaVersion === 1 && plan.images.length !== 2)) throw new Error('Invalid frozen image profiles.');
+  for (const profile of [...new Set(plan.images.map(i => i.profile))]) {
     const images = plan.images.filter(i => i.profile === profile);
     const i = images[0];
     if (images.length !== 1 || i.tag !== canonicalTag(plan.tag, profile) || !isDigest(i.digest) ||
         !Number.isSafeInteger(i.artifactId) || i.artifactId < 1 ||
         i.artifactName !== 'keycloak-oci-' + profile + '-amd64-' + plan.sourceCommit ||
         !/^[a-f0-9]{64}$/.test(i.archiveSha256 ?? '')) throw new Error('Invalid frozen image/profile/artifact.');
+    if (plan.schemaVersion === 2) {
+      if (!/^[a-f0-9]{64}$/.test(i.inputSha256 ?? '')) throw new Error('Image input fingerprint is required.');
+      validateChanges(i.changes);
+    }
   }
+  if (plan.aliases.some(a => !plan.images.some(i => i.profile === a.profile))) throw new Error('Alias must bind a published profile.');
   return plan;
 }
 export function validateRecord(record) {
@@ -63,6 +70,7 @@ export function validateRecord(record) {
     const image = record.plan.images.find(i => i.profile === alias.profile);
     if (changes.length !== 1 || c.profile !== alias.profile || c.toDigest !== image.digest || c.fromDigest !== record.plan.previousAliases[c.tag] ||
         (c.fromDigest !== null && !isDigest(c.fromDigest))) throw new Error('Invalid alias history.');
+    if (record.plan.schemaVersion === 2 && !equal(validateChanges(c.changes), image.changes)) throw new Error('Alias changes must preserve the profile change history.');
   }
   return record;
 }
@@ -97,8 +105,9 @@ export function selectRun(runs, { sha, main, tag }) {
     ((r.event === 'push' && r.head_branch === main) || (r.event === 'workflow_dispatch' && [main, tag].includes(r.head_branch))))
     .sort((a, b) => b.id - a.id || b.run_attempt - a.run_attempt)[0];
 }
-export function chooseArtifacts(artifacts, sha) {
-  return profiles.map(profile => {
+export function chooseArtifacts(artifacts, sha, selected = profiles) {
+  if (!selected.length || selected.some(p => !profiles.includes(p)) || new Set(selected).size !== selected.length) throw new Error('Invalid artifact profiles.');
+  return selected.map(profile => {
     const name = 'keycloak-oci-' + profile + '-amd64-' + sha;
     const matches = artifacts.filter(a => a.name === name && !a.expired);
     if (matches.length !== 1 || matches[0].size_in_bytes > 3000000000) throw new Error('Missing, ambiguous or oversized OCI artifact: ' + name);
@@ -124,7 +133,27 @@ export function resolveTag(records, tag, releaseTag) {
   }
   throw new Error('No recorded binding for tag: ' + tag);
 }
-export function renderCatalog(records) {
+export function imageChanges(record, image, history = {}) {
+  if (image.changes) return validateChanges(image.changes);
+  const note = history[image.tag];
+  if (note?.schemaVersion !== 1 || note.tag !== image.tag || note.profile !== image.profile) throw new Error('Missing change history for ' + image.tag);
+  return validateChanges(note.changes);
+}
+export function tagHistory(records, tag, history = {}) {
+  validateCatalog(records);
+  return [...records].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)).flatMap(record => {
+    const image = record.plan.images.find(i => i.tag === tag);
+    const alias = record.aliasChanges.find(c => c.tag === tag);
+    if (!image && !alias) return [];
+    const source = image ?? record.plan.images.find(i => i.profile === alias.profile);
+    return [{ tag, release: record.plan.tag, profile: source.profile, digest: source.digest,
+      publishedAt: record.publishedAt, changes: imageChanges(record, source, history),
+      ...(alias ? { fromDigest: alias.fromDigest, toDigest: alias.toDigest } : {}) }];
+  });
+}
+const changeMarkdown = c => '- **' + c.type + ':** ' + c.summary.replace(/([\\`*_[\]{}()!|])/g, '\\$1').replace(/@/g, '@\u200b') +
+  ' (' + c.issues.map(n => '[#' + n + '](https://github.com/' + repository + '/issues/' + n + ')').join(', ') + ')';
+export function renderCatalog(records, history = {}) {
   validateCatalog(records);
   let md = '# Published images\n\n<!-- Generated from release JSON records. Do not edit by hand. -->\n\n' +
     'Registry: `' + registry + '`. Formal releases only; no `latest` tag. Use digest-pinned references for deployments.\n\n';
@@ -140,8 +169,10 @@ export function renderCatalog(records) {
       '[Source commit](https://github.com/' + repository + '/commit/' + r.plan.sourceCommit + ') · ' +
       '[Source CI](https://github.com/' + repository + '/actions/runs/' + r.plan.sourceRun.id + ') · ' +
       '[Publication and fresh scans](https://github.com/' + repository + '/actions/runs/' + r.publishRunId + ')\n\n';
-    for (const i of r.plan.images) md += i.profile + ':\n\n```sh\npodman pull ' + registry + '@' + i.digest + '\n```\n\n';
-    if (r.aliasChanges.length) md += 'Alias changes:\n\n' + r.aliasChanges.map(c => '- `' + c.tag + '`: ' + (c.fromDigest ? '`' + c.fromDigest + '`' : 'unassigned') + ' → `' + c.toDigest + '`').join('\n') + '\n';
+    for (const i of r.plan.images) md += '### `' + i.tag + '` (' + i.profile + ')\n\n' +
+      imageChanges(r, i, history).map(changeMarkdown).join('\n') + '\n\n```sh\npodman pull ' + registry + '@' + i.digest + '\n```\n\n';
+    if (r.aliasChanges.length) md += 'Alias changes:\n\n' + r.aliasChanges.map(c => '- `' + c.tag + '`: ' + (c.fromDigest ? '`' + c.fromDigest + '`' : 'unassigned') + ' → `' + c.toDigest + '`\n' +
+      imageChanges(r, r.plan.images.find(i => i.profile === c.profile), history).map(changeMarkdown).join('\n')).join('\n') + '\n';
   }
   return md.trimEnd() + '\n';
 }

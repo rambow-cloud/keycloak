@@ -10,6 +10,35 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  impact:
+    name: Image impact
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+    outputs:
+      build: ${{ steps.plan.outputs.build }}
+      profiles: ${{ steps.plan.outputs.profiles }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: plan
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { assessCI, assessRelease } = await import(process.cwd() + '/scripts/lib/image-changes.mjs');
+            const { readCatalog } = await import(process.cwd() + '/scripts/quay-release.mjs');
+            const result = await assessCI({ github, context, assessReleaseForCI: async sourceCommit => {
+              const {data:repo} = await github.rest.repos.get(context.repo);
+              const records = await readCatalog(github, context.repo, repo.default_branch);
+              return assessRelease({ github, repo:context.repo, sourceCommit, records });
+            }});
+            core.setOutput('build', result.profiles.length > 0);
+            core.setOutput('profiles', JSON.stringify(result.profiles.length ? result.profiles : ['core']));
+            await core.summary.addHeading('Image work decision').addRaw(result.reason + '\n\n').addCodeBlock(JSON.stringify(result.profiles),'json').write();
   static:
     name: Static checks
     runs-on: ubuntu-24.04
@@ -32,18 +61,21 @@ jobs:
           node --check scripts/release-catalog.mjs
           node --check scripts/release-image.mjs
           node --check scripts/lib/quay-auth.mjs
+          node --check scripts/lib/image-changes.mjs
           node scripts/releases.mjs render --check
           node scripts/check-upstream-compatibility.mjs
           shellcheck scripts/*.sh
           git show --format= --check HEAD
   build:
     name: Build ${{ matrix.profile }}
+    needs: impact
+    if: needs.impact.outputs.build == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
-        profile: [core, aws]
+        profile: ${{ fromJSON(needs.impact.outputs.profiles) }}
     env:
       BUILD_PROFILE: ${{ matrix.profile }}
       SCAN_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -104,14 +136,22 @@ jobs:
   verify:
     name: Build and verify
     if: always()
-    needs: [static, build]
+    needs: [impact, static, build]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
       - name: Require static checks and both image profiles
         env:
           STATIC_RESULT: ${{ needs.static.result }}
+          IMPACT_RESULT: ${{ needs.impact.result }}
+          EXPECT_BUILD: ${{ needs.impact.outputs.build }}
           BUILD_RESULT: ${{ needs.build.result }}
         run: |
           test "$STATIC_RESULT" = success
-          test "$BUILD_RESULT" = success
+          test "$IMPACT_RESULT" = success
+          if [ "$EXPECT_BUILD" = true ]; then
+            test "$BUILD_RESULT" = success
+          else
+            test "$EXPECT_BUILD" = false
+            test "$BUILD_RESULT" = skipped
+          fi
