@@ -43,3 +43,11 @@ node scripts/releases.mjs render --check
 ```
 
 Main updates never push images. Formal Releases and explicit recovery remain the only publishing entries. Never invent a revision for documentation, CI bookkeeping or a no-op rebuild.
+
+## Verified no-op behavior
+
+[Implementation CI](https://github.com/rambow-cloud/keycloak/actions/runs/40278196763) verified both profiles, including PostgreSQL runtime checks and Trivy, before the planning changes merged. Validation-policy changes deliberately retain these image checks.
+
+[Unchanged release preview](https://github.com/rambow-cloud/keycloak/actions/runs/40279952866) succeeded with only preparation running. Artifact scanning, plan freezing, Quay publication, catalog recording and audit were skipped. The preview did not create a Git tag, GitHub Release or image tag; `v26.8.1-r2` was only a candidate input to the read-only preview.
+
+Documentation-only PRs retain Issue policy, static checks and the required aggregate. Their Trivy comments explicitly report that no image work was planned; skipped profiles are never described as clean scans.

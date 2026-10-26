@@ -7,7 +7,8 @@ export function plannedScanProfiles(jobs, conclusion) {
   const active = profiles.filter(p => jobs.some(j => j.name === 'Build ' + p && j.conclusion !== 'skipped'));
   if (active.length) return active;
   if (conclusion === 'success' && jobs.some(j => j.name === 'Build and verify' && j.conclusion === 'success') &&
-      jobs.some(j => /^Build(?: (?:core|aws))?$/.test(j.name) && j.conclusion === 'skipped')) return [];
+      jobs.some(j => (/^Build(?: (?:core|aws))?$/.test(j.name) || j.name === 'Build ${{ matrix.profile }}') &&
+        j.conclusion === 'skipped')) return [];
   return profiles; // Missing/failed planning evidence must never turn missing scans into skips.
 }
 
