@@ -143,5 +143,5 @@ export function renderCatalog(records) {
     for (const i of r.plan.images) md += i.profile + ':\n\n```sh\npodman pull ' + registry + '@' + i.digest + '\n```\n\n';
     if (r.aliasChanges.length) md += 'Alias changes:\n\n' + r.aliasChanges.map(c => '- `' + c.tag + '`: ' + (c.fromDigest ? '`' + c.fromDigest + '`' : 'unassigned') + ' → `' + c.toDigest + '`').join('\n') + '\n';
   }
-  return md;
+  return md.trimEnd() + '\n';
 }
