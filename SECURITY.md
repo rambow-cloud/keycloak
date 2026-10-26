@@ -1,5 +1,7 @@
 # Security policy
 
+Reviewed repairs and verification events are recorded in the [text security ledger](docs/security/README.md). Its JSONL source, generated CVE/event index and durable evidence are kept in Git. It is not a complete vulnerability inventory; current scan reports and limitations remain documented below.
+
 Report vulnerabilities through [private vulnerability reporting](https://github.com/rambow-cloud/keycloak/security/advisories/new). Do not publish exploit details, credentials, or real user data in public issues. If private reporting is unavailable, contact an organization maintainer to establish a private channel first.
 
 Only the image combination pinned on main is maintained. Older releases receive no automatic backports. Upgrades, CVE remediation, and exceptions require issues. A security fix may reference a sanitized maintenance issue while sensitive details remain in the private report.

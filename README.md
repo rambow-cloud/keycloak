@@ -4,6 +4,8 @@ Keycloak OCI images built with **Buildah**, with **distroless Java 25 LTS** and 
 
 Image work is gated per profile: no fix/feature input change means no image publication, and docs/catalog-only CI skips container builds. Every published tag has nonempty Issue-linked updates in the [catalog](releases/README.md). See [image work and change history](docs/image-change-policy.md).
 
+See the [security remediation ledger and CVE/event index](docs/security/README.md) for reviewed fixes, exact published image digests and durable verification reports.
+
 ## Initial supported configuration
 
 - Keycloak 26.8.1, optimized at build time for PostgreSQL, with health and metrics enabled.

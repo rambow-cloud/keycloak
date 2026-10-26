@@ -32,6 +32,8 @@ Build Keycloak OCI images for Rambow Cloud. Prefer distroless Java, a non-root u
 
 ## Validation and delivery
 
+- Record security repairs and reviewed existing-image verifications in `docs/security/records.jsonl`, with explicit published tag/profile/digest, advisories or event IDs, local Issues/PRs, evidence and limitations. Preserve existing lines; append corrections with `supersedes`. Generate `docs/security/README.md` with `node docs/security/ledger.mjs render`; never hand-edit it or claim unpublished repairs as published. Evidence-only records do not justify rebuilding unchanged images. Regression code for Issue #37 stays on its retained unmerged branch; this ledger stores only reports and provenance.
+
 - Static checks: `node --test tests/*.test.cjs`, `node scripts/check-upstream-compatibility.mjs`, whitespace checks, and ShellCheck in CI.
 - Linux image validation: `bash scripts/build.sh`, then `bash scripts/verify-image.sh`. CI uses Buildah/Podman on Ubuntu. On Windows, use an independent Linux/WSL environment without requiring Docker Desktop.
 - Run each relevant verification once. Repeat only after a newly understood failure or a meaningful state change. Test behavior and boundaries; avoid tests that merely mirror implementation.
