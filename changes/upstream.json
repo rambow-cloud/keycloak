@@ -1,4 +1,16 @@
 {
   "schemaVersion": 1,
-  "changes": []
+  "changes": [
+    {
+      "type": "fix",
+      "summary": "Refresh builder digest from ba0f0e1a33864105 to 2e6f25a996cdbd93.",
+      "issues": [
+        40
+      ],
+      "profiles": [
+        "core",
+        "aws"
+      ]
+    }
+  ]
 }
