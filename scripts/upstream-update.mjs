@@ -52,7 +52,8 @@ export async function runUpstreamUpdate({ github, context, core, dryRun = false,
     const [{ data: commit }, branchFiles] = await Promise.all([
       github.rest.repos.getCommit({ ...repo, ref: pr.head.sha }), readManaged(pr.head.sha),
     ]);
-    assertBotOwned(pr, commit, branchFiles);
+    const body = await canonicalUpstreamBody({ github, context, pr });
+    assertBotOwned({ ...pr, body }, commit, branchFiles);
     [issue] = policy.issueNumbers(pr.body);
     if (policy.issueNumbers(pr.body).length !== 1 || pr.head.ref !== 'chore/' + issue + '-upstream-images') throw new Error('Unexpected update Issue/branch association.');
     const { data: linked } = await github.rest.issues.get({ ...repo, issue_number: issue });
@@ -99,6 +100,36 @@ export async function runUpstreamUpdate({ github, context, core, dryRun = false,
   await dispatchMissingChecks(github, repo, pr, report);
   await configureAutoMerge(github, repo, pr, eligible, report);
   return { changed: true, pullRequest: pr.html_url, refreshed: true, warnings };
+}
+
+// This is the same bounded automation exception used by the release catalog.
+// Never strip arbitrary trailing text, or trust a footer based on its text alone.
+export async function canonicalUpstreamBody({ github, context, pr }) {
+  const body = pr.body ?? '';
+  if (!body.includes('<!-- codesmith:footer -->')) return body;
+  const parts = /^(.*<!-- generated-body-sha256:[a-f0-9]{64} -->\n)\n(<!-- codesmith:footer -->\n[\s\S]*\n<!-- \/codesmith:footer -->)\n?$/s.exec(body);
+  if (!parts || parts[2].length > 8192 || (body.match(/<!-- codesmith:footer -->/g) ?? []).length !== 1 ||
+      (body.match(/<!-- \/codesmith:footer -->/g) ?? []).length !== 1 || parts[2].includes('<!-- generated-') ||
+      parts[2].includes(marker) || !parts[2].startsWith('<!-- codesmith:footer -->\n---\n<a href="https://app.blacksmith.sh/' +
+        context.repo.owner + '/codesmith/' + context.repo.repo + '/pr/' + pr.number + '?')) {
+    throw new Error('Unexpected upstream PR footer; refusing automatic refresh.');
+  }
+  const { repository: result } = await github.graphql(`query($owner:String!,$name:String!,$number:Int!){
+    repository(owner:$owner,name:$name){pullRequest(number:$number){body headRefOid
+      editor{__typename ... on Bot{id}}
+      userContentEdits(first:100){totalCount pageInfo{hasNextPage} nodes{editor{__typename ... on Bot{id}}}}
+    }}}`, { owner: context.repo.owner, name: context.repo.repo, number: pr.number });
+  const current = result?.pullRequest;
+  const edits = current?.userContentEdits;
+  const actionsBot = 'MDM6Qm90NDE4OTgyODI=';
+  const footerBot = 'BOT_kgDOCWWZcg';
+  if (current?.body !== body || current?.headRefOid !== pr.head.sha || current?.editor?.__typename !== 'Bot' ||
+      current.editor.id !== footerBot || !edits?.totalCount || edits.totalCount !== edits.nodes?.length ||
+      edits.pageInfo?.hasNextPage !== false || edits.nodes.some(e => e?.editor?.__typename !== 'Bot' ||
+        ![actionsBot, footerBot].includes(e.editor.id))) {
+    throw new Error('Upstream PR footer edit history is not exclusively attributable to the pinned automation bots.');
+  }
+  return parts[1];
 }
 
 export async function configureAutoMerge(github, repo, pr, eligible, report) {

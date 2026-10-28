@@ -6,6 +6,11 @@ const lib = import('../scripts/lib/upstream.mjs');
 const bot = { login: 'github-actions[bot]' };
 const mainSha = 'a'.repeat(40);
 const headSha = 'b'.repeat(40);
+const actionsEditor = { __typename: 'Bot', id: 'MDM6Qm90NDE4OTgyODI=' };
+const footerEditor = { __typename: 'Bot', id: 'BOT_kgDOCWWZcg' };
+const footerFor = number => '\n<!-- codesmith:footer -->\n---\n<a href="https://app.blacksmith.sh/rambow-cloud/codesmith/keycloak/pr/' + number + '?autoLogin=true">View</a>\n<!-- /codesmith:footer -->';
+const footerSnapshot = pr => ({ body: pr.body, headRefOid: pr.head.sha, editor: footerEditor,
+  userContentEdits: { totalCount: 2, pageInfo: { hasNextPage: false }, nodes: [{ editor: footerEditor }, { editor: actionsEditor }] } });
 // Fixed historical fixtures: later real version bumps must not change these behavioral cases.
 const pinned = ref => ref + '@sha256:' + 'a'.repeat(64);
 const lock = { keycloakVersion: '26.8.1', javaVersion: 25, platform: 'linux/amd64',
@@ -82,14 +87,15 @@ test('generated PR guards refuse edited bodies, files, or commits', async () => 
   assert.throws(() => assertBotOwned(pr, { ...commit, author: { login: 'maintainer' } }, baseFiles), /human/);
 });
 
-async function fixture({ changed = true, existing = false, edited = false, runs = [], warnings = [], releaseVersion = lock.keycloakVersion, staleBase = false } = {}) {
+async function fixture({ changed = true, existing = false, edited = false, runs = [], warnings = [], releaseVersion = lock.keycloakVersion, staleBase = false,
+  footer = false, editSnapshot = snapshot => snapshot } = {}) {
   const { candidateFiles, pullBody, issueBody } = await lib;
   const calls = [];
   const next = { ...lock, keycloakVersion: releaseVersion, ...(changed ? { runtime: lock.runtime.split('@')[0] + '@sha256:' + 'c'.repeat(64) } : {}) };
   const branchFiles = candidateFiles(baseFiles, next, warnings, 11);
   const pr = { number: 12, node_id: 'PR_test', state: 'open', user: bot, html_url: 'https://example.test/pull/12',
     head: { sha: headSha, ref: 'chore/11-upstream-images', repo: { full_name: 'rambow-cloud/keycloak' } },
-    body: pullBody(11, lock, next, branchFiles, warnings, headSha) + (edited ? 'human note' : '') };
+    body: pullBody(11, lock, next, branchFiles, warnings, headSha) + (edited ? 'human note' : '') + (footer ? footerFor(12) : '') };
   let autoMerge = false;
   const write = (name, data) => async args => { calls.push({ name, args }); return { data: typeof data === 'function' ? data(args) : data }; };
   const github = { rest: {
@@ -115,12 +121,13 @@ async function fixture({ changed = true, existing = false, edited = false, runs 
     actions: { listWorkflowRuns: () => {}, createWorkflowDispatch: write('dispatch', {}) },
   }, paginate: async method => method === github.rest.pulls.list ? (existing ? [pr] : []) : runs,
   graphql: async (query, args) => {
+    if (query.includes('userContentEdits')) return { repository: { pullRequest: editSnapshot(footerSnapshot(pr)) } };
     if (query.startsWith('query')) return { repository: { pullRequest: { id: pr.node_id, headRefOid: headSha, isDraft: false, autoMergeRequest: autoMerge ? {} : null } } };
     calls.push({ name: query.includes('disablePullRequestAutoMerge') ? 'disable-auto-merge' : 'enable-auto-merge', args });
     autoMerge = !query.includes('disablePullRequestAutoMerge');
     return {};
   } };
-  return { calls, args: { github, context: { repo: { owner: 'rambow-cloud', repo: 'keycloak' }, ref: 'refs/heads/main' },
+  return { calls, pr, branchFiles, args: { github, context: { repo: { owner: 'rambow-cloud', repo: 'keycloak' }, ref: 'refs/heads/main' },
     core: { info() {}, warning() {} }, resolve: async ref => Object.values(next).find(value => typeof value === 'string' && value.startsWith(ref + '@')),
     inspect: async () => ({ warnings }) } };
 }
@@ -182,6 +189,81 @@ test('human edits and nondefault updater refs fail before any write', async () =
   await assert.rejects(runUpstreamUpdate(f.args), /edited/);
   assert.deepEqual(f.calls, []);
   await assert.rejects(runUpstreamUpdate({ ...f.args, context: { ...f.args.context, ref: 'refs/heads/untrusted' } }), /default branch/);
+});
+
+test('plain generated bodies need no footer attribution lookup', async () => {
+  const { canonicalUpstreamBody } = await import('../scripts/upstream-update.mjs');
+  const f = await fixture({ existing: true });
+  assert.equal(await canonicalUpstreamBody({ ...f.args, github: { graphql() { throw new Error('Unexpected lookup'); } }, pr: f.pr }), f.pr.body);
+});
+
+test('attributable footer reuses unchanged checks and permits a non-forced base refresh', async () => {
+  const { runUpstreamUpdate } = await import('../scripts/upstream-update.mjs');
+  for (const staleBase of [false, true]) {
+    const f = await fixture({ existing: true, footer: true, staleBase, runs: [{ head_sha: headSha, conclusion: 'success' }] });
+    await runUpstreamUpdate(f.args);
+    if (!staleBase) assert.deepEqual(f.calls.map(c => c.name), ['enable-auto-merge']);
+    else {
+      assert.equal(f.calls.find(c => c.name === 'update-branch').args.force, false);
+      assert.ok(f.calls.some(c => c.name === 'update-pr'));
+    }
+    assert.equal(f.calls.some(c => c.name === 'issue' || c.name === 'dispatch'), false);
+  }
+});
+
+test('malformed, foreign, duplicate and oversized footer envelopes fail before writes', async () => {
+  const { runUpstreamUpdate } = await import('../scripts/upstream-update.mjs');
+  const mutations = [
+    body => body + '\nextra human note',
+    body => body + footerFor(12),
+    body => body.replace('/pr/12?', '/pr/99?'),
+    body => body.replace('/rambow-cloud/', '/other-owner/'),
+    body => body.replace('View</a>', 'x'.repeat(8192) + '</a>'),
+    body => body.replace('View</a>', '<!-- generated-head-sha:' + mainSha + ' --></a>'),
+    body => body.replace('<!-- /codesmith:footer -->', ''),
+  ];
+  for (const mutate of mutations) {
+    const f = await fixture({ existing: true, footer: true });
+    f.pr.body = mutate(f.pr.body);
+    await assert.rejects(runUpstreamUpdate(f.args), /Unexpected upstream PR footer/);
+    assert.deepEqual(f.calls, []);
+  }
+});
+
+test('footer attribution rejects human or unknown editors, missing history and stale snapshots', async () => {
+  const { runUpstreamUpdate } = await import('../scripts/upstream-update.mjs');
+  const mutations = [
+    s => ({ ...s, body: s.body + '\nconcurrent edit' }),
+    s => ({ ...s, headRefOid: mainSha }),
+    s => ({ ...s, editor: actionsEditor }),
+    s => ({ ...s, editor: { __typename: 'User', id: footerEditor.id } }),
+    s => ({ ...s, editor: { __typename: 'Bot', id: 'unknown-bot' } }),
+    s => { s.userContentEdits.nodes[1].editor = { __typename: 'User', id: 'human' }; return s; },
+    s => { s.userContentEdits.nodes[1].editor = { __typename: 'Bot', id: 'unknown-bot' }; return s; },
+    s => { s.userContentEdits.nodes[1].editor = null; return s; },
+    s => { s.userContentEdits.pageInfo.hasNextPage = true; return s; },
+    s => { s.userContentEdits.totalCount = 3; return s; },
+    s => ({ ...s, userContentEdits: undefined }),
+    s => ({ ...s, userContentEdits: { totalCount: 0, nodes: [], pageInfo: { hasNextPage: false } } }),
+    () => null,
+  ];
+  for (const editSnapshot of mutations) {
+    const f = await fixture({ existing: true, footer: true, editSnapshot });
+    await assert.rejects(runUpstreamUpdate(f.args), /edit history/);
+    assert.deepEqual(f.calls, []);
+  }
+});
+
+test('attributed footers cannot hide generated-body, file or commit edits', async () => {
+  const { runUpstreamUpdate } = await import('../scripts/upstream-update.mjs');
+  for (const change of ['body', 'files', 'commit']) {
+    const f = await fixture({ existing: true, footer: true });
+    if (change === 'body') f.pr.body = f.pr.body.replace('Refresh upstream image inputs', 'Change reviewed scope');
+    if (change === 'files') f.branchFiles['README.md'] += 'Human edit\n';
+    if (change === 'commit') f.args.github.rest.repos.getCommit = async () => ({ data: { sha: mainSha, author: bot } });
+    await assert.rejects(runUpstreamUpdate(f.args), /edited|untracked commits/);
+    assert.deepEqual(f.calls, []);
+  }
 });
 
 test('dispatched Issue policy accepts only the exact local open PR head', async () => {
