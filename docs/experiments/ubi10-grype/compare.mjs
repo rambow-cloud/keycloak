@@ -167,7 +167,7 @@ async function main() {
           info.Labels?.['cloud.rambow.keycloak.profile'] !== profile) throw Error('Image provenance/profile mismatch');
       const manifest = JSON.parse(run('skopeo', ['inspect', '--raw', 'oci-archive:' + archive]));
       const local = 'localhost/grype-comparison:' + key;
-      const imageID = run('podman', ['pull', '--quiet', '--retry=0', 'oci-archive:' + archive]).trim().split('\n').at(-1);
+      const imageID = run('podman', ['pull', '--quiet', 'oci-archive:' + archive]).trim().split('\n').at(-1);
       if (!/^(?:sha256:)?[a-f0-9]{64}$/.test(imageID)) throw Error('Unexpected local OCI image identity');
       run('podman', ['tag', imageID, local]);
       const size = JSON.parse(run('podman', ['image', 'inspect', local]))[0].Size;
