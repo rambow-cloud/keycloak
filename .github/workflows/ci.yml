@@ -62,9 +62,12 @@ jobs:
           node --check scripts/release-image.mjs
           node --check scripts/lib/quay-auth.mjs
           node --check scripts/lib/image-changes.mjs
+          node --check docs/experiments/ubi10-grype/prepare.mjs
+          node --check docs/experiments/ubi10-grype/compare.mjs
           node scripts/releases.mjs render --check
           node scripts/check-upstream-compatibility.mjs
           shellcheck scripts/*.sh
+          shellcheck docs/experiments/ubi10-grype/*.sh
           git show --format= --check HEAD
   build:
     name: Build ${{ matrix.profile }}
@@ -133,10 +136,83 @@ jobs:
       - name: Enforce vulnerability policy
         if: ${{ !cancelled() && steps.export_image.outcome == 'success' }}
         run: node scripts/trivy-gate.mjs .cache/trivy-report/summary.json
+  ubi10:
+    name: UBI 10 runtime candidates
+    if: startsWith(github.head_ref || github.ref_name, 'chore/50-ubi10-grype-comparison')
+    needs: static
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      SCAN_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install open-source OCI tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y buildah podman skopeo openssl
+      - name: Build and verify UBI 10 core
+        run: bash docs/experiments/ubi10-grype/build.sh core
+      - name: Build and verify UBI 10 aws using the shared runtime cache
+        if: ${{ !cancelled() }}
+        run: bash docs/experiments/ubi10-grype/build.sh aws
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: ubi10-oci-core-amd64-${{ github.sha }}
+          path: .cache/ubi10/core/
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: ubi10-oci-aws-amd64-${{ github.sha }}
+          path: .cache/ubi10/aws/
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+  grype_compare:
+    name: Grype and Java comparison
+    if: ${{ !cancelled() && startsWith(github.head_ref || github.ref_name, 'chore/50-ubi10-grype-comparison') }}
+    needs: [build, ubi10]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      SCAN_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      BASELINE_RESULT: ${{ needs.build.result }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: '*-oci-*-amd64-${{ github.sha }}'
+          path: .cache/comparison-inputs/
+      - name: Install rootless OCI inspection/runtime tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y podman skopeo
+      - name: Scan four exact artifacts with one Grype database and probe actual JVMs
+        run: node docs/experiments/ubi10-grype/compare.mjs
+      - name: Preserve complete comparison before its gate result
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ubi10-grype-java-comparison-${{ github.run_attempt }}
+          path: |
+            .cache/ubi10-grype-report/
+            !.cache/ubi10-grype-report/tools/
+            !.cache/ubi10-grype-report/probe/
+            !.cache/ubi10-grype-report/control-vulnerable/
+            !.cache/ubi10-grype-report/control-fixed/
+          retention-days: 7
+          if-no-files-found: error
   verify:
     name: Build and verify
     if: always()
-    needs: [impact, static, build]
+    needs: [impact, static, build, ubi10, grype_compare]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
@@ -146,6 +222,9 @@ jobs:
           IMPACT_RESULT: ${{ needs.impact.result }}
           EXPECT_BUILD: ${{ needs.impact.outputs.build }}
           BUILD_RESULT: ${{ needs.build.result }}
+          EXPERIMENT: ${{ startsWith(github.head_ref || github.ref_name, 'chore/50-ubi10-grype-comparison') }}
+          UBI_RESULT: ${{ needs.ubi10.result }}
+          GRYPE_RESULT: ${{ needs.grype_compare.result }}
         run: |
           test "$STATIC_RESULT" = success
           test "$IMPACT_RESULT" = success
@@ -154,4 +233,8 @@ jobs:
           else
             test "$EXPECT_BUILD" = false
             test "$BUILD_RESULT" = skipped
+          fi
+          if [ "$EXPERIMENT" = true ]; then
+            test "$UBI_RESULT" = success
+            test "$GRYPE_RESULT" = success
           fi

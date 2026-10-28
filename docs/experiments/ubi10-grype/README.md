@@ -1,0 +1,13 @@
+# Retained UBI 10 / Grype / Java comparison
+
+Issue #50 authorizes this branch-only experiment. Keep its draft PR unmerged and retain the branch. Do not change production runtime locks, publish experimental images or create Releases. The actual application remains Keycloak 26.8.1 with the reviewed Guava repair and identical core/aws providers.
+
+The normal CI builds/verifies the distroless baseline once. An additional job builds both UBI 10 Micro profiles using the prior reviewed public-UBI root preparation, a headless Red Hat Java 25 RPM and a flattened shell-free rootfs with installed-library RPM metadata. The shared builder cache reuses its runtime transaction across core/aws. OCI roots are digest-pinned; public RPM repositories still roll. The exact RPM inventory is evidence, not a production package snapshot. UBI 10 amd64 requires x86-64-v3. Preserve the UBI EULA and package licenses.
+
+One comparison job scans all four archived OCI artifacts with SHA-256-pinned Syft and Grype and one frozen current Grype database. Syft JSON is an internal package inventory, not a published SBOM feature. Preserve raw scan JSON, inventories, JVM probes, DB identity, image metadata, package-match methods and limits before applying the existing fixable HIGH/CRITICAL policy. Vulnerable/fixed real Guava JAR controls check Java matching. Do not override detected distro or suppress matches. A missing/malformed image, unsupported OS, empty OS/JAR inventory or failed control cannot be called a clean scan.
+
+The actual JVM probe runs inside each runtime without network access, reports vendor/patch/build and default trust-store identity, and checks the two previously distrusted eMudhra incident roots. This is an inventory check, not the retained 14-chain PKIX regression or a live TLS certification. Java JAR coverage, JVM package identification and JVM advisory coverage are distinct. Vendor severity/fix feeds and package decomposition differ, so raw CVE totals are not exploitability ratios.
+
+Sources: [Grype OS support including RHEL 10](https://oss.anchore.com/docs/capabilities/all-os/), [Java/JVM cataloging](https://oss.anchore.com/docs/capabilities/java/), [Grype scan targets](https://oss.anchore.com/docs/guides/vulnerability/scan-targets/), [Grype 0.121.0](https://github.com/anchore/grype/releases/tag/v0.121.0), [Syft 1.55.0](https://github.com/anchore/syft/releases/tag/v1.55.0).
+
+The final report is retained in the linked Issue/PR with its exact tested source commit and Actions run; raw Actions artifacts expire after seven days. Keep a downloaded copy when longer retention of the full machine output is required.

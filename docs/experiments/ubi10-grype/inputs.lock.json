@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "runtime": "registry.access.redhat.com/ubi10/ubi-micro@sha256:1c105e547de5d9e0bc20d06ebabee73b20bc6bba994c50ae3e207684fd8bef2b",
+  "runtimeBuilder": "registry.access.redhat.com/ubi10/ubi@sha256:7495bfa53ae7a81a58aeface0bb4858d12741832c542c29dc690d67b183b73b0",
+  "officialJavaRuntime": "registry.access.redhat.com/ubi10/openjdk-25-runtime@sha256:e898c4ad1c8cfb5afee86917906356226956813733ebc27bbf33f762bb3b8f08",
+  "grype": { "version": "0.121.0", "sha256": "64e07133d3486115de647a66581461dccf5c732748a0a3119077395565f15519" },
+  "syft": { "version": "1.55.0", "sha256": "bb65249542db5fedeeb4d3f9b018b75e7264dbfbbb10486f044581a92f90490d" }
+}
