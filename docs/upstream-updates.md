@@ -30,6 +30,8 @@ When compatibility changes:
 
 Editing a bot PR's commits, managed files, or generated description stops automatic refresh to preserve that work. Save any needed changes and close the PR to let the next run open a fresh candidate. A non-fast-forward concurrent push is rejected. Changes on main cause a fresh candidate commit and checks so strict branch protection can be satisfied.
 
+A trailing Codesmith footer added by external automation is treated separately from the generated description only after a fresh GitHub snapshot verifies the exact PR head/body and complete edit history against the pinned GitHub Actions and Blacksmith bot identities. The footer must have the expected bounded envelope and repository/PR link; unknown editors, incomplete history, malformed footers and changes to the generated body, files or commits still block refresh. This does not install or execute Codesmith, alter auto-merge eligibility, or change image inputs.
+
 ## Manual execution and recovery
 
 Open the workflow's Actions page, choose **Run workflow**, select **main**, and optionally enable **dry_run**. A dry run reports detections and warnings without creating Issues, commits, PRs, dispatches or auto-merge requests. An authenticated `repository_dispatch` event with type `upstream-update` is also supported for future upstream notification integrations; no webhook subscription is installed by this project.
