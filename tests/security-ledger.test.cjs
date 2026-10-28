@@ -39,6 +39,14 @@ test('rendering and queries retain per-image history and visibly link correction
   assert.match(markdown,/Later corrections/); assert.match(markdown,/&#124;/); assert.equal(markdown.includes('@mention'),false);
   assert.equal(markdown,render(rows));
 });
+
+test('candidate fixes label published images as affected until publication evidence is appended', async () => {
+  const { validateRecords, render } = await lib;
+  const pending = { ...record(), status: 'pending-publication' };
+  validateRecords([pending], [image]);
+  assert.match(render([pending]), /Fix pending publication; listed images are affected/);
+  assert.throws(() => validateRecords([{ ...pending, kind: 'verification' }], [image]), /kind\/status/);
+});
 test('repository ledger, durable evidence, generated page and PR baseline are consistent', async () => {
   const { readLedger, render, directory, checkBaseline } = await lib;
   const { records, source } = await readLedger();
