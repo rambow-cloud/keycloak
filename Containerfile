@@ -8,6 +8,17 @@ FROM ${KEYCLOAK_IMAGE} AS distribution
 FROM ${BUILD_IMAGE} AS source
 ARG KEYCLOAK_JAVA_MAJOR
 COPY --from=distribution /opt/keycloak /opt/keycloak
+COPY .cache/keycloak/ /tmp/keycloak-dependencies/
+COPY tests/GuavaCompatibility.java /tmp/GuavaCompatibility.java
+# Preserve the filename referenced by Quarkus' existing app model; the payload's
+# Maven metadata is 33.7.2-jre. Verify both payloads before reaugmentation.
+RUN cd /opt/keycloak && sha256sum -c /tmp/keycloak-dependencies/upstream.sha256 \
+    && target=$(cut -d ' ' -f 3 /tmp/keycloak-dependencies/upstream.sha256) \
+    && cp /tmp/keycloak-dependencies/guava.jar "$target" \
+    && sha256sum -c /tmp/keycloak-dependencies/patched.sha256 \
+    && javac -cp '/opt/keycloak/lib/lib/main/*' -d /tmp /tmp/GuavaCompatibility.java \
+    && java -Xmx64m -cp '/tmp:/opt/keycloak/lib/lib/main/*' GuavaCompatibility "$(cat /tmp/keycloak-dependencies/version.txt)" \
+    && rm -rf /tmp/keycloak-dependencies /tmp/GuavaCompatibility.java /tmp/GuavaCompatibility.class
 ENV KC_DB=postgres KC_HEALTH_ENABLED=true KC_METRICS_ENABLED=true
 RUN java -version 2>&1 | grep -F "version \"${KEYCLOAK_JAVA_MAJOR}."
 

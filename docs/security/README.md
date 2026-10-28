@@ -12,13 +12,16 @@ Git-backed JSONL records; no database service. This page documents reviewed repa
 | --- | --- | --- | --- | --- |
 | [SEC-2026-001](#sec-2026-001) | CVE-2026-54399, CVE-2026-54428, CVE-2026-64607 | Fixed before first publication | `26.8.1-r1-aws` | [#13](https://github.com/rambow-cloud/keycloak/issues/13), [#36](https://github.com/rambow-cloud/keycloak/issues/36) |
 | [SEC-2026-002](#sec-2026-002) | EMUDHRA-2026-10 | Existing images verified | `26.8.1-r1-core`, `26.8.1-r1-aws` | [#36](https://github.com/rambow-cloud/keycloak/issues/36), [#37](https://github.com/rambow-cloud/keycloak/issues/37) |
+| [SEC-2026-003](#sec-2026-003) | CVE-2026-102554, GHSA-xxph-c9ww-hj94 | Fix pending publication; listed images are affected | `26.8.1-r1-core`, `26.8.1-r1-aws` | [#44](https://github.com/rambow-cloud/keycloak/issues/44) |
 
 ## CVE and security event index
 
+- **CVE-2026-102554**: [SEC-2026-003](#sec-2026-003)
 - **CVE-2026-54399**: [SEC-2026-001](#sec-2026-001)
 - **CVE-2026-54428**: [SEC-2026-001](#sec-2026-001)
 - **CVE-2026-64607**: [SEC-2026-001](#sec-2026-001)
 - **EMUDHRA-2026-10**: [SEC-2026-002](#sec-2026-002)
+- **GHSA-xxph-c9ww-hj94**: [SEC-2026-003](#sec-2026-003)
 
 ## SEC-2026-001
 
@@ -80,11 +83,37 @@ Evidence and sources:
 - [core runner regression report, complete public fixtures and controls](evidence/emudhra-core.json) — SHA-256 `f805e971a655ebc467b5f8de5a90b43106d0457a0bf5b03aa6d13001078d5113`
 - [aws runner regression report, complete public fixtures and controls](evidence/emudhra-aws.json) — SHA-256 `0517563ed1f685d16a5f10e21f01503ae17f8cb7d39aca048cb8a80dc9519349`
 
+## SEC-2026-003
+
+Remediate the shared Guava dependency in core/aws; formal publication is pending.
+
+Recorded (UTC): `2026-10-28T19:51:12.239Z`. Result: **Fix pending publication; listed images are affected**.
+
+- The listed r1 image tags are the existing published scope and are not repaired by a source-only change. Keycloak 26.8.1 supplies Guava 33.6.0-jre in both profiles.
+- Candidate CI 40753028959 reports one fixable HIGH Guava finding per profile with the database updated 2026-10-28T13:01:10.618103814Z. This is a scan of the candidate, not a fresh scan of the published r1 digests.
+- Issue #44 locks the official Maven Central Guava 33.7.2-jre payload and original upstream checksum, applies replacement before both optimization builds, and retains the Quarkus dependency filename while changing actual Maven metadata.
+- No severity exception or finding suppression is used. Original source drift and Keycloak upgrades require explicit override review or removal. Runner runtime and fresh scan outcomes are recorded in the remediation PR.
+- Append a correction containing the exact repaired tags/digests and successful publication evidence after a new formal revision is published; do not overwrite this pending event or any r1 publication facts.
+
+| Profile | Published tag | Digest |
+| --- | --- | --- |
+| core | `26.8.1-r1-core` | `sha256:e0975379e3f2080cc4b9a4e852ce3341c54041e8a733a529b01cca2922beaa32` |
+| aws | `26.8.1-r1-aws` | `sha256:0771ae5db0bc40e057ce51d2609d50a56a0d867a66411e411179ecf12f9608a7` |
+
+Issues: [#44](https://github.com/rambow-cloud/keycloak/issues/44).
+
+Evidence and sources:
+
+- [Official patched Guava release](<https://github.com/google/guava/releases/tag/v33.7.2>)
+- [Official public advisory](<https://github.com/google/guava/security/advisories/GHSA-xxph-c9ww-hj94>)
+- [Remediation and validation Issue](<https://github.com/rambow-cloud/keycloak/issues/44>)
+- [Blocked candidate scan](<https://github.com/rambow-cloud/keycloak/actions/runs/40753028959>)
+
 ## Maintain and query
 
 Append one complete JSON object per line to `records.jsonl`; retain existing lines, apart from Git newline conversion. Corrections use `kind: "correction"` and `supersedes` with the earlier record ID. Existing publication records and image digests are never rewritten.
 
-Every repair PR must include a ledger record or reference its existing record and explain why no new event is needed. Evidence-only verification records do not justify rebuilding or publishing an unchanged image. Both the text ledger and generated page are reviewed through the normal Issue/PR process.
+Every repair PR must include a ledger record or reference its existing record and explain why no new event is needed. Use `pending-publication` for a candidate fix; its listed tags identify affected published images, not repaired images. After publication, append a correction with the exact repaired tag/profile/digest and publication evidence. Evidence-only verification records do not justify rebuilding or publishing an unchanged image. Both the text ledger and generated page are reviewed through the normal Issue/PR process.
 
 From the repository root:
 

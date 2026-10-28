@@ -37,6 +37,13 @@ podman export "$probe" > "$rootfs"
 podman rm -v "$probe" >/dev/null
 probe=''
 entries=$(tar -tf "$rootfs")
+guava_path="opt/keycloak/lib/lib/main/com.google.guava.guava-$(node -p "require('./dependencies/keycloak/overrides.lock.json').upstreamVersion").jar"
+guava_sha=$(node -p "require('./dependencies/keycloak/overrides.lock.json').sha256")
+[[ "$(grep -Ec '(^|/)com\.google\.guava\.guava-[^/]+\.jar$' <<< "$entries")" == 1 ]]
+[[ "$(tar -xOf "$rootfs" "$guava_path" | sha256sum | cut -d ' ' -f 1)" == "$guava_sha" ]] || {
+  echo 'Final image Guava payload differs from the reviewed security lock' >&2; exit 1;
+}
+echo 'Verified the single patched Guava payload in the final image rootfs.'
 rm "$rootfs"
 rootfs=''
 if grep -Eq '(^|/)(sh|bash|dash|ash|busybox|apt|apt-get|dpkg|rpm|dnf|microdnf|apk|javac|jshell)$' <<< "$entries"; then
