@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "status": "published",
+  "publishedAt": "2026-10-28T20:08:15.664Z",
+  "publishRunId": 40760118301,
+  "validationToolsCommit": "da29c6005420d0971589877dab10ec4ad335dc58",
+  "plan": {
+    "schemaVersion": 2,
+    "registry": "quay.io/rambow-cloud/keycloak",
+    "tag": "v26.8.1-r2",
+    "releaseId": 427135685,
+    "keycloakVersion": "26.8.1",
+    "revision": 2,
+    "sourceCommit": "da29c6005420d0971589877dab10ec4ad335dc58",
+    "toolsCommit": "da29c6005420d0971589877dab10ec4ad335dc58",
+    "sourceRun": {
+      "id": 40759307054,
+      "attempt": 1
+    },
+    "lockSha256": "636da1eaf818d41c6d87110943977b0a4924aa6dc758ecbf02dd35ad4c252abf",
+    "imageLock": {
+      "keycloakVersion": "26.8.1",
+      "javaVersion": 25,
+      "platform": "linux/amd64",
+      "keycloak": "quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b",
+      "builder": "docker.io/library/eclipse-temurin:25-jdk-noble@sha256:ba0f0e1a33864105e1d454e88105c617ab40f71062db1f306bf58be32a3f8e5e",
+      "runtime": "gcr.io/distroless/java25-debian13:nonroot@sha256:5d3177252775d4b01603470fe21c015393019089904f68724bd37242e4bc6e6d",
+      "postgres": "docker.io/library/postgres:17-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+      "awsDependencies": {
+        "wrapperVersion": "4.5.0",
+        "sdkVersion": "2.46.10",
+        "lockFile": "dependencies/aws/dependencies.lock.json",
+        "rdsCa": {
+          "url": "https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem",
+          "sha256": "90a6f1a7978a1b1b096dca6c57511ca48d3b8cf052f8e704baf358f34ea2f21b"
+        }
+      }
+    },
+    "aliases": [],
+    "previousAliases": {},
+    "images": [
+      {
+        "profile": "core",
+        "inputSha256": "65850a0ad474135fa81469ee68fca292421786bab56204c93b30b7b819e836d8",
+        "changes": [
+          {
+            "type": "fix",
+            "summary": "Replace Keycloak's Guava 33.6.0-jre payload with checksum-locked 33.7.2-jre before optimization to remediate CVE-2026-102554 in both image profiles.",
+            "issues": [
+              44
+            ]
+          }
+        ],
+        "artifactId": 12848440131,
+        "artifactName": "keycloak-oci-core-amd64-da29c6005420d0971589877dab10ec4ad335dc58",
+        "tag": "26.8.1-r2-core",
+        "digest": "sha256:9f36c090c07e12f0fdd9dd171bd102a50c25edfb7b6c54e691da918200908438",
+        "archiveSha256": "d0f2602daca976ee90249f10c6ad55bf696973886e93b4f2417b2845647605b4"
+      },
+      {
+        "profile": "aws",
+        "inputSha256": "0b47aafe858a2e9ee720499fac02a13eb8d13568a3d97fb4705e106934ecc8d1",
+        "changes": [
+          {
+            "type": "fix",
+            "summary": "Replace Keycloak's Guava 33.6.0-jre payload with checksum-locked 33.7.2-jre before optimization to remediate CVE-2026-102554 in both image profiles.",
+            "issues": [
+              44
+            ]
+          }
+        ],
+        "artifactId": 12848280222,
+        "artifactName": "keycloak-oci-aws-amd64-da29c6005420d0971589877dab10ec4ad335dc58",
+        "tag": "26.8.1-r2-aws",
+        "digest": "sha256:ee73b535798351bd007d72e1db6522e6fccacb2368005c7659bc171b88c19d23",
+        "archiveSha256": "c00b8b7d39845fd57765c0d91ccf08a9a6f4a9239708344ef8fd00dc630ad531"
+      }
+    ]
+  },
+  "aliasChanges": []
+}
