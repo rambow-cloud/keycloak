@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "changes": [
+    {
+      "type": "fix",
+      "summary": "Replace Keycloak's Guava 33.6.0-jre payload with checksum-locked 33.7.2-jre before optimization to remediate CVE-2026-102554 in both image profiles.",
+      "issues": [44],
+      "profiles": ["core", "aws"]
+    }
+  ]
+}

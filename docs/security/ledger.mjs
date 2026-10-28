@@ -33,12 +33,12 @@ export function validateRecords(records, catalog) {
     if (!r || typeof r !== 'object' || Array.isArray(r) || Object.keys(r).some(k => !allowed.includes(k)) || r.schemaVersion !== 1 ||
         !/^SEC-\d{4}-\d{3,}$/.test(r.id ?? '') || seen.has(r.id) ||
         !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(r.recordedAt ?? '') || !Number.isFinite(Date.parse(r.recordedAt)) || new Date(r.recordedAt).toISOString() !== r.recordedAt ||
-        !['fix', 'verification', 'correction'].includes(r.kind) || !['fixed-before-publication', 'verified-existing', 'under-review', 'retracted'].includes(r.status) ||
+        !['fix', 'verification', 'correction'].includes(r.kind) || !['fixed-before-publication', 'pending-publication', 'verified-existing', 'under-review', 'retracted'].includes(r.status) ||
         !text(r.summary) || r.summary.length < 20 || !Array.isArray(r.details) || !r.details.length || !r.details.every(text) ||
         !Array.isArray(r.advisories) || !r.advisories.length || !unique(r.advisories) || r.advisories.some(a => !/^(?:CVE-\d{4}-\d{4,}|GHSA-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}-[23456789cfghjmpqrvwx]{4}|[A-Z]+-\d{4}-\d{2})$/.test(a)) ||
         !numbers(r.issues) || !Array.isArray(r.pullRequests) || (r.pullRequests.length > 0 && !numbers(r.pullRequests))) throw Error('Invalid security record: ' + (r?.id ?? 'unknown'));
     if ((r.kind === 'correction') !== Boolean(r.supersedes) || (r.supersedes && !seen.has(r.supersedes))) throw Error('Correction must reference an earlier record');
-    if ((r.kind === 'fix' && r.status !== 'fixed-before-publication') || (r.kind === 'verification' && r.status !== 'verified-existing')) throw Error('Record kind/status mismatch');
+    if ((r.kind === 'fix' && !['fixed-before-publication', 'pending-publication'].includes(r.status)) || (r.kind === 'verification' && r.status !== 'verified-existing')) throw Error('Record kind/status mismatch');
     if (!Array.isArray(r.images) || !r.images.length || r.images.length > 20 || !unique(r.images.map(i => i.tag))) throw Error('Explicit unique published images are required');
     for (const image of r.images) {
       if (!catalog.some(p => p.profile === image.profile && p.tag === image.tag && p.digest === image.digest)) throw Error('Image tag/profile/digest is absent from the publication catalog');
@@ -79,7 +79,7 @@ export function query(records, value) {
   return records.filter(r => r.id === value || r.supersedes === value || r.advisories.includes(value) || r.images.some(i => i.tag === value || i.digest === value));
 }
 export function render(records) {
-  const status = { 'fixed-before-publication': 'Fixed before first publication', 'verified-existing': 'Existing images verified', 'under-review': 'Under review', retracted: 'Retracted' };
+  const status = { 'fixed-before-publication': 'Fixed before first publication', 'pending-publication': 'Fix pending publication; listed images are affected', 'verified-existing': 'Existing images verified', 'under-review': 'Under review', retracted: 'Retracted' };
   let md = '# Security remediation ledger\n\n<!-- Generated from records.jsonl by ledger.mjs. Do not edit by hand. -->\n\n' +
     'Git-backed JSONL records; no database service. This page documents reviewed repairs and verification events. It is not a complete current vulnerability inventory or a continuous scan dashboard.\n\n' +
     '[Published images](../../releases/README.md) · [Scan policy](../vulnerability-scanning.md) · [Text records](records.jsonl)\n\n' +
@@ -101,7 +101,7 @@ export function render(records) {
     for (const e of r.evidence) md += '- [' + escape(e.label) + '](' + e.path + ') — SHA-256 `' + e.sha256 + '`\n';
   }
   return md + '\n## Maintain and query\n\nAppend one complete JSON object per line to `records.jsonl`; retain existing lines, apart from Git newline conversion. Corrections use `kind: "correction"` and `supersedes` with the earlier record ID. Existing publication records and image digests are never rewritten.\n\n' +
-    'Every repair PR must include a ledger record or reference its existing record and explain why no new event is needed. Evidence-only verification records do not justify rebuilding or publishing an unchanged image. Both the text ledger and generated page are reviewed through the normal Issue/PR process.\n\n' +
+    'Every repair PR must include a ledger record or reference its existing record and explain why no new event is needed. Use `pending-publication` for a candidate fix; its listed tags identify affected published images, not repaired images. After publication, append a correction with the exact repaired tag/profile/digest and publication evidence. Evidence-only verification records do not justify rebuilding or publishing an unchanged image. Both the text ledger and generated page are reviewed through the normal Issue/PR process.\n\n' +
     'From the repository root:\n\n```sh\nnode docs/security/ledger.mjs render\nnode docs/security/ledger.mjs render --check\nnode docs/security/ledger.mjs show CVE-2026-54399\nnode docs/security/ledger.mjs show EMUDHRA-2026-10\nnode docs/security/ledger.mjs show 26.8.1-r1-aws\nnode docs/security/ledger.mjs append-check origin/main\n```\n\n' +
     'The retained regression branch is `chore/37-emudhra-regression` ([draft PR #38](https://github.com/rambow-cloud/keycloak/pull/38)). Its test code/workflow stays outside main. Reports above include the exact code commit and Actions run, all public chain fixtures and checksums, JVM/trust-store identity, controls and limits; expiring Actions artifacts are supplemental evidence. No scheduled rescan or automatic triage is implemented by this ledger.\n';
 }
