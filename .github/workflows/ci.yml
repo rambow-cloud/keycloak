@@ -4,6 +4,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      comparison_source_run:
+        description: Reuse immutable OCI artifacts from an earlier run of this retained experiment (no rebuild)
+        type: string
+        default: ''
 permissions:
   contents: read
 concurrency:
@@ -11,6 +16,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   impact:
+    if: ${{ !inputs.comparison_source_run }}
     name: Image impact
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -138,7 +144,7 @@ jobs:
         run: node scripts/trivy-gate.mjs .cache/trivy-report/summary.json
   ubi10:
     name: UBI 10 runtime candidates
-    if: startsWith(github.head_ref || github.ref_name, 'chore/50-ubi10-grype-comparison')
+    if: ${{ !inputs.comparison_source_run && startsWith(github.head_ref || github.ref_name, 'chore/50-ubi10-grype-comparison') }}
     needs: static
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -176,25 +182,64 @@ jobs:
   grype_compare:
     name: Grype and Java comparison
     if: ${{ !cancelled() && startsWith(github.head_ref || github.ref_name, 'chore/50-ubi10-grype-comparison') }}
-    needs: [build, ubi10]
+    needs: [static, build, ubi10]
+    permissions:
+      contents: read
+      actions: read
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     env:
       SCAN_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      BASELINE_RESULT: ${{ needs.build.result }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - id: binding
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          SOURCE_RUN: ${{ inputs.comparison_source_run }}
+        with:
+          script: |
+            const requested = process.env.SOURCE_RUN;
+            const run_id = requested ? Number(requested) : context.runId;
+            if (!Number.isSafeInteger(run_id) || run_id < 1) throw Error('Invalid source run');
+            const { data: source } = await github.rest.actions.getWorkflowRun({ ...context.repo, run_id });
+            if (source.head_repository.full_name !== 'rambow-cloud/keycloak' || source.head_branch !== 'chore/50-ubi10-grype-comparison' ||
+                source.path !== '.github/workflows/ci.yml') throw Error('Unrelated artifact source');
+            if (requested) {
+              const { data: diff } = await github.rest.repos.compareCommits({ ...context.repo, base: source.head_sha, head: context.sha });
+              const allowed = new Set(['docs/experiments/ubi10-grype/compare.mjs', 'tests/ubi10-grype.test.cjs', '.github/workflows/ci.yml']);
+              if (!['ahead', 'identical'].includes(diff.status) || !diff.files || diff.files.some(f => !allowed.has(f.filename) || f.previous_filename)) {
+                throw Error('Only comparison/report orchestration changes can reuse source artifacts');
+              }
+            }
+            const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, { ...context.repo, run_id, per_page: 100 });
+            const images = artifacts.filter(a => /^(keycloak|ubi10)-oci-(core|aws)-amd64-[a-f0-9]{40}$/.test(a.name));
+            const shas = new Set(images.map(a => a.name.slice(-40)));
+            if (images.length !== 4 || shas.size !== 1 || images.some(a => a.expired)) throw Error('Incomplete/expired source image set');
+            const sha = [...shas][0];
+            for (const runtime of ['keycloak','ubi10']) for (const profile of ['core','aws']) {
+              if (images.filter(a => a.name === runtime + '-oci-' + profile + '-amd64-' + sha).length !== 1) throw Error('Duplicate/missing source profile');
+            }
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id, filter: 'latest', per_page: 100 });
+            const baseline = ['Build core','Build aws'].every(name => jobs.some(j => j.name === name && j.conclusion === 'success'));
+            core.setOutput('run', String(run_id)); core.setOutput('sha', sha); core.setOutput('baseline', baseline ? 'success' : 'failure');
+            await core.summary.addRaw('Using the four immutable OCI artifacts from run ' + run_id + ' at image source ' + sha + '. No image rebuild is claimed by a comparison-only recovery.\n').write();
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          pattern: '*-oci-*-amd64-${{ github.sha }}'
+          pattern: '*-oci-*-amd64-${{ steps.binding.outputs.sha }}'
           path: .cache/comparison-inputs/
+          run-id: ${{ steps.binding.outputs.run }}
+          github-token: ${{ github.token }}
       - name: Install rootless OCI inspection/runtime tools
         run: |
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y podman skopeo
       - name: Scan four exact artifacts with one Grype database and probe actual JVMs
+        env:
+          ARTIFACT_SOURCE_SHA: ${{ steps.binding.outputs.sha }}
+          ARTIFACT_SOURCE_RUN: ${{ steps.binding.outputs.run }}
+          BASELINE_RESULT: ${{ steps.binding.outputs.baseline }}
         run: node docs/experiments/ubi10-grype/compare.mjs
       - name: Preserve complete comparison before its gate result
         if: ${{ !cancelled() }}
@@ -225,8 +270,14 @@ jobs:
           EXPERIMENT: ${{ startsWith(github.head_ref || github.ref_name, 'chore/50-ubi10-grype-comparison') }}
           UBI_RESULT: ${{ needs.ubi10.result }}
           GRYPE_RESULT: ${{ needs.grype_compare.result }}
+          RECOVERY: ${{ inputs.comparison_source_run != '' }}
         run: |
           test "$STATIC_RESULT" = success
+          if [ "$RECOVERY" = true ]; then
+            test "$EXPERIMENT" = true
+            test "$GRYPE_RESULT" = success
+            exit 0
+          fi
           test "$IMPACT_RESULT" = success
           if [ "$EXPECT_BUILD" = true ]; then
             test "$BUILD_RESULT" = success

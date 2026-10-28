@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, stat, readdir } from 'node:fs/promises';
 import { openSync, closeSync, createReadStream } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
@@ -28,13 +28,15 @@ export function isGuavaFinding(match) {
 }
 export function summarize(report, inventory, runtime) {
   const errors = [];
+  const database = report.descriptor?.db?.status;
   const family = runtime === 'ubi10' ? /rhel|redhat|red hat/i : /debian/i;
   const major = runtime === 'ubi10' ? /^10(?:\.|$)/ : /^13(?:\.|$)/;
   const distro = inventory.distro ?? {};
   if (!family.test(distro.id ?? distro.name ?? '') || !major.test(distro.versionID ?? distro.version ?? '')) errors.push('Unexpected inventory OS');
   if (!family.test(report.distro?.name ?? '') || !major.test(report.distro?.version ?? '')) errors.push('Unexpected Grype OS');
   if (report.descriptor?.name !== 'grype' || report.descriptor?.version !== '0.121.0' ||
-      report.descriptor?.db?.status !== 'valid' || report.descriptor.db.error) errors.push('Scanner/database identity or status invalid');
+      database?.valid !== true || !/^v?6\./.test(database?.schemaVersion ?? '') ||
+      !Number.isFinite(Date.parse(database?.built ?? '')) || database?.error) errors.push('Scanner/database identity or status invalid');
   if (!Array.isArray(report.matches) || !Array.isArray(inventory.artifacts)) throw Error('Incomplete scan/inventory JSON');
   const osType = runtime === 'ubi10' ? 'rpm' : 'deb';
   const os = inventory.artifacts.filter(p => p.type === osType);
@@ -63,7 +65,7 @@ export function summarize(report, inventory, runtime) {
     (p.type === osType && /java-\d+-openjdk|temurin|openjdk|jre/i.test(p.name)));
   const summarizePackage = p => ({ name: p.name, version: p.version, type: p.type, purl: p.purl, cpes: p.cpes, metadata: p.metadata });
   return { status: errors.length ? 'coverage-failed' : 'complete', errors, distro: report.distro,
-    database: report.descriptor.db, counts, total: report.matches.length,
+    database: database ? { ...database, providers: report.descriptor.db.providers } : undefined, counts, total: report.matches.length,
     uniqueAdvisories: new Set(matches.map(m => m.id)).size, blocking, namespaces: [...namespaces].sort(),
     inventory: { os: os.length, jars: jars.length, applicationJars: application.length, jvm: jvmPackages.map(summarizePackage) },
     applicationPackages: application.map(p => ({ name: p.name, version: p.version, purl: p.purl })).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))),
@@ -101,7 +103,7 @@ async function controls(grype) {
     const file = resolve(output, 'control-' + label + '.json');
     run(grype, ['dir:' + dir, '-o', 'json'], file);
     const report = JSON.parse(await readFile(file, 'utf8'));
-    states.push({ label, version, matched: report.matches.some(isGuavaFinding), database: report.descriptor.db });
+    states.push({ label, version, matched: report.matches.some(isGuavaFinding), database: report.descriptor.db.status });
   }
   if (!states[0].matched || states[1].matched) throw Error('Vulnerable/fixed Guava controls failed');
   await writeFile(resolve(output, 'controls.json'), JSON.stringify(states, null, 2) + '\n');
@@ -132,6 +134,16 @@ async function main() {
   run(tools.syft, ['version'], resolve(output, 'syft-version.txt'));
   run(tools.grype, ['db', 'update']);
   run(tools.grype, ['db', 'status'], resolve(output, 'database-status.txt'));
+  run(tools.grype, ['db', 'status', '-o', 'json'], resolve(output, 'database-status.json'));
+  const databaseStatus = JSON.parse(await readFile(resolve(output, 'database-status.json'), 'utf8'));
+  if (databaseStatus.valid !== true || !databaseStatus.path) throw Error('Native Grype DB validation failed');
+  let databaseFile = databaseStatus.path;
+  if ((await stat(databaseFile)).isDirectory()) {
+    const files = (await readdir(databaseFile)).filter(name => name.endsWith('.db'));
+    if (files.length !== 1) throw Error('Cannot identify the frozen database');
+    databaseFile = resolve(databaseFile, files[0]);
+  }
+  const databaseSha256 = await hashFile(databaseFile);
   const control = await controls(tools.grype);
   const images = JSON.parse(await readFile('images.lock.json', 'utf8'));
   const probe = resolve(output, 'probe');
@@ -140,21 +152,24 @@ async function main() {
     '--entrypoint', 'javac', images.builder, '--release', '25', '-d', '/out', '/source/JavaRuntimeInfo.java']);
   run('skopeo', ['inspect', '--config', '--override-os', 'linux', '--override-arch', 'amd64', 'docker://' + lock.officialJavaRuntime], resolve(output, 'official-ubi-java-image-config.json'));
   const rows = [];
+  const artifactSource = process.env.ARTIFACT_SOURCE_SHA || process.env.GITHUB_SHA;
   for (const runtime of ['distroless', 'ubi10']) for (const profile of ['core', 'aws']) {
     const key = runtime + '-' + profile;
     const dir = resolve(output, key);
     await mkdir(dir, { recursive: true });
     try {
-      const input = resolve('.cache/comparison-inputs', (runtime === 'ubi10' ? 'ubi10' : 'keycloak') + '-oci-' + profile + '-amd64-' + process.env.GITHUB_SHA);
+      const input = resolve('.cache/comparison-inputs', (runtime === 'ubi10' ? 'ubi10' : 'keycloak') + '-oci-' + profile + '-amd64-' + artifactSource);
       const archive = resolve(input, 'keycloak.oci.tar');
       const hash = await hashFile(archive);
       if (!(await readFile(archive + '.sha256', 'utf8')).startsWith(hash + '  keycloak.oci.tar')) throw Error('Archive checksum mismatch');
       const info = JSON.parse(run('skopeo', ['inspect', 'oci-archive:' + archive]));
-      if (info.Architecture !== 'amd64' || info.Os !== 'linux' || info.Labels?.['org.opencontainers.image.revision'] !== process.env.GITHUB_SHA ||
+      if (info.Architecture !== 'amd64' || info.Os !== 'linux' || info.Labels?.['org.opencontainers.image.revision'] !== artifactSource ||
           info.Labels?.['cloud.rambow.keycloak.profile'] !== profile) throw Error('Image provenance/profile mismatch');
       const manifest = JSON.parse(run('skopeo', ['inspect', '--raw', 'oci-archive:' + archive]));
       const local = 'localhost/grype-comparison:' + key;
-      run('skopeo', ['copy', 'oci-archive:' + archive, 'containers-storage:' + local]);
+      const imageID = run('podman', ['pull', '--quiet', '--retry=0', 'oci-archive:' + archive]).trim().split('\n').at(-1);
+      if (!/^(?:sha256:)?[a-f0-9]{64}$/.test(imageID)) throw Error('Unexpected local OCI image identity');
+      run('podman', ['tag', imageID, local]);
       const size = JSON.parse(run('podman', ['image', 'inspect', local]))[0].Size;
       run('podman', ['run', '--rm', '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--memory=256m',
         '-v', probe + ':/probe:ro', '--entrypoint', '/usr/bin/java', local, '-Xmx128m', '-cp', '/probe', 'JavaRuntimeInfo'], resolve(dir, 'java.json'));
@@ -180,17 +195,19 @@ async function main() {
       await writeFile(resolve(dir, 'failure.json'), JSON.stringify({ error: error.message }) + '\n');
     }
   }
-  const databases = rows.filter(r => r.database).map(r => JSON.stringify([r.database.built, r.database.schemaVersion, r.database.checksum]));
+  const databases = rows.filter(r => r.database).map(r => JSON.stringify([r.database.built, r.database.schemaVersion, r.database.from]));
   const issues = [];
-  if (databases.length !== 4 || new Set([...databases, ...control.map(c => JSON.stringify([c.database.built, c.database.schemaVersion, c.database.checksum]))]).size !== 1) issues.push('Database identity differs or an image scan is missing');
+  if (databases.length !== 4 || new Set([...databases, ...control.map(c => JSON.stringify([c.database.built, c.database.schemaVersion, c.database.from]))]).size !== 1 ||
+      await hashFile(databaseFile) !== databaseSha256) issues.push('Database identity differs or an image scan is missing');
   for (const profile of ['core', 'aws']) {
     const candidates = rows.filter(r => r.profile === profile);
     if (candidates.some(r => !r.applicationPackages) || JSON.stringify(candidates[0].applicationPackages) !== JSON.stringify(candidates[1].applicationPackages)) issues.push('Application Java inputs differ for ' + profile);
   }
   const result = { schemaVersion: 1, branch: process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME,
-    sourceCommit: process.env.GITHUB_SHA, headCommit: process.env.SCAN_HEAD_SHA,
+    sourceCommit: artifactSource, reportCodeCommit: process.env.GITHUB_SHA, headCommit: process.env.SCAN_HEAD_SHA,
+    artifactSourceRun: Number(process.env.ARTIFACT_SOURCE_RUN || process.env.GITHUB_RUN_ID),
     runId: Number(process.env.GITHUB_RUN_ID), runUrl: 'https://github.com/rambow-cloud/keycloak/actions/runs/' + process.env.GITHUB_RUN_ID,
-    createdAt: new Date().toISOString(), tools: lock, control, issues, rows };
+    createdAt: new Date().toISOString(), tools: lock, database: { ...databaseStatus, sha256: databaseSha256 }, control, issues, rows };
   await writeFile(resolve(output, 'comparison.json'), JSON.stringify(result, null, 2) + '\n');
   await writeFile(resolve(output, 'README.md'), render(rows));
   if (issues.length || rows.some(r => r.status !== 'complete' || r.errors.length || r.blocking)) throw Error('Comparison reported coverage, runtime, trust or vulnerability gate failures; inspect preserved evidence.');

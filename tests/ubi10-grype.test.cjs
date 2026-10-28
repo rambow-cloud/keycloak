@@ -1,9 +1,9 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const lib = import('../docs/experiments/ubi10-grype/compare.mjs');
-const db = { status: 'valid', built: '2026-10-29T00:00:00Z', schemaVersion: '6.0.0', checksum: 'test-checksum' };
+const db = { valid: true, built: '2026-10-29T00:00:00Z', schemaVersion: 'v6.1.10' };
 function fixture() {
-  return { scan: { distro: { name: 'redhat', version: '10.2' }, descriptor: { name: 'grype', version: '0.121.0', db }, matches: [] },
+  return { scan: { distro: { name: 'redhat', version: '10.2' }, descriptor: { name: 'grype', version: '0.121.0', db: { status: db, providers: {} } }, matches: [] },
     inventory: { distro: { id: 'rhel', versionID: '10.2' }, artifacts: [
       { name: 'glibc', version: '2.39', type: 'rpm' },
       { name: 'java-25-openjdk-headless', version: '25.0.4.1', type: 'rpm' },
@@ -19,7 +19,8 @@ test('RHEL 10 coverage needs the actual OS, live DB and both RPM/application inv
   for (const change of [
     f => { f.inventory.distro.versionID = '9.8'; },
     f => { f.scan.distro.name = 'debian'; },
-    f => { f.scan.descriptor.db = { status: 'invalid' }; },
+    f => { f.scan.descriptor.db.status = { valid: false }; },
+    f => { f.scan.descriptor.db.status = { ...db, schemaVersion: '5' }; },
     f => { f.inventory.artifacts = f.inventory.artifacts.filter(p => p.type !== 'rpm'); },
     f => { f.inventory.artifacts = f.inventory.artifacts.filter(p => p.type !== 'java-archive'); },
     f => { f.inventory.artifacts.at(-1).version = '33.6.0-jre'; },
