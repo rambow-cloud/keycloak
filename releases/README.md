@@ -6,10 +6,39 @@ Registry: `quay.io/rambow-cloud/keycloak`. Formal releases only; no `latest` tag
 
 | Release | Keycloak | Profile | Image tag | Digest | Aliases | Published (UTC) |
 | --- | --- | --- | --- | --- | --- | --- |
+| [v26.8.1-r3](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r3) | 26.8.1 | core | `26.8.1-r3-core` | `sha256:0546c047c8f4536ced6a0f90335e00f57b943915db53acbcadbfab6db497cbf6` | — | 2026-10-29T18:48:42.337Z |
+| [v26.8.1-r3](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r3) | 26.8.1 | aws | `26.8.1-r3-aws` | `sha256:50835d238bbcdc886c033d27c91aee4270dcde59905304597af430480bc5ce0e` | — | 2026-10-29T18:48:42.337Z |
 | [v26.8.1-r2](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r2) | 26.8.1 | core | `26.8.1-r2-core` | `sha256:9f36c090c07e12f0fdd9dd171bd102a50c25edfb7b6c54e691da918200908438` | — | 2026-10-28T20:08:15.664Z |
 | [v26.8.1-r2](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r2) | 26.8.1 | aws | `26.8.1-r2-aws` | `sha256:ee73b535798351bd007d72e1db6522e6fccacb2368005c7659bc171b88c19d23` | — | 2026-10-28T20:08:15.664Z |
 | [v26.8.1-r1](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r1) | 26.8.1 | core | `26.8.1-r1-core` | `sha256:e0975379e3f2080cc4b9a4e852ce3341c54041e8a733a529b01cca2922beaa32` | — | 2026-10-26T02:41:36.090Z |
 | [v26.8.1-r1](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r1) | 26.8.1 | aws | `26.8.1-r1-aws` | `sha256:0771ae5db0bc40e057ce51d2609d50a56a0d867a66411e411179ecf12f9608a7` | — | 2026-10-26T02:41:36.090Z |
+
+## v26.8.1-r3
+
+[Source commit](https://github.com/rambow-cloud/keycloak/commit/1293dd22485e4196e556f3428037cec0a64acc35) · [Source CI](https://github.com/rambow-cloud/keycloak/actions/runs/40932528395) · [Publication and fresh scans](https://github.com/rambow-cloud/keycloak/actions/runs/40933529546)
+
+### `26.8.1-r3-core` (core)
+
+- **feature:** Add native Linux arm64 alongside amd64, with per-architecture runtime and vulnerability checks and digest-preserving multi-architecture OCI release indexes. ([#64](https://github.com/rambow-cloud/keycloak/issues/64))
+- **fix:** Refresh builder digest from ba0f0e1a33864105 to a9c5ddd386f62951. ([#54](https://github.com/rambow-cloud/keycloak/issues/54))
+
+Architectures: `linux/amd64` (`sha256:8c0e8bdc700b70e4ab1e9867f63f87a359e7e9c64a4165205255a9503c564bdd`), `linux/arm64` (`sha256:3e51ea9c9425d66171fea155f2f83cebb6fc96e650ababf6ab48107005b5250e`). The tag and pull reference select the OCI index.
+
+```sh
+podman pull quay.io/rambow-cloud/keycloak@sha256:0546c047c8f4536ced6a0f90335e00f57b943915db53acbcadbfab6db497cbf6
+```
+
+### `26.8.1-r3-aws` (aws)
+
+- **feature:** Add native Linux arm64 alongside amd64, with per-architecture runtime and vulnerability checks and digest-preserving multi-architecture OCI release indexes. ([#64](https://github.com/rambow-cloud/keycloak/issues/64))
+- **fix:** Refresh builder digest from ba0f0e1a33864105 to a9c5ddd386f62951. ([#54](https://github.com/rambow-cloud/keycloak/issues/54))
+
+Architectures: `linux/amd64` (`sha256:d876bee68d6dac8c571fe8d5663cf0bb3e38d25a1485d2582d853ad9973a1bba`), `linux/arm64` (`sha256:adee8450c8750e22249a3cf250e02fa303de7e4637bcafd78f3e69cc01bbe2d7`). The tag and pull reference select the OCI index.
+
+```sh
+podman pull quay.io/rambow-cloud/keycloak@sha256:50835d238bbcdc886c033d27c91aee4270dcde59905304597af430480bc5ce0e
+```
+
 
 ## v26.8.1-r2
 
