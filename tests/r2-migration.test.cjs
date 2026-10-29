@@ -31,6 +31,19 @@ test('r3 withdrawal is idempotent and refuses other tags sharing a manifest or c
  assert.throws(()=>withdrawalTargets({...bindings,extra:r3.plan.images[0].digest}));
  assert.throws(()=>withdrawalTargets({...bindings,[r3.plan.images[0].tag]:digest('a')}));
 });
+test('completion fails closed for skipped publication ancestors, failures and missing decisions',async()=>{
+ const {assertMigrationOutcome}=await lib;
+ const full={prepare:'success',verify:'success',freeze:'success',publish:'success',audit:'success'};
+ const main=results=>({active:'true',eventName:'workflow_dispatch',ref:'refs/heads/main',results});
+ assertMigrationOutcome(main(full));
+ for(const job of ['prepare','verify','freeze','publish','audit']) for(const result of ['failure','skipped']) assert.throws(()=>assertMigrationOutcome(main({...full,[job]:result})));
+ const readonly={...full,freeze:'skipped',publish:'skipped',audit:'skipped'};
+ assertMigrationOutcome({...main(readonly),eventName:'pull_request',ref:'refs/pull/76/merge'});
+ assert.throws(()=>assertMigrationOutcome({...main(full),eventName:'pull_request'}));
+ assertMigrationOutcome({...main({...readonly,verify:'skipped'}),active:'false'});
+ assert.throws(()=>assertMigrationOutcome({...main(full),active:'false'}));
+ assert.throws(()=>assertMigrationOutcome({...main(full),active:''}));
+});
 test('lifecycle projections preserve raw records, exact old AMD64 bindings and withdrawal history',async()=>{
  const {validateReleaseEvents,parseReleaseEvents}=await import('../scripts/lib/release-events.mjs');
  const {renderCatalog,resolveTag,tagHistory}=await import('../scripts/lib/releases.mjs');
