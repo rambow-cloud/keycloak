@@ -4,20 +4,20 @@ Minimal Keycloak OCI images for PostgreSQL deployments, with a **distroless Java
 
 ## Current images
 
-Current published release: [v26.8.1-r2](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r2). Keycloak **26.8.1**, Java **25 LTS**, Linux **amd64**.
+Current published release: [v26.8.1-r3](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r3). Keycloak **26.8.1**, Java **25 LTS**, Linux **amd64 and arm64**.
 
-Native builds and CI also support **arm64**. The r2 tags below remain amd64-only; ARM64 images require the next formal revision. See [architecture support](docs/architectures.md).
+Each tag is an immutable OCI index that automatically selects **amd64** or **arm64**. Earlier r1/r2 tags remain amd64-only. See [architecture support](docs/architectures.md).
 
 | Profile | Latest published tag | Image reference | Purpose |
 | --- | --- | --- | --- |
-| core | `26.8.1-r2-core` | `quay.io/rambow-cloud/keycloak:26.8.1-r2-core` | PostgreSQL with the native JDBC driver. |
-| aws | `26.8.1-r2-aws` | `quay.io/rambow-cloud/keycloak:26.8.1-r2-aws` | RDS PostgreSQL with the AWS JDBC Wrapper, IAM authentication support and a pinned RDS CA bundle. |
+| core | `26.8.1-r3-core` | `quay.io/rambow-cloud/keycloak:26.8.1-r3-core` | PostgreSQL with the native JDBC driver. |
+| aws | `26.8.1-r3-aws` | `quay.io/rambow-cloud/keycloak:26.8.1-r3-aws` | RDS PostgreSQL with the AWS JDBC Wrapper, IAM authentication support and a pinned RDS CA bundle. |
 
 Pull either profile with Podman:
 
 ```sh
-podman pull quay.io/rambow-cloud/keycloak:26.8.1-r2-core
-podman pull quay.io/rambow-cloud/keycloak:26.8.1-r2-aws
+podman pull quay.io/rambow-cloud/keycloak:26.8.1-r3-core
+podman pull quay.io/rambow-cloud/keycloak:26.8.1-r3-aws
 ```
 
 Use [digest-pinned references](releases/README.md) for deployments. Formal tags are immutable; no `latest` tag is published. See [security release notes](docs/security/README.md) for fixes in each version.

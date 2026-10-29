@@ -42,7 +42,7 @@ CI also scans each built image with checksum-pinned native Trivy, reports findin
 
 Formal releases publish changed profiles to `quay.io/rambow-cloud/keycloak` after fresh vulnerability gates. Use `v26.8.1-r1`-style GitHub Releases and `26.8.1-r1-core` / `26.8.1-r1-aws` registry tags. See the [published image catalog](../releases/README.md) and [Quay release setup/recovery](quay-releases.md). Main updates alone do not publish, and no `latest` or implicit custom alias is created.
 
-Archive checksums detect transfer corruption; they are not a signature or provenance attestation. Artifacts expire after seven days. SBOM generation, signing, and multi-architecture support remain follow-up work requiring their own issues.
+Archive checksums detect transfer corruption; they are not a signature or provenance attestation. Artifacts expire after seven days. SBOM generation and signing remain follow-up work requiring their own issues. Native amd64/arm64 validation and OCI indexes are described in the [architecture guide](architectures.md).
 
 The [automatic upstream updater](upstream-updates.md) checks Keycloak, distroless and the current Temurin image family hourly. It creates an Issue-linked PR, validates affected image profiles, and auto-merges patch/digest updates after required checks. Larger or compatibility-changing upgrades require review.
 
