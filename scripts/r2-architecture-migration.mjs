@@ -161,7 +161,7 @@ export async function publishMigration({github,context,core,path,out}) {
     // then address only the two archived r3 index digests; never delete children.
     const tags=JSON.parse(run('skopeo',['list-tags','--authfile',auth,'docker://'+registry])).Tags;
     if(!Array.isArray(tags)||tags.length>100||new Set(tags).size!==tags.length) throw Error('Unexpected registry tag inventory');
-    const bindings={};
+    const bindings=Object.create(null);
     for(const tag of tags) {
       if(!/^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$/.test(tag)) throw Error('Invalid registry tag');
       bindings[tag]='sha256:'+hash(run('skopeo',['inspect','--authfile',auth,'--raw','docker://'+registry+':'+tag]));
