@@ -3,9 +3,9 @@
   "changes": [
     {
       "type": "fix",
-      "summary": "Refresh builder digest from ba0f0e1a33864105 to a9c5ddd386f62951.",
+      "summary": "Refresh builder digest from a9c5ddd386f62951 to 7247bd8d2aeec64e.",
       "issues": [
-        54
+        72
       ],
       "profiles": [
         "core",
