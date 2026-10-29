@@ -2,6 +2,7 @@ import { registry, repository, profiles, json, hash, equal, parseRelease, canoni
   validatePlan, validateRecord, validateCatalog, priorAliasDigest, assertNewRevision, selectRun, chooseArtifacts } from './lib/releases.mjs';
 import { assessRelease as assessImageRelease, readJSON } from './lib/image-changes.mjs';
 import { lockArchitectures } from './lib/platforms.mjs';
+import { parseReleaseEvents, validateReleaseEvents } from './lib/release-events.mjs';
 
 export async function readText(github, repo, path, ref) {
   const { data } = await github.rest.repos.getContent({ ...repo, path, ref });
@@ -17,7 +18,10 @@ export async function readCatalog(github, repo, ref) {
     if (path !== 'releases/records/' + record.plan?.tag + '.json') throw new Error('Record path mismatch.');
     return record;
   }));
-  return validateCatalog(records);
+  validateCatalog(records);
+  const events=data.tree.some(e=>e.path==='releases/events.jsonl') ? parseReleaseEvents(await readText(github,repo,'releases/events.jsonl',ref)) : [];
+  Object.defineProperty(records,'lifecycle',{value:validateReleaseEvents(events,records)});
+  return records;
 }
 export async function readHistory(github, repo, ref, records) {
   const tags = [...new Set(records.flatMap(r => r.plan.images.filter(i => !i.changes).map(i => i.tag)))];

@@ -3,6 +3,7 @@ import { readText, readCatalog, readHistory, readAsset, putImmutableAsset, asser
 import { dispatchMissingChecks, configureAutoMerge } from './upstream-update.mjs';
 import policy from './issue-policy.cjs';
 import { validateChanges, validateFragment } from './lib/image-changes.mjs';
+import {parseReleaseEvents,validateReleaseEvents} from './lib/release-events.mjs';
 
 const marker = '<!-- quay-catalog:v1 -->';
 const actionsBot = 'MDM6Qm90NDE4OTgyODI=';
@@ -29,6 +30,27 @@ function issueBody(record) {
 export async function checkRecordChanges({ github, context, pr }) {
   const repo = context.repo;
   const changes = await github.paginate(github.rest.pulls.listFiles, { ...repo, pull_number: pr.number, per_page: 100 });
+  for(const change of changes.filter(c=>c.filename==='releases/events.jsonl')) {
+    if(change.status==='removed'||change.previous_filename) throw Error('Release lifecycle history cannot be removed or renamed');
+    let previous='';
+    try {previous=await readText(github,repo,change.filename,pr.base.sha);} catch(error) {if(error.status!==404) throw error;}
+    const current=await readText(github,repo,change.filename,pr.head.sha);
+    if(!current.replaceAll('\r\n','\n').startsWith(previous.replaceAll('\r\n','\n'))) throw Error('Release lifecycle events are append-only');
+    const events=validateReleaseEvents(parseReleaseEvents(current),await readCatalog(github,repo,pr.head.sha));
+    for(const event of events.slice(parseReleaseEvents(previous).length)) {
+      if(event.operation==='architecture-expansion') {
+        const {data:release}=await github.rest.repos.getReleaseByTag({...repo,tag:event.tag});
+        if(!equal(await readAsset(github,repo,release,'architecture-extension-record.json'),event)) throw Error('Architecture event must match its protected publication attachment');
+      } else {
+        let present=true;
+        try {await github.rest.repos.getReleaseByTag({...repo,tag:event.tag});} catch(error) {if(error.status!==404) throw error;present=false;}
+        if(present) throw Error('Withdrawal cannot claim a still-active GitHub Release');
+        const archive=JSON.parse(await readText(github,repo,'releases/archives/'+event.tag+'/publication-record.json',pr.head.sha));
+        const original=(await readCatalog(github,repo,pr.base.sha)).find(r=>r.plan.tag===event.tag);
+        if(!equal(archive,original)) throw Error('Withdrawal must preserve original publication facts in Git');
+      }
+    }
+  }
   for (const change of changes.filter(c => /^changes\/.+\.json$/.test(c.filename))) {
     if (change.previous_filename || (change.status !== 'added' && !(change.filename === 'changes/upstream.json' && change.status === 'modified'))) throw new Error('Reviewed change fragments are append-only; only managed upstream notes may refresh.');
     const fragment = validateFragment(JSON.parse(await readText(github, repo, change.filename, pr.head.sha)), { allowEmpty: change.filename === 'changes/upstream.json' });

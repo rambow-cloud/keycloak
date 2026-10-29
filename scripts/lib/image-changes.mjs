@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
 import policy from '../issue-policy.cjs';
+import { revisionChanges } from './release-policy.mjs';
+import { activeReleaseRecords } from './release-events.mjs';
 
 export const imageProfiles = ['core', 'aws'];
 const sha256 = value => createHash('sha256').update(value).digest('hex');
@@ -7,7 +9,7 @@ const ordered = value => Array.isArray(value) ? value.map(ordered) : value && ty
   ? Object.fromEntries(Object.entries(value).sort(([a],[b]) => a.localeCompare(b)).map(([k,v]) => [k,ordered(v)])) : value;
 const stringify = value => JSON.stringify(ordered(value));
 const metadata = /^(?:docs\/|releases\/|changes\/|\.github\/(?:ISSUE_TEMPLATE\/|pull_request_template\.md|issue-policy\.json)|.*\.md$|LICENSE(?:\..*)?$|\.gitignore$)/;
-const bookkeeping = /^scripts\/(?:quay-release|release-catalog|releases|upstream-update|lock-images|issue-policy|trivy-comment)\.(?:mjs|cjs)$|^scripts\/lib\/(?:releases|quay-publish|quay-auth|upstream)\.mjs$|^\.github\/workflows\/(?!ci\.yml$)[^/]+\.yml$|^tests\/[^/]+\.test\.cjs$/;
+const bookkeeping = /^scripts\/(?:r2-architecture-migration|quay-release|release-catalog|releases|upstream-update|lock-images|issue-policy|trivy-comment)\.(?:mjs|cjs)$|^scripts\/lib\/(?:release-policy|release-events|image-changes|releases|quay-publish|quay-auth|upstream)\.mjs$|^config\/r2-architecture-migration\.json$|^\.github\/workflows\/(?!ci\.yml$)[^/]+\.yml$|^tests\/[^/]+\.test\.cjs$/;
 const validation = /^scripts\/(?:verify-|scan-image|scan-release|package-images|platform|trivy-gate|release-image|check-upstream-compatibility)|^scripts\/lib\/(?:trivy|oci|image-changes|multiarch|platforms)\.mjs$|^config\/(?:trivy|upstream-compatibility)\.json$|^\.github\/workflows\/ci\.yml$|^tests\//;
 export function sourceProfiles(path) {
   if (metadata.test(path) || bookkeeping.test(path) || validation.test(path)) return [];
@@ -19,20 +21,20 @@ export function validationProfiles(path) {
   if (path === 'tests/AwsHttpTransport.java') return ['aws'];
   return validation.test(path) ? imageProfiles : [];
 }
-export function validateChanges(changes) {
+export function validateChanges(changes, {allowMaintenance=false} = {}) {
   if (!Array.isArray(changes) || !changes.length || changes.length > 100) throw new Error('Every image tag needs nonempty fix/feature changes.');
   for (const c of changes) {
-    if (!['fix', 'feature'].includes(c.type) || typeof c.summary !== 'string' || c.summary.trim() !== c.summary ||
+    if (!(allowMaintenance ? ['fix','feature','maintenance'] : ['fix','feature']).includes(c.type) || typeof c.summary !== 'string' || c.summary.trim() !== c.summary ||
         c.summary.length < 20 || c.summary.length > 600 || /[\x00-\x1f\x7f<>]/.test(c.summary) ||
         /^(?:no (?:image )?(?:changes?|updates?)\b|nothing\b)|^(?:n\/?a|none|todo|tbd|placeholder|updates?|fix(?:es)?)\b[.! ]*$/i.test(c.summary) ||
         !Array.isArray(c.issues) || !c.issues.length || c.issues.length > 20 || c.issues.some(n => !Number.isSafeInteger(n) || n < 1) ||
-        new Set(c.issues).size !== c.issues.length) throw new Error('Changes require a substantive fix/feature summary and local Issue numbers.');
+        new Set(c.issues).size !== c.issues.length || c.release !== undefined && typeof c.release!=='boolean' || c.cves !== undefined && (!Array.isArray(c.cves) || !c.cves.length || new Set(c.cves).size!==c.cves.length || c.cves.some(id=>!/^CVE-\d{4}-\d{4,}$/.test(id)))) throw new Error('Changes require a substantive summary, valid CVEs and local Issue numbers.');
   }
   return changes;
 }
 export function validateFragment(fragment, { allowEmpty = false } = {}) {
   if (fragment.schemaVersion !== 1 || !Array.isArray(fragment.changes)) throw new Error('Invalid change fragment.');
-  if (!(allowEmpty && fragment.changes.length === 0)) validateChanges(fragment.changes);
+  if (!(allowEmpty && fragment.changes.length === 0)) validateChanges(fragment.changes,{allowMaintenance:true});
   for (const c of fragment.changes) if (!Array.isArray(c.profiles) || !c.profiles.length ||
     c.profiles.some(p => !imageProfiles.includes(p)) || new Set(c.profiles).size !== c.profiles.length) throw new Error('Change fragments require explicit unique profiles.');
   return fragment;
@@ -105,10 +107,10 @@ export async function changedNotes({ github, repo, base, source, selected, check
   for (const path of paths) {
     const f = validateFragment(await readJSON(github, repo, path, source.ref), { allowEmpty: path === 'changes/upstream.json' });
     for (const change of f.changes) for (const profile of selected.filter(p => change.profiles.includes(p))) {
-      byProfile[profile].push({ type: change.type, summary: change.summary, issues: change.issues });
+      byProfile[profile].push({ type: change.type, summary: change.summary, issues: change.issues, ...(change.cves ? {cves:change.cves} : {}), ...(change.release===false ? {release:false} : {}) });
     }
   }
-  for (const profile of selected) validateChanges(byProfile[profile]);
+  for (const profile of selected) validateChanges(byProfile[profile],{allowMaintenance:true});
   const issues = [...new Set(Object.values(byProfile).flat().flatMap(c => c.issues))];
   if (issues.length > 100) throw new Error('Too many change Issue references.');
   for (const issue_number of issues.filter(n => !checkedIssues.has(n))) {
@@ -124,10 +126,12 @@ export async function assessRelease({ github, repo, sourceCommit, records }) {
   const checkedIssues = new Set();
   const compared = new Set();
   const images = [];
-  const ordered = [...records].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || b.publishRunId - a.publishRunId);
+  const ordered = activeReleaseRecords(records).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || b.publishRunId - a.publishRunId);
   for (const profile of imageProfiles) {
     const prior = ordered.find(r => r.plan.images.some(i => i.profile === profile));
     const previous = prior?.plan.images.find(i => i.profile === profile);
+    const expansion = (records.lifecycle??[]).find(e=>e.operation==='architecture-expansion'&&e.tag===prior?.plan.tag);
+    const baselineCommit = expansion?.consumedSourceCommit ?? prior?.plan.sourceCommit;
     let base;
     if (prior) {
       if (!compared.has(prior.plan.sourceCommit)) {
@@ -135,12 +139,14 @@ export async function assessRelease({ github, repo, sourceCommit, records }) {
         if (comparison.merge_base_commit.sha !== prior.plan.sourceCommit) throw new Error('Release source predates the published profile baseline.');
         compared.add(prior.plan.sourceCommit);
       }
-      if (!snapshots.has(prior.plan.sourceCommit)) snapshots.set(prior.plan.sourceCommit, snapshot(github, repo, prior.plan.sourceCommit));
-      base = await snapshots.get(prior.plan.sourceCommit);
+      if (!snapshots.has(baselineCommit)) snapshots.set(baselineCommit, snapshot(github, repo, baselineCommit));
+      base = await snapshots.get(baselineCommit);
     }
     const inputSha256 = fingerprint(source, profile);
-    if (previous && inputSha256 === (previous.inputSha256 ?? fingerprint(base, profile))) continue;
-    const changes = (await changedNotes({ github, repo, base, source, selected: [profile], checkedIssues }))[profile];
+    if (previous && inputSha256 === (expansion ? fingerprint(base,profile) : previous.inputSha256 ?? fingerprint(base, profile))) continue;
+    const notes=(await changedNotes({ github, repo, base, source, selected: [profile], checkedIssues }))[profile];
+    if (!revisionChanges(notes).length) continue;
+    const changes=notes.filter(c=>c.type!=='maintenance'&&c.release!==false);
     images.push({ profile, inputSha256, changes });
   }
   return { images, profiles: images.map(i => i.profile) };
