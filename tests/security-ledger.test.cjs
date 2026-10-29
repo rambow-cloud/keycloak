@@ -28,7 +28,7 @@ test('records require accurate published scope, safe references, evidence and ex
   validateRecords([record(),correction],[image]);
 });
 test('rendering and queries retain per-image history and visibly link corrections', async () => {
-  const { query, render } = await lib;
+  const { query, renderHistory: render } = await lib;
   const first = record(); first.summary += ' Pipe | and @mention.';
   const second = {...record(),id:'SEC-2026-002',kind:'correction',status:'under-review',supersedes:first.id};
   const rows=[first,second]; const markdown=render(rows);
@@ -41,17 +41,62 @@ test('rendering and queries retain per-image history and visibly link correction
 });
 
 test('candidate fixes label published images as affected until publication evidence is appended', async () => {
-  const { validateRecords, render } = await lib;
+  const { validateRecords, renderHistory: render } = await lib;
   const pending = { ...record(), status: 'pending-publication' };
   validateRecords([pending], [image]);
   assert.match(render([pending]), /Fix pending publication; listed images are affected/);
   assert.throws(() => validateRecords([{ ...pending, kind: 'verification' }], [image]), /kind\/status/);
 });
 test('repository ledger, durable evidence, generated page and PR baseline are consistent', async () => {
-  const { readLedger, render, directory, checkBaseline } = await lib;
-  const { records, source } = await readLedger();
-  assert.equal(await readFile(directory+'/README.md','utf8'),render(records));
+  const { readLedger, render, renderHistory, directory, checkBaseline } = await lib;
+  const { records, source, notes, publications } = await readLedger();
+  assert.equal(await readFile(directory+'/README.md','utf8'),render(records,notes,publications));
+  assert.equal(await readFile(directory+'/history.md','utf8'),renderHistory(records));
   let base='origin/main';
   if(process.env.GITHUB_EVENT_PATH){const event=JSON.parse(await readFile(process.env.GITHUB_EVENT_PATH,'utf8'));base=event.pull_request?.base?.sha ?? (/^[a-f0-9]{40}$/.test(event.before??'') && !/^0+$/.test(event.before) ? event.before : base);}
   checkBaseline(base,source);
+});
+
+test('release notes order versions numerically and report only newly published repairs with their profiles', async () => {
+  const { render } = await lib;
+  const first = record();
+  const pending = {...record(),id:'SEC-2026-002',status:'pending-publication'};
+  const secondImage = {...image,tag:'26.8.1-r2-core',profile:'core'};
+  const second = {...record(),id:'SEC-2026-003',kind:'correction',supersedes:pending.id,images:[secondImage]};
+  const tenthImage = {...image,tag:'26.8.1-r10-aws'};
+  const tenth = {...record(),id:'SEC-2026-004',images:[tenthImage]};
+  const verification = {...record(),id:'SEC-2026-005',kind:'verification',status:'verified-existing'};
+  const records = [first,pending,second,tenth,verification];
+  const publications = [first,second,tenth].map(r => ({status:'published',plan:{tag:'v'+r.images[0].tag.replace(/-(core|aws)$/,''),images:r.images}}));
+  const notes = {schemaVersion:1,notes:[first,second,tenth].map(r=>({release:publications.find(p=>p.plan.images===r.images).plan.tag,record:r.id,fixes:[{advisory:r.advisories[0],summary:r.summary}]}))};
+  const md = render(records,notes,publications);
+  assert.ok(md.indexOf('## v26.8.1-r10') < md.indexOf('## v26.8.1-r2'));
+  assert.ok(md.indexOf('## v26.8.1-r2') < md.indexOf('## v26.8.1-r1\n'));
+  const r2 = md.split('## v26.8.1-r2\n')[1].split('## v26.8.1-r1\n')[0];
+  assert.match(r2,/\(`core`\)/); assert.doesNotMatch(r2,/`aws`/);
+  assert.match(md,/history.md#sec-2026-003/);
+  for (const r of records) assert.ok(md.includes('id="'+r.id.toLowerCase()+'"'));
+  assert.doesNotMatch(md,/pending publication|Existing images verified|sha256:/);
+  assert.equal(md,render(records,{...notes,notes:[...notes.notes].reverse()},publications));
+});
+
+test('notes reject false publication scope, superseded repairs, incomplete CVEs and missing published fixes', async () => {
+  const { validateNotes } = await lib;
+  const repaired = record();
+  const publication = {status:'published',plan:{tag:'v26.8.1-r1',images:[image]}};
+  const note = {release:publication.plan.tag,record:repaired.id,fixes:[{advisory:repaired.advisories[0],summary:repaired.summary}]};
+  const document = {schemaVersion:1,notes:[note]};
+  validateNotes([repaired],document,[publication]);
+  for (const status of ['pending-publication','verified-existing','under-review','retracted']) {
+    assert.throws(()=>validateNotes([{...repaired,status}],document,[publication]));
+  }
+  assert.throws(()=>validateNotes([repaired],document,[{...publication,status:'planned'}]));
+  assert.throws(()=>validateNotes([repaired],document,[{...publication,plan:{...publication.plan,images:[{...image,digest:'sha256:'+'b'.repeat(64)}]}}]));
+  assert.throws(()=>validateNotes([repaired],{...document,notes:[{...note,release:'v26.8.1-r2'}]},[publication]));
+  assert.throws(()=>validateNotes([repaired],{...document,notes:[note,note]},[publication]));
+  assert.throws(()=>validateNotes([repaired],{...document,notes:[]},[publication]));
+  assert.throws(()=>validateNotes([{...repaired,advisories:[...repaired.advisories,'CVE-2026-99999']}],document,[publication]));
+  assert.throws(()=>validateNotes([repaired],{...document,notes:[{...note,fixes:[{...note.fixes[0],advisory:'CVE-2026-99999'}]}]},[publication]));
+  const correction = {...repaired,id:'SEC-2026-002',kind:'correction',status:'retracted',supersedes:repaired.id};
+  assert.throws(()=>validateNotes([repaired,correction],document,[publication]));
 });
