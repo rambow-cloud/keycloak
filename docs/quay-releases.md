@@ -1,14 +1,14 @@
 # Formal Quay releases and release catalog
 
-Images are distributed through [quay.io/rambow-cloud/keycloak](https://quay.io/repository/rambow-cloud/keycloak). Normal main and PR CI builds remain artifacts only. The `Quay release` workflow handles stable GitHub Release publication (including promotion to stable) and manual recovery. New revisions package Linux amd64/arm64 OCI indexes per profile; historical r1/r2 stay amd64-only. Both remain distroless and nonroot. See [architecture contracts and native validation](architectures.md). Other registries, SBOMs and signatures remain outside this workflow.
+Images are distributed through [quay.io/rambow-cloud/keycloak](https://quay.io/repository/rambow-cloud/keycloak). Normal main and PR CI builds remain artifacts only. The `Quay release` workflow handles stable GitHub Release publication (including promotion to stable) and manual recovery. Each current r2 profile uses one Linux amd64/arm64 OCI index tag; r1 remains amd64-only. Both profiles remain distroless and nonroot. See [architecture contracts and native validation](architectures.md). Other registries, SBOMs and signatures remain outside this workflow.
 
 Publication is gated independently per profile by changed inputs and explicit new-feature/CVE-repair authorization. Ordinary maintenance does not authorize a revision. Missing architectures extend the existing version through a separately reviewed bounded migration retaining all old child digests. See [release eligibility](release-eligibility.md) and [image work and per-tag history](image-change-policy.md).
 
 ## Version and tag contract
 
-Use a GitHub Release tag such as `v26.8.1-r1`. Its Keycloak version must equal the tagged source's `images.lock.json`; the source must belong to protected main history. A later distroless/JDK or provider rebuild uses a higher image revision, such as `v26.8.1-r2`. Do not move a published Git tag to new code or reuse a formal image tag for different bytes.
+Use a GitHub Release tag such as `v26.8.1-r1`. Its Keycloak version must equal the tagged source's `images.lock.json`; the source must belong to protected main history. A higher image revision requires a new feature or a repair declaring CVE IDs. Routine distroless/JDK/provider/builder maintenance alone is not release authorization. Published Git tags never move to new source.
 
-The registry tags are `26.8.1-r1-core` and `26.8.1-r1-aws`. There is no `latest`, implicit default profile, or version-only moving tag. The workflow refuses to overwrite a formal tag whose digest differs. Deploy by digest; registry administrators must also preserve these bindings when performing out-of-band administration.
+The current registry tags are `26.8.1-r2-core` and `26.8.1-r2-aws`. Each selects the host architecture; no architecture suffix or `latest` is published. The general publisher refuses to overwrite differing formal digests. The separately reviewed r2 architecture expansion preserves its original AMD64 digests as children and records the one-time single-manifest to index transition in `releases/events.jsonl`; it does not relax general conflict checks. Deploy by digest.
 
 Aliases are explicitly reviewed in `releases/aliases.json`, initially empty. For example, a future Issue/PR could add:
 
@@ -44,7 +44,7 @@ The implementation's first release is `v26.8.1-r1` if the verified source still 
 
 ## Execution and recovery
 
-1. Resolve the real tagged commit, check main ancestry/version lock, and compare each profile's inputs with its last publication. Exclude unchanged profiles; if none changed, stop successfully before CI/artifacts/scans/credentials. Changed profiles require reviewed nonempty fix/feature fragments. Then select the newest eligible exact-commit CI. Never replace a failed/cancelled source CI with an older success. Missing/expired unfrozen artifacts cause one read-only tag CI dispatch, which builds only affected profiles.
+1. Resolve the real tagged commit, check main ancestry/version lock, and compare each profile's inputs with its effective publication baseline. Exclude unchanged profiles and changes lacking explicit feature/CVE authorization; if none qualify, stop before CI/artifacts/scans/credentials. Then select the newest eligible exact-commit CI. Never replace a failed/cancelled source CI with an older success. Missing/expired unfrozen artifacts cause one read-only tag CI dispatch, which builds only affected profiles.
 2. Verify every selected archive checksum, source lock, image label, profile and platform. Run current checksum-pinned Trivy with fresh databases against those exact images. All selected gates must pass before any publishing credential is used.
 3. Freeze `publication-plan.json` as a Release asset. Schema 2 includes selected profile fingerprints and nonempty per-tag changes, in addition to Git/CI/artifact identities, expected digests, revision and aliases. Recovery retains the plan. Expired frozen inputs require restoring identical artifacts or a new revision; never substitute rebuilt bits into a partial publication.
 4. Use Skopeo `--preserve-digests` for all selected formal tags, then their configured aliases. Exact existing digests are reused. Failed attempts retain partial state in the publication artifact and `publication-attempt-<run>-<attempt>.json` when audit can run. Registry operations are not transactional; recovery fills missing tags without replacing existing ones.
@@ -59,7 +59,7 @@ Enable **preview** to inspect and freshly scan an existing successful current-ma
 
 ## Catalog and queries
 
-`releases/records/<release-tag>.json` is the source of truth for successful publication history. `releases/README.md` is generated from those records and includes profile tags/digests, aliases, timestamps, source/CI/publication links and digest pull commands. Existing records are immutable; failed attempts remain in Actions/Release evidence rather than being advertised as usable catalog entries. The initial directory has no published records.
+`releases/records/<release-tag>.json` preserves immutable original publication facts. Append-only `releases/events.jsonl` records reviewed architecture bindings and withdrawals, with protected Release evidence for expansions. `releases/README.md` projects active tags, digests, children, aliases and validation links from these data. Withdrawn releases remain in historical Git data and are excluded from active digest resolution. Failed attempts remain in Actions/Release evidence.
 
 ```sh
 node scripts/releases.mjs render
