@@ -23,8 +23,8 @@ COPY tests/OpenTelemetryCompatibility.java /tmp/OpenTelemetryCompatibility.java
 RUN cd /opt/keycloak && sha256sum -c /tmp/keycloak-dependencies/otel/upstream.sha256 \
     && while read -r artifact target; do cp "/tmp/keycloak-dependencies/otel/$artifact" "$target"; done < /tmp/keycloak-dependencies/otel/targets.txt \
     && sha256sum -c /tmp/keycloak-dependencies/otel/patched.sha256 \
-    && javac -cp '/opt/keycloak/lib/lib/main/*' -d /tmp /tmp/OpenTelemetryCompatibility.java \
-    && timeout 15s java -Xmx128m -cp '/tmp:/opt/keycloak/lib/lib/main/*' OpenTelemetryCompatibility "$(cat /tmp/keycloak-dependencies/otel/version.txt)" "$(cat /tmp/keycloak-dependencies/otel/sdk-version.txt)" \
+    && javac -cp '/opt/keycloak/lib/lib/boot/*:/opt/keycloak/lib/lib/main/*' -d /tmp /tmp/OpenTelemetryCompatibility.java \
+    && timeout 15s java -Xmx128m -cp '/tmp:/opt/keycloak/lib/lib/boot/*:/opt/keycloak/lib/lib/main/*' OpenTelemetryCompatibility "$(cat /tmp/keycloak-dependencies/otel/version.txt)" "$(cat /tmp/keycloak-dependencies/otel/sdk-version.txt)" \
     && rm -rf /tmp/keycloak-dependencies /tmp/OpenTelemetryCompatibility*
 ENV KC_DB=postgres KC_HEALTH_ENABLED=true KC_METRICS_ENABLED=true
 RUN java -version 2>&1 | grep -F "version \"${KEYCLOAK_JAVA_MAJOR}."
