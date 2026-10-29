@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "notes": [
+    {
+      "release": "v26.8.1-r2",
+      "record": "SEC-2026-004",
+      "fixes": [
+        {
+          "advisory": "CVE-2026-102554",
+          "summary": "Fix the Guava vulnerability by upgrading 33.6.0-jre to 33.7.2-jre."
+        }
+      ]
+    },
+    {
+      "release": "v26.8.1-r1",
+      "record": "SEC-2026-001",
+      "fixes": [
+        {
+          "advisory": "CVE-2026-54399",
+          "summary": "Fix the HTTP Core vulnerability by upgrading httpcore5 from 5.4.2 to 5.4.4."
+        },
+        {
+          "advisory": "CVE-2026-54428",
+          "summary": "Fix the HTTP/2 vulnerability by upgrading httpcore5-h2 from 5.4 to 5.4.4."
+        },
+        {
+          "advisory": "CVE-2026-64607",
+          "summary": "Fix the HTTP Client vulnerability by upgrading httpclient5 from 5.6.1 to 5.6.4."
+        }
+      ]
+    }
+  ]
+}
