@@ -21,7 +21,7 @@ jobs:
     name: Issue policy
     # Merge closes linked Issues; later description edits must not revalidate them as open work.
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.state == 'open'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     steps:
       # Never check out the PR head in pull_request_target.

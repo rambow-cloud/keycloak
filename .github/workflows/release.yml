@@ -20,7 +20,7 @@ concurrency:
 jobs:
   prepare:
     if: github.event_name == 'workflow_dispatch' || (!github.event.release.draft && !github.event.release.prerelease)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 40
     permissions:
       contents: read
@@ -67,7 +67,7 @@ jobs:
   scan:
     needs: prepare
     if: needs.prepare.outputs.active == 'true' && needs.prepare.outputs.record_only != 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     permissions:
       contents: read
@@ -77,6 +77,7 @@ jobs:
       matrix:
         profile: ${{ fromJSON(needs.prepare.outputs.profiles) }}
     env:
+      TMPDIR: ${{ runner.temp }}
       BUILD_PROFILE: ${{ matrix.profile }}
       SCAN_HEAD_SHA: ${{ needs.prepare.outputs.source_commit }}
       PREPARED: ${{ needs.prepare.outputs.prepared }}
@@ -119,7 +120,7 @@ jobs:
   freeze:
     needs: [prepare, scan]
     if: needs.prepare.outputs.preview != 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     permissions:
       contents: write
@@ -149,8 +150,10 @@ jobs:
             core.setOutput('plan', JSON.stringify(plan));
   publish:
     needs: [prepare, freeze]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 25
+    env:
+      TMPDIR: ${{ runner.temp }}
     environment: quay-release
     permissions:
       contents: read
@@ -201,7 +204,7 @@ jobs:
     if: >-
       !cancelled() && needs.prepare.outputs.active == 'true' && needs.prepare.outputs.preview != 'true' &&
       needs.prepare.outputs.record_only != 'true' && needs.publish.result != 'skipped'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     permissions:
       contents: write
@@ -239,7 +242,7 @@ jobs:
     if: >-
       !cancelled() && needs.prepare.outputs.active == 'true' && needs.prepare.outputs.preview != 'true' &&
       (needs.prepare.outputs.record_only == 'true' || (needs.publish.result == 'success' && needs.audit.result == 'success'))
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 40
     permissions:
       contents: write
