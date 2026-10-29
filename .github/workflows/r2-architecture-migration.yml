@@ -144,7 +144,9 @@ jobs:
           retention-days: 7
   freeze:
     needs: [prepare, verify]
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    if: >-
+      !cancelled() && needs.prepare.outputs.active == 'true' && needs.verify.result == 'success' &&
+      github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-26.04
     permissions:
       contents: write
@@ -170,7 +172,9 @@ jobs:
             await putImmutableAsset(github,context.repo,release,'architecture-extension-plan.json',plan);
   publish:
     needs: [prepare, verify, freeze]
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    if: >-
+      !cancelled() && needs.verify.result == 'success' && needs.freeze.result == 'success' &&
+      github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-26.04
     environment: quay-release
     permissions:
@@ -236,3 +240,21 @@ jobs:
               validateReleaseEvents([event],await readCatalog(github,context.repo,context.sha));
               await putImmutableAsset(github,context.repo,release,'architecture-extension-record.json',event);
             }
+  complete:
+    needs: [prepare, verify, freeze, publish, audit]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          MIGRATION_ACTIVE: ${{ needs.prepare.outputs.active }}
+          MIGRATION_RESULTS: ${{ toJSON(needs) }}
+        with:
+          script: |
+            const {assertMigrationOutcome}=await import(process.cwd()+'/scripts/r2-architecture-migration.mjs');
+            const jobs=JSON.parse(process.env.MIGRATION_RESULTS);
+            assertMigrationOutcome({active:process.env.MIGRATION_ACTIVE,eventName:context.eventName,ref:context.ref,results:Object.fromEntries(Object.entries(jobs).map(([key,value])=>[key,value.result]))});
+            core.info('Migration outcomes match the explicit read-only, protected publication or completed no-op contract.');

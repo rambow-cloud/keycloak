@@ -35,6 +35,17 @@ export function withdrawalTargets(bindings) {
   }
   return targets;
 }
+export function assertMigrationOutcome({active,eventName,ref,results}) {
+  if(results.prepare!=='success'||!['true','false'].includes(active)) throw Error('No trustworthy migration decision');
+  const writes=['freeze','publish','audit'];
+  if(active==='false') {
+    if(['verify',...writes].some(job=>results[job]!=='skipped')) throw Error('Completed migration must be an explicit no-op');
+    return;
+  }
+  if(results.verify!=='success') throw Error('Frozen package verification did not pass');
+  const expected=eventName==='workflow_dispatch'&&ref==='refs/heads/main'?'success':'skipped';
+  if(writes.some(job=>results[job]!==expected)) throw Error('Migration publication/audit outcomes are incomplete or unexpected');
+}
 export function validateMigrationPlan(plan) {
   if(config.id!=='r2-arm64-v1'||config.tag!=='v26.8.1-r2'||config.sourceCommit!==original.plan.sourceCommit||config.sourceLockSha256!==original.plan.lockSha256||
     plan.schemaVersion!==1||plan.id!==config.id||plan.tag!==config.tag||plan.releaseId!==original.plan.releaseId||plan.sourceCommit!==config.sourceCommit||
