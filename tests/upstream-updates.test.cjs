@@ -153,7 +153,7 @@ test('new App updates create an Issue first and rely on native checks without du
   assert.deepEqual(f.calls.map(c => c.name), ['issue', 'tree', 'commit', 'branch', 'pr', 'enable-auto-merge']);
   const tree = f.calls.find(c => c.name === 'tree');
   const note = JSON.parse(tree.args.tree.find(e => e.path === 'changes/upstream.json').content);
-  assert.equal(note.changes[0].type,'fix');
+  assert.equal(note.changes[0].type,'maintenance');
   assert.deepEqual(note.changes[0].issues,[11]);
   assert.ok(note.changes[0].summary.includes('runtime digest'));
   validateIssue({ ...f.calls[0].args, number: 11, state: 'open' });

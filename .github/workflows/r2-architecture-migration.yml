@@ -1,0 +1,238 @@
+name: R2 architecture migration
+on:
+  pull_request:
+    paths:
+      - .github/workflows/r2-architecture-migration.yml
+      - scripts/r2-architecture-migration.mjs
+      - config/r2-architecture-migration.json
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: r2-architecture-migration
+  cancel-in-progress: false
+env:
+  TOOLS_COMMIT: ${{ github.sha }}
+jobs:
+  prepare:
+    runs-on: ubuntu-26.04
+    outputs:
+      active: ${{ steps.prepare.outputs.active }}
+      reuse: ${{ steps.prepare.outputs.reuse }}
+      source_run: ${{ steps.prepare.outputs.source_run }}
+      artifact: ${{ steps.prepare.outputs.artifact }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: prepare
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const {prepareMigration}=await import(process.cwd()+'/scripts/r2-architecture-migration.mjs');
+            await prepareMigration({github,context,core});
+  arm:
+    name: Validate r2 ${{ matrix.profile }} arm64
+    needs: prepare
+    if: needs.prepare.outputs.active == 'true' && needs.prepare.outputs.reuse != 'true'
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [core, aws]
+    env:
+      BUILD_PROFILE: ${{ matrix.profile }}
+      BUILD_ARCH: arm64
+      SCAN_HEAD_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: tools
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: da29c6005420d0971589877dab10ec4ad335dc58
+          path: payload
+          persist-credentials: false
+      - name: Install native OCI tooling
+        run: |
+          printf 'TMPDIR=%s\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y buildah podman skopeo openssl
+      - name: Prepare original r2 payload with reviewed native tooling
+        run: node tools/scripts/r2-architecture-migration.mjs source payload
+      - name: Build only missing ARM64 from r2 inputs
+        run: bash payload/scripts/build.sh
+      - name: Native runtime and protocol regression
+        run: bash payload/scripts/verify-image.sh
+      - name: Export and scan actual ARM64 image
+        working-directory: payload
+        run: |
+          mkdir -p .cache/migration-layout .cache/migration-scan
+          buildah push localhost/rambow-keycloak:test oci:.cache/migration-layout
+          node ../tools/scripts/scan-image.mjs .cache/migration-layout .cache/migration-scan
+          node ../tools/scripts/trivy-gate.mjs .cache/migration-scan/summary.json
+      - name: Seal native source and image evidence
+        run: node tools/scripts/r2-architecture-migration.mjs export-arm payload payload/.cache/migration-layout artifact
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: r2-arm64-${{ matrix.profile }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifact/
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+  assemble:
+    needs: [prepare, arm]
+    if: needs.prepare.outputs.active == 'true' && needs.prepare.outputs.reuse != 'true'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: r2-arm64-*-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/native
+      - name: Install OCI tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y skopeo
+      - name: Reuse exact r2 AMD64 and assemble two indexes
+        env:
+          TMPDIR: ${{ runner.temp }}
+        run: node scripts/r2-architecture-migration.mjs assemble .cache/native .cache/package
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ needs.prepare.outputs.artifact }}
+          path: .cache/package/
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+  verify:
+    needs: [prepare, assemble]
+    if: >-
+      !cancelled() && needs.prepare.outputs.active == 'true' &&
+      (needs.prepare.outputs.reuse == 'true' || needs.assemble.result == 'success')
+    runs-on: ubuntu-26.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.prepare.outputs.artifact }}
+          path: .cache/package
+          run-id: ${{ needs.prepare.outputs.source_run }}
+          github-token: ${{ github.token }}
+      - name: Install OCI tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y skopeo
+      - name: Verify frozen package and freshly scan every child
+        env:
+          TMPDIR: ${{ runner.temp }}
+        run: node scripts/r2-architecture-migration.mjs verify .cache/package
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: r2-migration-scans-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/package/scans/
+          retention-days: 7
+  freeze:
+    needs: [prepare, verify]
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.prepare.outputs.artifact }}
+          path: .cache/package
+          run-id: ${{ needs.prepare.outputs.source_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const fs=require('node:fs/promises');
+            const {validateMigrationPlan}=await import(process.cwd()+'/scripts/r2-architecture-migration.mjs');
+            const {putImmutableAsset}=await import(process.cwd()+'/scripts/quay-release.mjs');
+            const plan=validateMigrationPlan(JSON.parse(await fs.readFile('.cache/package/plan.json','utf8')));
+            const {data:release}=await github.rest.repos.getReleaseByTag({...context.repo,tag:'v26.8.1-r2'});
+            await putImmutableAsset(github,context.repo,release,'architecture-extension-plan.json',plan);
+  publish:
+    needs: [prepare, verify, freeze]
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-26.04
+    environment: quay-release
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.prepare.outputs.artifact }}
+          path: .cache/package
+          run-id: ${{ needs.prepare.outputs.source_run }}
+          github-token: ${{ github.token }}
+      - name: Install OCI tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y skopeo
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          TMPDIR: ${{ runner.temp }}
+          QUAY_USERNAME: ${{ vars.QUAY_USERNAME }}
+        with:
+          script: |
+            const {publishMigration}=await import(process.cwd()+'/scripts/r2-architecture-migration.mjs');
+            await publishMigration({github,context,core,path:'.cache/package',out:'.cache/result'});
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: r2-migration-result-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/result/
+          retention-days: 7
+  audit:
+    needs: [publish]
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && !cancelled() && needs.publish.result != 'skipped'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: r2-migration-result-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .cache/result
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PUBLISH_RESULT: ${{ needs.publish.result }}
+        with:
+          script: |
+            const fs=require('node:fs/promises');
+            const {putImmutableAsset,readCatalog}=await import(process.cwd()+'/scripts/quay-release.mjs');
+            const {validateReleaseEvents}=await import(process.cwd()+'/scripts/lib/release-events.mjs');
+            const {data:release}=await github.rest.repos.getReleaseByTag({...context.repo,tag:'v26.8.1-r2'});
+            const state=JSON.parse(await fs.readFile('.cache/result/attempt.json','utf8'));
+            await putImmutableAsset(github,context.repo,release,'architecture-extension-attempt-'+context.runId+'-'+process.env.GITHUB_RUN_ATTEMPT+'.json',state);
+            if(process.env.PUBLISH_RESULT==='success') {
+              const event=JSON.parse(await fs.readFile('.cache/result/event.json','utf8'));
+              validateReleaseEvents([event],await readCatalog(github,context.repo,context.sha));
+              await putImmutableAsset(github,context.repo,release,'architecture-extension-record.json',event);
+            }

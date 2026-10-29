@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { validateChanges } from './image-changes.mjs';
 import { lockArchitectures } from './platforms.mjs';
 import { validateChildren } from './multiarch.mjs';
+import { activeReleaseRecords, liveImage } from './release-events.mjs';
 export const registry = 'quay.io/rambow-cloud/keycloak';
 export const repository = 'rambow-cloud/keycloak';
 export const profiles = ['core', 'aws'];
@@ -129,11 +130,12 @@ export function destinationAction(existingDigest, expectedDigest, mutable = fals
 }
 export function resolveTag(records, tag, releaseTag) {
   validateCatalog(records);
-  const ordered = [...records].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || b.publishRunId - a.publishRunId);
+  const ordered = activeReleaseRecords(records).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || b.publishRunId - a.publishRunId);
   for (const record of ordered) {
     if (releaseTag && record.plan.tag !== releaseTag) continue;
-    const image = record.plan.images.find(i => i.tag === tag) ??
+    const original = record.plan.images.find(i => i.tag === tag) ??
       record.plan.images.find(i => record.plan.aliases.some(a => a.tag === tag && a.profile === i.profile));
+    const image = original && liveImage(record,original,records.lifecycle);
     if (image) return { tag, release: record.plan.tag, profile: image.profile, digest: image.digest, ...(image.children ? {children:image.children} : {}),
       reference: registry + '@' + image.digest, sourceCommit: record.plan.sourceCommit };
   }
@@ -147,7 +149,7 @@ export function imageChanges(record, image, history = {}) {
 }
 export function tagHistory(records, tag, history = {}) {
   validateCatalog(records);
-  return [...records].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)).flatMap(record => {
+  const published = [...records].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)).flatMap(record => {
     const image = record.plan.images.find(i => i.tag === tag);
     const alias = record.aliasChanges.find(c => c.tag === tag);
     if (!image && !alias) return [];
@@ -156,6 +158,11 @@ export function tagHistory(records, tag, history = {}) {
       publishedAt: record.publishedAt, changes: imageChanges(record, source, history),
       ...(alias ? { fromDigest: alias.fromDigest, toDigest: alias.toDigest } : {}) }];
   });
+  const events=(records.lifecycle??[]).flatMap(e=>{
+    const image=e.images?.find(i=>i.tag===tag);
+    return image ? [{tag,release:e.tag,profile:image.profile,digest:image.digest,fromDigest:image.beforeDigest,children:image.children,publishedAt:e.recordedAt,operation:e.operation,runId:e.runId,changes:[{type:'feature',summary:'Add ARM64 under the existing tag while retaining the original AMD64 manifest.',issues:[e.issue]}]}] : [];
+  });
+  return [...events,...published];
 }
 const changeMarkdown = c => '- **' + c.type + ':** ' + c.summary.replace(/([\\`*_[\]{}()!|])/g, '\\$1').replace(/@/g, '@\u200b') +
   ' (' + c.issues.map(n => '[#' + n + '](https://github.com/' + repository + '/issues/' + n + ')').join(', ') + ')';
@@ -165,8 +172,9 @@ export function renderCatalog(records, history = {}) {
     'Registry: `' + registry + '`. Formal releases only; no `latest` tag. Use digest-pinned references for deployments.\n\n';
   if (!records.length) return md + 'No image releases have been recorded yet.\n';
   md += '| Release | Keycloak | Profile | Image tag | Digest | Aliases | Published (UTC) |\n| --- | --- | --- | --- | --- | --- | --- |\n';
-  const ordered = [...records].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || b.publishRunId - a.publishRunId);
-  for (const r of ordered) for (const i of r.plan.images) {
+  const ordered = activeReleaseRecords(records).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt) || b.publishRunId - a.publishRunId);
+  for (const r of ordered) for (const original of r.plan.images) {
+    const i=liveImage(r,original,records.lifecycle);
     md += '| [' + r.plan.tag + '](https://github.com/' + repository + '/releases/tag/' + r.plan.tag + ') | ' + r.plan.keycloakVersion + ' | ' + i.profile +
       ' | `' + i.tag + '` | `' + i.digest + '` | ' + (r.plan.aliases.filter(a => a.profile === i.profile).map(a => '`' + a.tag + '`').join(', ') || '—') + ' | ' + r.publishedAt + ' |\n';
   }
@@ -175,10 +183,16 @@ export function renderCatalog(records, history = {}) {
       '[Source commit](https://github.com/' + repository + '/commit/' + r.plan.sourceCommit + ') · ' +
       '[Source CI](https://github.com/' + repository + '/actions/runs/' + r.plan.sourceRun.id + ') · ' +
       '[Publication and fresh scans](https://github.com/' + repository + '/actions/runs/' + r.publishRunId + ')\n\n';
-    for (const i of r.plan.images) md += '### `' + i.tag + '` (' + i.profile + ')\n\n' +
-      imageChanges(r, i, history).map(changeMarkdown).join('\n') + (i.children ? '\n\nArchitectures: ' + i.children.map(c => '`linux/' + c.architecture + '` (`' + c.digest + '`)').join(', ') + '. The tag and pull reference select the OCI index.' : '') + '\n\n```sh\npodman pull ' + registry + '@' + i.digest + '\n```\n\n';
+    for (const original of r.plan.images) {
+      const i=liveImage(r,original,records.lifecycle);
+      md += '### `' + i.tag + '` (' + i.profile + ')\n\n' +
+        imageChanges(r, original, history).map(changeMarkdown).join('\n') + (i.extensionRun ? '\n\nArchitecture expansion: [verification and publication](https://github.com/'+repository+'/actions/runs/'+i.extensionRun+'). Original amd64 manifest retained; tag now selects the OCI index. See [append-only binding history](events.jsonl).' : '') +
+        (i.children ? '\n\nArchitectures: ' + i.children.map(c => '`linux/' + c.architecture + '` (`' + c.digest + '`)').join(', ') + '. The tag and pull reference select the OCI index.' : '') + '\n\n```sh\npodman pull ' + registry + '@' + i.digest + '\n```\n\n';
+    }
     if (r.aliasChanges.length) md += 'Alias changes:\n\n' + r.aliasChanges.map(c => '- `' + c.tag + '`: ' + (c.fromDigest ? '`' + c.fromDigest + '`' : 'unassigned') + ' → `' + c.toDigest + '`\n' +
       imageChanges(r, r.plan.images.find(i => i.profile === c.profile), history).map(changeMarkdown).join('\n')).join('\n') + '\n';
   }
+  const withdrawals=(records.lifecycle??[]).filter(e=>e.operation==='withdrawal');
+  if (withdrawals.length) md+='\n## Withdrawn releases\n\n'+withdrawals.map(e=>'- `'+e.tag+'` withdrawn at `'+e.recordedAt+'` at the owner\'s request ([#'+e.issue+'](https://github.com/'+repository+'/issues/'+e.issue+')). [Original publication facts](records/'+e.tag+'.json) remain archived; these tags are no longer active.').join('\n')+'\n';
   return md.trimEnd() + '\n';
 }

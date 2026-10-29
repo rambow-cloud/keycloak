@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "r2-arm64-v1",
+  "issue": 70,
+  "tag": "v26.8.1-r2",
+  "releaseId": 427135685,
+  "sourceCommit": "da29c6005420d0971589877dab10ec4ad335dc58",
+  "sourceLockSha256": "636da1eaf818d41c6d87110943977b0a4924aa6dc758ecbf02dd35ad4c252abf",
+  "images": [
+    {
+      "profile": "core",
+      "tag": "26.8.1-r2-core",
+      "beforeDigest": "sha256:9f36c090c07e12f0fdd9dd171bd102a50c25edfb7b6c54e691da918200908438"
+    },
+    {
+      "profile": "aws",
+      "tag": "26.8.1-r2-aws",
+      "beforeDigest": "sha256:ee73b535798351bd007d72e1db6522e6fccacb2368005c7659bc171b88c19d23"
+    }
+  ]
+}

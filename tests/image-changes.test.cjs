@@ -6,7 +6,7 @@ const lib = import('../scripts/lib/image-changes.mjs');
 const oldSha = 'a'.repeat(40), newSha = 'b'.repeat(40);
 const oid = value => createHash('sha1').update(value).digest('hex');
 const lock = { keycloakVersion: '26.8.1', javaVersion: 25, platform: 'linux/amd64', keycloak: 'keycloak@one', runtime: 'runtime@one', builder: 'builder@one', postgres: 'pg@one', awsDependencies: { wrapperVersion: '4.5.0' } };
-const entry = { type: 'fix', summary: 'Correct the AWS database connection retry behavior.', issues: [5], profiles: ['aws'] };
+const entry = { type: 'fix', summary: 'Remediate the test advisory in AWS database connection behavior.', cves:['CVE-2099-12345'], issues: [5], profiles: ['aws'] };
 const files = { Containerfile: 'container-source', 'scripts/build.sh': 'build-source', 'config/java.options': 'java-flags',
   'dependencies/aws/dependencies.lock.json': 'providers', 'tests/verify-fixture.json': 'fixture', 'README.md': 'documentation' };
 function source(ref = oldSha, patches = {}, nextLock = lock) {
@@ -71,7 +71,7 @@ test('Containerfile stage dependencies isolate AWS/core changes and unknown synt
   assert.equal(containerInputs(ambiguous,'core'),ambiguous);
 });
 
-test('AWS-only changes require reviewed nonempty Issue-linked notes and leave core unpublished', async () => {
+test('AWS-only CVE repairs require reviewed nonempty Issue-linked notes and leave core unpublished', async () => {
   const { assessRelease, fingerprint } = await lib;
   const current = source(newSha, { 'dependencies/aws/dependencies.lock.json': 'fixed providers', 'changes/5-retries.json': JSON.stringify({ schemaVersion: 1, changes: [entry] }) });
   const f = fixture(current);
@@ -80,6 +80,24 @@ test('AWS-only changes require reviewed nonempty Issue-linked notes and leave co
   assert.equal(intent.images[0].inputSha256, fingerprint(current, 'aws'));
   assert.deepEqual(intent.images[0].changes[0].issues, [5]);
   assert.equal(f.reads.filter(r => r[0] === 'issue').length, 1);
+});
+test('builder/dependency maintenance and ordinary bug fixes cannot authorize a new revision',async()=>{
+  const {assessRelease}=await lib;
+  for(const type of ['fix','maintenance']) {
+    const note={...entry,type};delete note.cves;
+    const current=source(newSha,{'dependencies/aws/dependencies.lock.json':'reviewed maintenance','changes/maintenance.json':JSON.stringify({schemaVersion:1,changes:[note]})});
+    assert.deepEqual((await assessRelease(fixture(current))).profiles,[]);
+  }
+  const note={...entry,type:'maintenance',profiles:['core','aws']};delete note.cves;
+  const builder=source(newSha,{'changes/upstream.json':JSON.stringify({schemaVersion:1,changes:[note]})},{...lock,builder:'builder@new'});
+  assert.deepEqual((await assessRelease(fixture(builder))).profiles,[]);
+});
+test('architecture extension consumes its reviewed baseline without redispatching image builds',async()=>{
+  const {assessRelease}=await lib;
+  const current=source(newSha,{'dependencies/aws/dependencies.lock.json':'extension-reviewed input','changes/extension.json':JSON.stringify({schemaVersion:1,changes:[{...entry,type:'feature',release:false}]})});
+  const f=fixture(current);f.records[0].plan.tag='v26.8.1-r2';
+  Object.defineProperty(f.records,'lifecycle',{value:[{operation:'architecture-expansion',tag:'v26.8.1-r2',consumedSourceCommit:newSha}]});
+  assert.deepEqual((await assessRelease(f)).profiles,[]);assert.equal(f.reads.some(r=>r[0]==='issue'),false);
 });
 
 test('missing, empty, placeholder, wrongly scoped and rewritten change fragments stop publication', async () => {

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 3,
+  "registry": "quay.io/rambow-cloud/keycloak",
+  "tag": "v26.8.1-r3",
+  "releaseId": 428262323,
+  "keycloakVersion": "26.8.1",
+  "revision": 3,
+  "sourceCommit": "1293dd22485e4196e556f3428037cec0a64acc35",
+  "toolsCommit": "1293dd22485e4196e556f3428037cec0a64acc35",
+  "sourceRun": {
+    "id": 40932528395,
+    "attempt": 1
+  },
+  "lockSha256": "537556a83157b91dfa4cc05ef93cd701fe299fe7f9c765fa477fc859675f1d49",
+  "imageLock": {
+    "keycloakVersion": "26.8.1",
+    "javaVersion": 25,
+    "platforms": [
+      "linux/amd64",
+      "linux/arm64"
+    ],
+    "keycloak": "quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b",
+    "builder": "docker.io/library/eclipse-temurin:25-jdk-noble@sha256:a9c5ddd386f629518bd500ecfabf7d1e5d32d7ffed735d5c3b1604ae92c830f4",
+    "runtime": "gcr.io/distroless/java25-debian13:nonroot@sha256:5d3177252775d4b01603470fe21c015393019089904f68724bd37242e4bc6e6d",
+    "postgres": "docker.io/library/postgres:17-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+    "awsDependencies": {
+      "wrapperVersion": "4.5.0",
+      "sdkVersion": "2.46.10",
+      "lockFile": "dependencies/aws/dependencies.lock.json",
+      "rdsCa": {
+        "url": "https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem",
+        "sha256": "90a6f1a7978a1b1b096dca6c57511ca48d3b8cf052f8e704baf358f34ea2f21b"
+      }
+    }
+  },
+  "aliases": [],
+  "previousAliases": {},
+  "images": [
+    {
+      "profile": "core",
+      "inputSha256": "31990edf76f46176bf3ecdac693bfcc8e17639abd752a03501278f338cc11488",
+      "changes": [
+        {
+          "type": "feature",
+          "summary": "Add native Linux arm64 alongside amd64, with per-architecture runtime and vulnerability checks and digest-preserving multi-architecture OCI release indexes.",
+          "issues": [
+            64
+          ]
+        },
+        {
+          "type": "fix",
+          "summary": "Refresh builder digest from ba0f0e1a33864105 to a9c5ddd386f62951.",
+          "issues": [
+            54
+          ]
+        }
+      ],
+      "artifactId": 12922483956,
+      "artifactName": "keycloak-oci-core-multiarch-1293dd22485e4196e556f3428037cec0a64acc35",
+      "tag": "26.8.1-r3-core",
+      "digest": "sha256:0546c047c8f4536ced6a0f90335e00f57b943915db53acbcadbfab6db497cbf6",
+      "archiveSha256": "5ae776e2222d0b86683b11daf2ac13319657f9edd11bb21f928d905299cebe61",
+      "children": [
+        {
+          "architecture": "amd64",
+          "digest": "sha256:8c0e8bdc700b70e4ab1e9867f63f87a359e7e9c64a4165205255a9503c564bdd"
+        },
+        {
+          "architecture": "arm64",
+          "digest": "sha256:3e51ea9c9425d66171fea155f2f83cebb6fc96e650ababf6ab48107005b5250e"
+        }
+      ]
+    },
+    {
+      "profile": "aws",
+      "inputSha256": "f692a9ab1f902795d57e49b01a88005270194be396087d88899fca52d8abfd18",
+      "changes": [
+        {
+          "type": "feature",
+          "summary": "Add native Linux arm64 alongside amd64, with per-architecture runtime and vulnerability checks and digest-preserving multi-architecture OCI release indexes.",
+          "issues": [
+            64
+          ]
+        },
+        {
+          "type": "fix",
+          "summary": "Refresh builder digest from ba0f0e1a33864105 to a9c5ddd386f62951.",
+          "issues": [
+            54
+          ]
+        }
+      ],
+      "artifactId": 12922948025,
+      "artifactName": "keycloak-oci-aws-multiarch-1293dd22485e4196e556f3428037cec0a64acc35",
+      "tag": "26.8.1-r3-aws",
+      "digest": "sha256:50835d238bbcdc886c033d27c91aee4270dcde59905304597af430480bc5ce0e",
+      "archiveSha256": "e8db984740b889ce7f4a118b83e4ca5a3b18833021b5a56909ca63bfdf69d8c8",
+      "children": [
+        {
+          "architecture": "amd64",
+          "digest": "sha256:d876bee68d6dac8c571fe8d5663cf0bb3e38d25a1485d2582d853ad9973a1bba"
+        },
+        {
+          "architecture": "arm64",
+          "digest": "sha256:adee8450c8750e22249a3cf250e02fa303de7e4637bcafd78f3e69cc01bbe2d7"
+        }
+      ]
+    }
+  ]
+}

@@ -68,7 +68,7 @@ export function candidateFiles(currentFiles, nextLock, warnings, issue) {
   const old = JSON.parse(currentFiles['images.lock.json']);
   const result = { ...currentFiles, 'images.lock.json': formatJson(nextLock) };
   if (old.keycloakVersion !== nextLock.keycloakVersion) {
-    for (const path of ['README.md', 'AGENTS.md']) result[path] = result[path].replaceAll(old.keycloakVersion, nextLock.keycloakVersion);
+    result['AGENTS.md'] = result['AGENTS.md'].replaceAll(old.keycloakVersion, nextLock.keycloakVersion);
     if (!warnings.length) result['config/java.options'] = result['config/java.options'].replaceAll(old.keycloakVersion, nextLock.keycloakVersion);
   }
   if (issue && ['keycloak', 'runtime', 'builder'].some(k => old[k] !== nextLock[k])) {
@@ -76,7 +76,7 @@ export function candidateFiles(currentFiles, nextLock, warnings, issue) {
       k === 'keycloak' && old.keycloakVersion !== nextLock.keycloakVersion ? 'Upgrade Keycloak from ' + old.keycloakVersion + ' to ' + nextLock.keycloakVersion :
         'Refresh ' + k + ' digest from ' + old[k].split('@sha256:')[1].slice(0, 16) + ' to ' + nextLock[k].split('@sha256:')[1].slice(0, 16));
     result['changes/upstream.json'] = formatJson({ schemaVersion: 1, changes: [{
-      type: old.keycloakVersion.split('.').slice(0, 2).join('.') === nextLock.keycloakVersion.split('.').slice(0, 2).join('.') ? 'fix' : 'feature',
+      type: 'maintenance',
       summary: details.join('; ') + '.', issues: [issue], profiles: ['core', 'aws'],
     }] });
   }

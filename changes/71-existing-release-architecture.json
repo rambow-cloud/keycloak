@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "changes": [{
+    "type": "feature",
+    "release": false,
+    "summary": "Extend the existing r2 core/aws tags with ARM64 while retaining the original AMD64 manifests; this owner-authorized architecture migration does not create a new image revision.",
+    "profiles": ["core", "aws"],
+    "issues": [71]
+  }]
+}

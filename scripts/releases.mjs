@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { json, validateAliases, validateCatalog, renderCatalog, resolveTag, tagHistory, imageChanges } from './lib/releases.mjs';
 import { validateFragment } from './lib/image-changes.mjs';
+import { parseReleaseEvents, validateReleaseEvents } from './lib/release-events.mjs';
 
 const root = fileURLToPath(new URL('../releases/', import.meta.url));
 const aliases = validateAliases(JSON.parse(await readFile(resolve(root, 'aliases.json'), 'utf8')));
@@ -12,6 +13,9 @@ const records = await Promise.all((await readdir(resolve(root, 'records'))).filt
   return record;
 }));
 validateCatalog(records);
+let events=[];
+try { events=parseReleaseEvents(await readFile(resolve(root,'events.jsonl'),'utf8')); } catch(error) {if(error.code!=='ENOENT') throw error;}
+Object.defineProperty(records,'lifecycle',{value:validateReleaseEvents(events,records)});
 const history = Object.fromEntries(await Promise.all((await readdir(resolve(root, 'history'))).filter(n => n.endsWith('.json')).map(async name => {
   const note = JSON.parse(await readFile(resolve(root, 'history', name), 'utf8'));
   if (name !== note.tag + '.json') throw new Error('History filename mismatch.');
@@ -40,7 +44,7 @@ if (command === 'render') {
   console.log(json(resolveTag(records, tag, filter < 0 ? undefined : args[filter + 1])).trim());
 } else if (command === 'history') {
   const tag = args[0];
-  console.log(json(records.filter(r => !tag || r.plan.images.some(i => i.tag === tag) || r.plan.aliases.some(a => a.tag === tag))).trim());
+  console.log(json({schemaVersion:2,publications:records.filter(r => !tag || r.plan.images.some(i => i.tag === tag) || r.plan.aliases.some(a => a.tag === tag)),events:events.filter(e=>!tag||e.images?.some(i=>i.tag===tag)||e.tags?.includes(tag))}).trim());
 } else if (command === 'changes') {
   const entries = tagHistory(records, args[0], history);
   if (!entries.length) throw new Error('No change history for this tag.');
