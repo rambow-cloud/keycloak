@@ -95,6 +95,8 @@ test('scanner summaries and release gates cannot substitute one architecture for
 });
 test('trusted report planning exposes missing architecture jobs/reports instead of a clean profile',async()=>{
   const {plannedScanTargets}=await import('../scripts/trivy-comment.mjs');
+  const {plannedScanProfiles}=await import('../scripts/trivy-comment.mjs');
+  assert.deepEqual(plannedScanProfiles([{name:'Image impact',conclusion:'success'},{name:'Build ${{ matrix.profile }} (${{ matrix.architecture }})',conclusion:'skipped'},{name:'Build and verify',conclusion:'success'}],'success'),[]);
   assert.deepEqual(plannedScanTargets([{name:'Build aws (amd64)',conclusion:'success'}]),['aws/amd64','aws/arm64']);
   const {summarize,renderReport}=await scans;
   const summary=summarize(report('amd64'),{...scanContext,architecture:'amd64'});
