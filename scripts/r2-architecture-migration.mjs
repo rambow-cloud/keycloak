@@ -7,7 +7,7 @@ import {pathToFileURL,fileURLToPath} from 'node:url';
 import {hash,json,equal,registry} from './lib/releases.mjs';
 import {combineLayouts,inspectLayout,fileHash} from './lib/multiarch.mjs';
 import {validateSummary,gateSummary} from './lib/trivy.mjs';
-import {federatedQuayCredentials} from './lib/quay-auth.mjs';
+import {federatedQuayCredentials,quayRegistryWriteToken} from './lib/quay-auth.mjs';
 import {readAsset,putImmutableAsset} from './quay-release.mjs';
 import {validateReleaseEvents} from './lib/release-events.mjs';
 const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
@@ -166,8 +166,10 @@ export async function publishMigration({github,context,core,path,out}) {
       if(!/^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$/.test(tag)) throw Error('Invalid registry tag');
       bindings[tag]='sha256:'+hash(run('skopeo',['inspect','--authfile',auth,'--raw','docker://'+registry+':'+tag]));
     }
-    for(const image of withdrawalTargets(bindings)) {
-      run('skopeo',['delete','--authfile',auth,'docker://'+registry+'@'+image.digest]);
+    const targets=withdrawalTargets(bindings);
+    const bearer=targets.length?await quayRegistryWriteToken({credentials,mask:value=>core.setSecret(value)}):null;
+    for(const image of targets) {
+      run('skopeo',['delete','--registry-token',bearer,'docker://'+registry+'@'+image.digest]);
       state.withdrawnTags.push(image.tag);writeFileSync(join(out,'attempt.json'),json(state));
     }
     const remaining=JSON.parse(run('skopeo',['list-tags','--authfile',auth,'docker://'+registry])).Tags;
