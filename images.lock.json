@@ -1,7 +1,7 @@
 {
   "keycloakVersion": "26.8.1",
   "javaVersion": 25,
-  "platform": "linux/amd64",
+  "platforms": ["linux/amd64", "linux/arm64"],
   "keycloak": "quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b",
   "builder": "docker.io/library/eclipse-temurin:25-jdk-noble@sha256:a9c5ddd386f629518bd500ecfabf7d1e5d32d7ffed735d5c3b1604ae92c830f4",
   "runtime": "gcr.io/distroless/java25-debian13:nonroot@sha256:5d3177252775d4b01603470fe21c015393019089904f68724bd37242e4bc6e6d",

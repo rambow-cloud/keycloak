@@ -1,6 +1,7 @@
 import { registry, repository, profiles, json, hash, equal, parseRelease, canonicalTag, validateAliases,
   validatePlan, validateRecord, validateCatalog, priorAliasDigest, assertNewRevision, selectRun, chooseArtifacts } from './lib/releases.mjs';
 import { assessRelease as assessImageRelease, readJSON } from './lib/image-changes.mjs';
+import { lockArchitectures } from './lib/platforms.mjs';
 
 export async function readText(github, repo, path, ref) {
   const { data } = await github.rest.repos.getContent({ ...repo, path, ref });
@@ -93,7 +94,7 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
   }
   const lockText = await readText(github, repo, 'images.lock.json', sourceCommit);
   const imageLock = JSON.parse(lockText);
-  if (imageLock.keycloakVersion !== version.keycloakVersion || imageLock.platform !== 'linux/amd64') throw new Error('Release version/platform does not match the image lock.');
+  if (imageLock.keycloakVersion !== version.keycloakVersion || !lockArchitectures(imageLock).length) throw new Error('Release version/platform does not match the image lock.');
   const records = await readCatalog(github, repo, toolsCommit);
   const existingRecord = records.find(r => r.plan.tag === tag);
   if (existingRecord) {
@@ -146,7 +147,7 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
         if (run.conclusion !== 'success') throw new Error('Latest source CI failed/cancelled; investigate it before release recovery.');
         const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, { ...repo, run_id: run.id, per_page: 100 });
         let selected;
-        try { selected = chooseArtifacts(frozen ? artifacts.filter(a => frozen.images.some(i => i.artifactId === a.id)) : artifacts, sourceCommit, intent.profiles); }
+        try { selected = chooseArtifacts(frozen ? artifacts.filter(a => frozen.images.some(i => i.artifactId === a.id)) : artifacts, sourceCommit, intent.profiles, imageLock); }
         catch (error) {
           if (frozen) throw new Error('Frozen OCI artifacts are unavailable. Restore the original artifacts or use a new revision.');
           if (dispatched || preview) throw error;
@@ -179,9 +180,10 @@ export function makeFrozenPlan(prepared, scans) {
     const scan = scans.find(s => s.profile === image.profile);
     if (!scan || scan.sourceCommit !== prepared.sourceCommit || scan.sourceRunId !== prepared.sourceRun.id ||
         scan.artifactId !== image.artifactId || scan.lockSha256 !== prepared.lockSha256) throw new Error('Scan evidence does not match source artifact.');
-    return { ...image, tag: canonicalTag(prepared.tag, image.profile), digest: scan.digest, archiveSha256: scan.archiveSha256 };
+    return { ...image, tag: canonicalTag(prepared.tag, image.profile), digest: scan.digest, archiveSha256: scan.archiveSha256,
+      ...(lockArchitectures(prepared.imageLock).length > 1 ? {children:scan.children} : {}) };
   });
-  const plan = { schemaVersion: prepared.frozen?.schemaVersion ?? 2, registry, tag: prepared.tag, releaseId: prepared.releaseId,
+  const plan = { schemaVersion: prepared.frozen?.schemaVersion ?? (lockArchitectures(prepared.imageLock).length > 1 ? 3 : 2), registry, tag: prepared.tag, releaseId: prepared.releaseId,
     keycloakVersion: prepared.keycloakVersion, revision: prepared.revision, sourceCommit: prepared.sourceCommit,
     toolsCommit: prepared.frozen?.toolsCommit ?? prepared.toolsCommit, sourceRun: prepared.sourceRun,
     lockSha256: prepared.lockSha256, imageLock: prepared.imageLock, aliases: prepared.aliases,
