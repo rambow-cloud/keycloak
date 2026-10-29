@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "keycloakVersion": "26.8.1",
+  "upstreamVersion": "1.62.0",
+  "version": "1.67.0",
+  "modules": [
+    {
+      "artifactId": "opentelemetry-api",
+      "upstreamSha256": "d58143928c049233653e6bf1282ff8a767ebdd5e6a82b3f336158c30e40b431d",
+      "sha256": "538d1dff2f9a37aecbc0ef98fd17273a3affb058e734e6763a3a07a38a5fdc59"
+    },
+    {
+      "artifactId": "opentelemetry-api-incubator",
+      "upstreamSha256": "6b8dbe21aea973896555c65e94de694ff73f788bdf47c712f8b2267a57b5d0d8",
+      "sha256": "fea3d78726e49620168c3f6194ff491edfd1ec89b2df06fd5d5b73e55d74a342"
+    },
+    {
+      "artifactId": "opentelemetry-common",
+      "upstreamSha256": "d6310bebde67d65c1519696728d8604005315ed08ab14071956fc0826fd71815",
+      "sha256": "da97bdb395418e16ecdcbe7ad3497f45b9e767ceda4ae7e86133e7a757ac377f"
+    },
+    {
+      "artifactId": "opentelemetry-context",
+      "upstreamSha256": "8ec86c3609222b9b6307bf40154c1f1c288d1f18ada0155409e7797adbdbe517",
+      "sha256": "40fb813fb5e27ec2691daa29c81b572b5b1541ef9b41e62490c3ee3e6407c55e"
+    },
+    {
+      "artifactId": "opentelemetry-exporter-common",
+      "upstreamSha256": "50f84b5b58048f69bd684ec874413944209995e01c177200555c151dabfe1ec9",
+      "sha256": "eb61aab6d20bf105102dfa061b478b659cec17e82a50969898046456768ba09b"
+    },
+    {
+      "artifactId": "opentelemetry-exporter-otlp",
+      "upstreamSha256": "59df47fdc4bef6866ed39eb6a04892c68e28d7938eaeaa21801ac5dd2dcb0d65",
+      "sha256": "6724a9c8f9f42de757682c6194c48d9fee4670cd19a85c37954eba526c58b836"
+    },
+    {
+      "artifactId": "opentelemetry-exporter-otlp-common",
+      "upstreamSha256": "79eaaaf044df15209ee1461b668f7c93547734a793d6cf6ad5e57290d3f8c0ea",
+      "sha256": "75530ab4d93e6fdef478d3e112713337625e70a63df357e6e7b9060c13788015"
+    },
+    {
+      "artifactId": "opentelemetry-sdk",
+      "upstreamSha256": "99d421ea0e5a1ca8e45cb67f1d5db7f0e8a718dd55eeb86c1323597e1f10aed3",
+      "sha256": "52a8f599a368a3d62185e37053f6a53175d6fbe3ecc1d565baba13b1a854267f"
+    },
+    {
+      "artifactId": "opentelemetry-sdk-common",
+      "upstreamSha256": "bf9d13df9a50e49a5db664ba8ebfad79f73f03219d2ac6f6709d432f6896eba0",
+      "sha256": "628a4c00db9561ff4c608a650d5e7fd66a1e153ccdf1ba3cdc5ac0b7c6518fea"
+    },
+    {
+      "artifactId": "opentelemetry-sdk-extension-autoconfigure",
+      "upstreamSha256": "4165984bdc3261486918a55815ae57d5e75ba08730d1e1ccf97908720659b619",
+      "sha256": "09021cf4e41f081e11e1c00577fe03b98db0ae7fd5f73eaf4020e760fa0edb7e"
+    },
+    {
+      "artifactId": "opentelemetry-sdk-extension-autoconfigure-spi",
+      "upstreamSha256": "220c22bcf420faae59b7225c789f572eaa22e7af2304d55508aaf2a3efcfecf8",
+      "sha256": "41eb19f6caf2c655ac3139d331f5c34283f2efdb0f0b0e58765a6cc9e27f66bc"
+    },
+    {
+      "artifactId": "opentelemetry-sdk-logs",
+      "upstreamSha256": "51c94329bc8e335ed79027d29d49c075c11b91b39e48679edf590e784a392406",
+      "sha256": "dd0f0b625e08787af49d7e270abc6def4c2eabc2f18f5f145b7924024a3311e3"
+    },
+    {
+      "artifactId": "opentelemetry-sdk-metrics",
+      "upstreamSha256": "50b057fbf063f6801f623212f4b51b6a3fefc77837314a1316b2f54894c8b5d4",
+      "sha256": "c157ff10da59a87a57e5236d9f3290792d9b749433be5e5b449a7d1604c320a9"
+    },
+    {
+      "artifactId": "opentelemetry-sdk-trace",
+      "upstreamSha256": "fb6c0953b229a6da1db813135ae11a621bf9da56b7356c1e93049ed4b088c232",
+      "sha256": "14d9615c8a5dcf471dcbb74902b771dcfa8656b755ac38dce904042289ccd198"
+    }
+  ]
+}

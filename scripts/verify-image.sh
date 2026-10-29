@@ -48,6 +48,16 @@ guava_sha=$(node -p "require('./dependencies/keycloak/overrides.lock.json').sha2
   echo 'Final image Guava payload differs from the reviewed security lock' >&2; exit 1;
 }
 echo 'Verified the single patched Guava payload in the final image rootfs.'
+otel_manifest=$(node scripts/opentelemetry-dependencies.mjs integrity)
+while read -r expected target artifact; do
+  [[ "$(grep -Ec "(^|/)io\\.opentelemetry\\.$artifact-[0-9][^/]*\\.jar$" <<< "$entries")" == 1 ]] || {
+    echo 'Duplicate or missing OpenTelemetry module in final image' >&2; exit 1;
+  }
+  [[ "$(tar -xOf "$rootfs" "opt/keycloak/$target" | sha256sum | cut -d ' ' -f 1)" == "$expected" ]] || {
+    echo 'Final image OpenTelemetry payload differs from the reviewed security lock' >&2; exit 1;
+  }
+done <<< "$otel_manifest"
+echo 'Verified all exact fixed OpenTelemetry core payloads in the final image.'
 rm "$rootfs"
 rootfs=''
 if grep -Eq '(^|/)(sh|bash|dash|ash|busybox|apt|apt-get|dpkg|rpm|dnf|microdnf|apk|javac|jshell)$' <<< "$entries"; then

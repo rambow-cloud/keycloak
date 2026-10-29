@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import {parseReleaseEvents,validateReleaseEvents} from '../../scripts/lib/release-events.mjs';
 
 export const directory = dirname(fileURLToPath(import.meta.url));
 const repository = resolve(directory, '../..');
@@ -57,10 +58,16 @@ export function validateRecords(records, catalog) {
   }
   return records;
 }
+export function ledgerImageCatalog(publications,events=[]) {
+  validateReleaseEvents(events,publications);
+  return [...publications.flatMap(r=>r.plan.images),...events.filter(e=>e.operation==='architecture-expansion').flatMap(e=>e.images)];
+}
 export async function readLedger() {
   const files = (await readdir(resolve(repository, 'releases/records'))).filter(n => n.endsWith('.json'));
   const publications = await Promise.all(files.map(async n => JSON.parse(await readFile(resolve(repository, 'releases/records', n), 'utf8'))));
-  const catalog = publications.flatMap(r => r.plan.images);
+  let events=[];
+  try {events=parseReleaseEvents(await readFile(resolve(repository,'releases/events.jsonl'),'utf8'));} catch(error) {if(error.code!=='ENOENT')throw error;}
+  const catalog = ledgerImageCatalog(publications,events);
   const source = await readFile(resolve(directory, 'records.jsonl'), 'utf8');
   const records = validateRecords(parseLedger(source), catalog);
   for (const record of records) for (const evidence of record.evidence) {
