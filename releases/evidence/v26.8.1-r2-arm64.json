@@ -1,0 +1,907 @@
+{
+  "schemaVersion": 1,
+  "release": "v26.8.1-r2",
+  "recordedAt": "2026-10-29T22:44:48.439Z",
+  "issue": 70,
+  "sourceCommit": "da29c6005420d0971589877dab10ec4ad335dc58",
+  "sourceLockSha256": "636da1eaf818d41c6d87110943977b0a4924aa6dc758ecbf02dd35ad4c252abf",
+  "sourceToolsCommit": "51b64c74b8626b341da52a1941f3691936efa226",
+  "sourceRun": 40963585657,
+  "completionRun": 40967675486,
+  "scope": "Build and run only missing ARM64 from original r2 payload/base/provider pins; retain original AMD64 manifests; freshly scan all four children before protected publication.",
+  "limits": "Existing AMD64 runtime regressions were not repeated. This architecture extension is not a new CVE repair or a live RDS/PolarDB compatibility certification.",
+  "nativeJobs": [
+    {
+      "name": "Validate r2 core arm64",
+      "id": 123762344935,
+      "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40963585657/job/123762344935",
+      "conclusion": "success"
+    },
+    {
+      "name": "Validate r2 aws arm64",
+      "id": 123762345021,
+      "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40963585657/job/123762345021",
+      "conclusion": "success"
+    }
+  ],
+  "images": [
+    {
+      "profile": "core",
+      "tag": "26.8.1-r2-core",
+      "beforeDigest": "sha256:9f36c090c07e12f0fdd9dd171bd102a50c25edfb7b6c54e691da918200908438",
+      "digest": "sha256:53d85ad1f5ed2838d300c0475b93b386388ea73636adf4537fc792dd14c0d09a",
+      "children": [
+        {
+          "architecture": "amd64",
+          "digest": "sha256:9f36c090c07e12f0fdd9dd171bd102a50c25edfb7b6c54e691da918200908438"
+        },
+        {
+          "architecture": "arm64",
+          "digest": "sha256:5a4cf66e50a7542a3cb40548f3532357c5d40b68b2fa404eed27e98075a9422f"
+        }
+      ]
+    },
+    {
+      "profile": "aws",
+      "tag": "26.8.1-r2-aws",
+      "beforeDigest": "sha256:ee73b535798351bd007d72e1db6522e6fccacb2368005c7659bc171b88c19d23",
+      "digest": "sha256:2cea43c26ef0676d922f68de30504a6d9355a420c4c9544cda40aa10ab166129",
+      "children": [
+        {
+          "architecture": "amd64",
+          "digest": "sha256:ee73b535798351bd007d72e1db6522e6fccacb2368005c7659bc171b88c19d23"
+        },
+        {
+          "architecture": "arm64",
+          "digest": "sha256:925fb6b8a04e349a64f1adbdcb4606d04dd520d2e18527741ee19b52161f1baa"
+        }
+      ]
+    }
+  ],
+  "withdrawnTags": [
+    "26.8.1-r3-core",
+    "26.8.1-r3-aws"
+  ],
+  "scans": [
+    {
+      "profile": "core",
+      "architecture": "amd64",
+      "digest": "sha256:9f36c090c07e12f0fdd9dd171bd102a50c25edfb7b6c54e691da918200908438",
+      "summary": {
+        "schemaVersion": 2,
+        "profile": "core",
+        "architecture": "amd64",
+        "headSha": "8faa4cc02558637a826b37ec2cbc24b5ba212530",
+        "runId": 40967675486,
+        "runAttempt": 1,
+        "status": "complete",
+        "scannerVersion": "0.76.1",
+        "createdAt": "2026-10-29T22:41:51.715371202Z",
+        "policy": {
+          "blockingSeverities": [
+            "HIGH",
+            "CRITICAL"
+          ],
+          "blockUnfixed": false
+        },
+        "counts": {
+          "CRITICAL": {
+            "total": 0,
+            "fixable": 0
+          },
+          "HIGH": {
+            "total": 4,
+            "fixable": 0
+          },
+          "MEDIUM": {
+            "total": 40,
+            "fixable": 1
+          },
+          "LOW": {
+            "total": 20,
+            "fixable": 0
+          },
+          "UNKNOWN": {
+            "total": 3,
+            "fixable": 0
+          }
+        },
+        "total": 67,
+        "blocking": 0,
+        "osEosl": false,
+        "findings": [
+          {
+            "id": "CVE-2026-76642",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2025-66382",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "gcc-14-base",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libgcc-s1",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libstdc++6",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-113351",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-118259",
+            "package": "io.opentelemetry:opentelemetry-api",
+            "installed": "1.62.0",
+            "fixed": "1.67.0",
+            "severity": "MEDIUM",
+            "target": "Java"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-27171",
+            "package": "zlib1g",
+            "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-3184",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-42250",
+            "package": "libbz2-1.0",
+            "installed": "1.0.8-6",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-5435",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-amd64 (debian 13.7)"
+          }
+        ]
+      }
+    },
+    {
+      "profile": "core",
+      "architecture": "arm64",
+      "digest": "sha256:5a4cf66e50a7542a3cb40548f3532357c5d40b68b2fa404eed27e98075a9422f",
+      "summary": {
+        "schemaVersion": 2,
+        "profile": "core",
+        "architecture": "arm64",
+        "headSha": "8faa4cc02558637a826b37ec2cbc24b5ba212530",
+        "runId": 40967675486,
+        "runAttempt": 1,
+        "status": "complete",
+        "scannerVersion": "0.76.1",
+        "createdAt": "2026-10-29T22:42:19.920364208Z",
+        "policy": {
+          "blockingSeverities": [
+            "HIGH",
+            "CRITICAL"
+          ],
+          "blockUnfixed": false
+        },
+        "counts": {
+          "CRITICAL": {
+            "total": 0,
+            "fixable": 0
+          },
+          "HIGH": {
+            "total": 4,
+            "fixable": 0
+          },
+          "MEDIUM": {
+            "total": 40,
+            "fixable": 1
+          },
+          "LOW": {
+            "total": 20,
+            "fixable": 0
+          },
+          "UNKNOWN": {
+            "total": 3,
+            "fixable": 0
+          }
+        },
+        "total": 67,
+        "blocking": 0,
+        "osEosl": false,
+        "findings": [
+          {
+            "id": "CVE-2026-76642",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2025-66382",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "gcc-14-base",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libgcc-s1",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libstdc++6",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-113351",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-118259",
+            "package": "io.opentelemetry:opentelemetry-api",
+            "installed": "1.62.0",
+            "fixed": "1.67.0",
+            "severity": "MEDIUM",
+            "target": "Java"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-27171",
+            "package": "zlib1g",
+            "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-3184",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-42250",
+            "package": "libbz2-1.0",
+            "installed": "1.0.8-6",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-5435",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/core-arm64 (debian 13.7)"
+          }
+        ]
+      }
+    },
+    {
+      "profile": "aws",
+      "architecture": "amd64",
+      "digest": "sha256:ee73b535798351bd007d72e1db6522e6fccacb2368005c7659bc171b88c19d23",
+      "summary": {
+        "schemaVersion": 2,
+        "profile": "aws",
+        "architecture": "amd64",
+        "headSha": "8faa4cc02558637a826b37ec2cbc24b5ba212530",
+        "runId": 40967675486,
+        "runAttempt": 1,
+        "status": "complete",
+        "scannerVersion": "0.76.1",
+        "createdAt": "2026-10-29T22:42:49.426899459Z",
+        "policy": {
+          "blockingSeverities": [
+            "HIGH",
+            "CRITICAL"
+          ],
+          "blockUnfixed": false
+        },
+        "counts": {
+          "CRITICAL": {
+            "total": 0,
+            "fixable": 0
+          },
+          "HIGH": {
+            "total": 4,
+            "fixable": 0
+          },
+          "MEDIUM": {
+            "total": 40,
+            "fixable": 1
+          },
+          "LOW": {
+            "total": 20,
+            "fixable": 0
+          },
+          "UNKNOWN": {
+            "total": 3,
+            "fixable": 0
+          }
+        },
+        "total": 67,
+        "blocking": 0,
+        "osEosl": false,
+        "findings": [
+          {
+            "id": "CVE-2026-76642",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2025-66382",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "gcc-14-base",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libgcc-s1",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libstdc++6",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-113351",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-118259",
+            "package": "io.opentelemetry:opentelemetry-api",
+            "installed": "1.62.0",
+            "fixed": "1.67.0",
+            "severity": "MEDIUM",
+            "target": "Java"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-27171",
+            "package": "zlib1g",
+            "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-3184",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-42250",
+            "package": "libbz2-1.0",
+            "installed": "1.0.8-6",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-5435",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-amd64 (debian 13.7)"
+          }
+        ]
+      }
+    },
+    {
+      "profile": "aws",
+      "architecture": "arm64",
+      "digest": "sha256:925fb6b8a04e349a64f1adbdcb4606d04dd520d2e18527741ee19b52161f1baa",
+      "summary": {
+        "schemaVersion": 2,
+        "profile": "aws",
+        "architecture": "arm64",
+        "headSha": "8faa4cc02558637a826b37ec2cbc24b5ba212530",
+        "runId": 40967675486,
+        "runAttempt": 1,
+        "status": "complete",
+        "scannerVersion": "0.76.1",
+        "createdAt": "2026-10-29T22:43:16.73691389Z",
+        "policy": {
+          "blockingSeverities": [
+            "HIGH",
+            "CRITICAL"
+          ],
+          "blockUnfixed": false
+        },
+        "counts": {
+          "CRITICAL": {
+            "total": 0,
+            "fixable": 0
+          },
+          "HIGH": {
+            "total": 4,
+            "fixable": 0
+          },
+          "MEDIUM": {
+            "total": 40,
+            "fixable": 1
+          },
+          "LOW": {
+            "total": 20,
+            "fixable": 0
+          },
+          "UNKNOWN": {
+            "total": 3,
+            "fixable": 0
+          }
+        },
+        "total": 67,
+        "blocking": 0,
+        "osEosl": false,
+        "findings": [
+          {
+            "id": "CVE-2026-76642",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2025-66382",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "gcc-14-base",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libgcc-s1",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libstdc++6",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-113351",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-118259",
+            "package": "io.opentelemetry:opentelemetry-api",
+            "installed": "1.62.0",
+            "fixed": "1.67.0",
+            "severity": "MEDIUM",
+            "target": "Java"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-27171",
+            "package": "zlib1g",
+            "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-3184",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-42250",
+            "package": "libbz2-1.0",
+            "installed": "1.0.8-6",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-5435",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/r2-verify-zyPqdv/aws-arm64 (debian 13.7)"
+          }
+        ]
+      }
+    }
+  ]
+}

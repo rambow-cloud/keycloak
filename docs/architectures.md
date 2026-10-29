@@ -25,4 +25,10 @@ New formal revisions retain `26.8.1-r<N>-core` and `26.8.1-r<N>-aws` tags. Each 
 
 Publication freshly scans every child from the exact selected CI artifact before freezing the index/child digests and before the protected publisher requests Quay OIDC. Index identity, child config labels/architectures and layer checksums are verified again before authentication. Skopeo uploads all children with digest preservation. A conflicting index fails; same-digest and partial retries reuse the frozen index without rebuilding.
 
-Previously published r1/r2 tags remain **amd64 only**, with unchanged bytes, JSON records and digests. The first multi-architecture release is `v26.8.1-r3`. A main or branch push does not publish an image. The latest actually published tags are listed on the [homepage](../README.md#current-images), and [publication records](../releases/README.md) distinguish new indexes from historical single-architecture images.
+The existing `26.8.1-r2-core` and `26.8.1-r2-aws` tags now select both architectures. This reviewed expansion built only the missing ARM64 images from the original r2 payload/base/provider pins and retained both original AMD64 manifests byte-for-byte. The two index digests and all child digests are in the [catalog](../releases/README.md); the original AMD64 digest references still work. There are no public architecture-suffixed tags.
+
+The architecture-only r3 Release and its two tags were withdrawn at the owner's request. Its original publication facts and Release attachments remain archived in Git. The append-only [binding history](../releases/events.jsonl) records the r2 expansion and r3 withdrawal without rewriting original publication JSON. Earlier r1 tags remain **amd64 only**. Architecture coverage does not increment the revision; only new features or explicit CVE repairs authorize a new revision. See [release eligibility](release-eligibility.md).
+
+A main or branch push does not publish an image. The [homepage](../README.md#current-images) lists the latest active tags.
+
+The [durable r2 validation report](../releases/evidence/v26.8.1-r2-arm64.json) retains native ARM64 job provenance, exact reused/new manifests, and all four fresh Trivy summaries. This is architecture coverage for r2, not a new security repair.
