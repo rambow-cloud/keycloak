@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "changes": [
+    {
+      "type": "feature",
+      "profiles": ["core", "aws"],
+      "summary": "Add native Linux arm64 alongside amd64, with per-architecture runtime and vulnerability checks and digest-preserving multi-architecture OCI release indexes.",
+      "issues": [64]
+    }
+  ]
+}

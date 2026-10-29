@@ -4,6 +4,10 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 profile=${BUILD_PROFILE:-core}
 case "$profile" in core|aws) ;; *) echo 'BUILD_PROFILE must be core or aws' >&2; exit 1 ;; esac
 image=${IMAGE_TAG:-localhost/rambow-keycloak:test}
+architecture=$(node scripts/platform.mjs native)
+node scripts/platform.mjs require "$architecture"
+[[ "${BUILD_ARCH:-$architecture}" == "$architecture" ]]
+[[ "$(podman image inspect --format '{{.Architecture}}' "$image")" == "$architecture" ]]
 version=$(node -p "require('./images.lock.json').keycloakVersion")
 java_version=$(node -p "require('./images.lock.json').javaVersion")
 postgres=$(node -p "require('./images.lock.json').postgres")

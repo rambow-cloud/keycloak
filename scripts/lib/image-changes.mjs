@@ -8,7 +8,7 @@ const ordered = value => Array.isArray(value) ? value.map(ordered) : value && ty
 const stringify = value => JSON.stringify(ordered(value));
 const metadata = /^(?:docs\/|releases\/|changes\/|\.github\/(?:ISSUE_TEMPLATE\/|pull_request_template\.md|issue-policy\.json)|.*\.md$|LICENSE(?:\..*)?$|\.gitignore$)/;
 const bookkeeping = /^scripts\/(?:quay-release|release-catalog|releases|upstream-update|lock-images|issue-policy|trivy-comment)\.(?:mjs|cjs)$|^scripts\/lib\/(?:releases|quay-publish|quay-auth|upstream)\.mjs$|^\.github\/workflows\/(?!ci\.yml$)[^/]+\.yml$|^tests\/[^/]+\.test\.cjs$/;
-const validation = /^scripts\/(?:verify-|scan-image|trivy-gate|release-image|check-upstream-compatibility)|^scripts\/lib\/(?:trivy|oci|image-changes)\.mjs$|^config\/(?:trivy|upstream-compatibility)\.json$|^\.github\/workflows\/ci\.yml$|^tests\//;
+const validation = /^scripts\/(?:verify-|scan-image|scan-release|package-images|platform|trivy-gate|release-image|check-upstream-compatibility)|^scripts\/lib\/(?:trivy|oci|image-changes|multiarch|platforms)\.mjs$|^config\/(?:trivy|upstream-compatibility)\.json$|^\.github\/workflows\/ci\.yml$|^tests\//;
 export function sourceProfiles(path) {
   if (metadata.test(path) || bookkeeping.test(path) || validation.test(path)) return [];
   if (/^dependencies\/aws\/|^scripts\/aws-dependencies\.mjs$/.test(path)) return ['aws'];

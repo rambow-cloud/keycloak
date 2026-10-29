@@ -1,6 +1,6 @@
 # Hosted runners and Actions audit
 
-All 13 jobs in the five active workflows use explicit `ubuntu-26.04` x64 hosted runners. GitHub announced [general availability](https://github.com/actions/runner-images/issues/14747) on September 17, 2026. Use an explicit label so changes to `ubuntu-latest` do not silently change the selected OS. Image architecture remains Linux amd64.
+Active workflows use explicit `ubuntu-26.04` x64 runners, with native `ubuntu-26.04-arm` for ARM64 image jobs. GitHub announced [general availability for both architectures](https://github.blog/changelog/2026-09-17-ubuntu-26-generally-available-and-latest-migration/) on September 17, 2026. Explicit labels prevent changes to `ubuntu-latest` from silently selecting another OS. Each affected core/aws profile builds and runs on both architectures before the packaging job assembles its OCI index; see [architecture validation](architectures.md).
 
 The Ubuntu host supplies Buildah, Podman, Skopeo and fixture tooling; the image's build/runtime Java versions and base images still come from immutable `images.lock.json` inputs. Changing the host runner does not change those pins, create a GitHub Release, or publish to Quay.
 

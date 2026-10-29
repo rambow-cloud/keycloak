@@ -6,6 +6,8 @@ Minimal Keycloak OCI images for PostgreSQL deployments, with a **distroless Java
 
 Current published release: [v26.8.1-r2](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r2). Keycloak **26.8.1**, Java **25 LTS**, Linux **amd64**.
 
+Native builds and CI also support **arm64**. The r2 tags below remain amd64-only; ARM64 images require the next formal revision. See [architecture support](docs/architectures.md).
+
 | Profile | Latest published tag | Image reference | Purpose |
 | --- | --- | --- | --- |
 | core | `26.8.1-r2-core` | `quay.io/rambow-cloud/keycloak:26.8.1-r2-core` | PostgreSQL with the native JDBC driver. |
@@ -35,6 +37,7 @@ The default command is `start --optimized`. Build-time option or provider change
 | Guide | Contents |
 | --- | --- |
 | [Build and run](docs/build-and-run.md) | Local setup, image builds, runtime example, input updates and compatibility limits. |
+| [Architectures](docs/architectures.md) | Native amd64/arm64 builds, separate scans and multi-architecture release indexes. |
 | [RDS PostgreSQL](docs/rds-postgresql.md) | AWS profile configuration, database TLS, IAM authentication and staging checks. |
 | [PolarDB PostgreSQL](docs/polardb-postgresql.md) | Experimental core-profile configuration and required cloud verification. |
 | [Published images](releases/README.md) | All versions, exact digests, validation links and pull commands. |

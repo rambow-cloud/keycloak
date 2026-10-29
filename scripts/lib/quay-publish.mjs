@@ -29,7 +29,7 @@ export async function publishImages(plan, adapter, { runId, validationToolsCommi
         if (await adapter.copy(image, registry + ':' + alias.tag) !== image.digest) throw new Error('Alias copy changed digest.');
       }
       aliasChanges.push({ tag: alias.tag, profile: alias.profile, fromDigest: previous, toDigest: image.digest,
-        ...(plan.schemaVersion === 2 ? { changes: image.changes } : {}) });
+        ...(plan.schemaVersion >= 2 ? { changes: image.changes } : {}) });
       state.completedTags.push(alias.tag);
       progress({ ...state });
     }

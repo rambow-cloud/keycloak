@@ -68,7 +68,7 @@ jobs:
     needs: prepare
     if: needs.prepare.outputs.active == 'true' && needs.prepare.outputs.record_only != 'true'
     runs-on: ubuntu-26.04
-    timeout-minutes: 20
+    timeout-minutes: 35
     permissions:
       contents: read
       actions: read
@@ -108,7 +108,7 @@ jobs:
       - name: Fresh Trivy scan with current policy and databases
         env:
           TMPDIR: ${{ runner.temp }}
-        run: node scripts/scan-image.mjs .cache/release-layout .cache/release-scan
+        run: node scripts/scan-release.mjs .cache/prepared.json .cache/release-layout .cache/release-scan
       - name: Retain release scan evidence before the gate
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

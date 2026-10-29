@@ -1,6 +1,6 @@
 # Formal Quay releases and release catalog
 
-Images are distributed through [quay.io/rambow-cloud/keycloak](https://quay.io/repository/rambow-cloud/keycloak). Normal main and PR CI builds remain artifacts only. The `Quay release` workflow handles stable GitHub Release publication (including promotion to stable) and manual recovery. Both profiles remain Linux amd64, distroless and nonroot. This workflow does not add other registries, architectures, SBOMs or signatures.
+Images are distributed through [quay.io/rambow-cloud/keycloak](https://quay.io/repository/rambow-cloud/keycloak). Normal main and PR CI builds remain artifacts only. The `Quay release` workflow handles stable GitHub Release publication (including promotion to stable) and manual recovery. New revisions package Linux amd64/arm64 OCI indexes per profile; historical r1/r2 stay amd64-only. Both remain distroless and nonroot. See [architecture contracts and native validation](architectures.md). Other registries, SBOMs and signatures remain outside this workflow.
 
 Publication is gated independently per profile by actual build-input changes and nonempty reviewed fix/feature notes. A release may publish only AWS while retaining core's previous tag. With no changed inputs, the workflow skips all image work before CI dispatch or credentials. See [image work and per-tag history](image-change-policy.md).
 

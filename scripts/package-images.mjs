@@ -1,0 +1,48 @@
+import { readFile, writeFile, mkdir, mkdtemp } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
+import { architectures } from './lib/platforms.mjs';
+import { combineLayouts, fileHash } from './lib/multiarch.mjs';
+import { hash } from './lib/releases.mjs';
+import { validateSummary, gateSummary } from './lib/trivy.mjs';
+const profile = process.env.BUILD_PROFILE;
+if (!['core','aws'].includes(profile) || !/^[a-f0-9]{40}$/.test(process.env.GITHUB_SHA ?? '')) throw Error('Invalid package identity');
+const [inputDirectory, outputDirectory] = process.argv.slice(2).map(p => resolve(p));
+const lock = await readFile('images.lock.json', 'utf8');
+const version = JSON.parse(lock).keycloakVersion;
+const work = await mkdtemp(join(tmpdir(), 'rambow-package-'));
+const inputs = [];
+for (const architecture of architectures) {
+  const input = join(inputDirectory, 'keycloak-oci-' + profile + '-' + architecture + '-' + process.env.GITHUB_SHA);
+  const archive = join(input, 'keycloak.oci.tar');
+  const evidence = JSON.parse(await readFile(join(input, 'release-evidence.json'), 'utf8'));
+  const summary = JSON.parse(await readFile(join(input, 'scan-summary.json'), 'utf8'));
+  validateSummary(summary, {profile,architecture,headSha:process.env.SCAN_HEAD_SHA ?? process.env.GITHUB_SHA,runId:Number(process.env.GITHUB_RUN_ID),runAttempt:Number(process.env.GITHUB_RUN_ATTEMPT)});
+  gateSummary(summary);
+  if (evidence.architecture !== architecture || evidence.profile !== profile || evidence.sourceCommit !== process.env.GITHUB_SHA || evidence.lockSha256 !== hash(lock) ||
+      evidence.archiveSha256 !== await fileHash(archive) || await readFile(join(input, 'images.lock.json'), 'utf8') !== lock) throw Error('Native artifact contract/lock mismatch');
+  const layout = join(work, architecture);
+  const copied = spawnSync('skopeo', ['copy','--all','--preserve-digests','oci-archive:'+archive,'oci:'+layout+':native'], {stdio:'inherit',timeout:600000});
+  if (copied.status !== 0) throw Error('Cannot import native OCI artifact');
+  inputs.push({architecture,path:layout});
+}
+const layout = join(work, 'combined');
+const index = await combineLayouts(inputs, layout, {profile,sourceCommit:process.env.GITHUB_SHA,keycloakVersion:version});
+await mkdir(outputDirectory, {recursive:true});
+const archive = join(outputDirectory, 'keycloak.oci.tar');
+const packed = spawnSync('tar', ['-cf',archive,'-C',layout,'oci-layout','index.json','blobs'], {stdio:'inherit'});
+if (packed.status !== 0) throw Error('Cannot archive multi-architecture OCI layout');
+const raw = spawnSync('skopeo',['inspect','--raw','oci-archive:'+archive],{encoding:'utf8',timeout:120000,maxBuffer:10000000});
+if (raw.status !== 0 || 'sha256:'+hash(raw.stdout) !== index.digest) throw Error('Skopeo did not preserve the packaged index digest');
+for (const architecture of architectures) {
+  const config = spawnSync('skopeo',['--override-os','linux','--override-arch',architecture,'inspect','--config','oci-archive:'+archive],{encoding:'utf8',timeout:120000,maxBuffer:10000000});
+  if (config.status !== 0) throw Error('Skopeo cannot select the packaged architecture');
+  const value = JSON.parse(config.stdout);
+  if (value.os !== 'linux' || value.architecture !== architecture) throw Error('Packaged index selects the wrong architecture');
+}
+const archiveSha256 = await fileHash(archive);
+await writeFile(archive+'.sha256',archiveSha256+'  keycloak.oci.tar\n');
+await writeFile(join(outputDirectory, 'images.lock.json'),lock);
+await writeFile(join(outputDirectory, 'release-evidence.json'),JSON.stringify({schemaVersion:2,profile,sourceCommit:process.env.GITHUB_SHA,lockSha256:hash(lock),digest:index.digest,children:index.children,archiveSha256},null,2)+'\n');
+console.log('Packaged both verified native images without changing their manifest digests.');

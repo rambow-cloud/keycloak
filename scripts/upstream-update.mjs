@@ -1,4 +1,5 @@
 import { resolveImageDigest } from './lib/oci.mjs';
+import { lockArchitectures } from './lib/platforms.mjs';
 import { marker, managedPaths, chooseVersion, inspectCompatibility, candidateFiles, filesHash, issueBody, pullBody, assertBotOwned, autoMergeEligible, validateUpdaterIdentity, sameUpdater } from './lib/upstream.mjs';
 import policy from './issue-policy.cjs';
 
@@ -25,7 +26,7 @@ export async function runUpstreamUpdate({ github, context, core, dryRun = false,
   const version = chooseVersion(current.keycloakVersion, release);
   const refs = { keycloak: 'quay.io/keycloak/keycloak:' + version,
     runtime: current.runtime.split('@')[0], builder: current.builder.split('@')[0] };
-  const resolved = Object.fromEntries(await Promise.all(Object.entries(refs).map(async ([key, ref]) => [key, await resolve(ref)])));
+  const resolved = Object.fromEntries(await Promise.all(Object.entries(refs).map(async ([key, ref]) => [key, await resolve(ref, fetch, lockArchitectures(current))])));
   const next = { ...current, keycloakVersion: version, ...resolved };
   const { warnings } = await inspect(version, current.javaVersion, baseline);
   let files = candidateFiles(currentFiles, next, warnings);
