@@ -22,6 +22,15 @@ test('migration plan and registry transition reject unrelated releases or change
  for(const value of [null,digest('d'),'unknown']) assert.throws(()=>migrationAction(value,i.beforeDigest,i.digest));
  assert.throws(()=>migrationAction(i.beforeDigest,i.beforeDigest,i.beforeDigest));
 });
+test('r3 withdrawal is idempotent and refuses other tags sharing a manifest or changed digests',async()=>{
+ const {withdrawalTargets}=await lib,[,r3]=await records;
+ const bindings=Object.fromEntries(r3.plan.images.map(i=>[i.tag,i.digest]));
+ assert.deepEqual(withdrawalTargets(bindings),r3.plan.images);
+ assert.deepEqual(withdrawalTargets({}),[]);
+ assert.equal(withdrawalTargets({[r3.plan.images[0].tag]:r3.plan.images[0].digest}).length,1);
+ assert.throws(()=>withdrawalTargets({...bindings,extra:r3.plan.images[0].digest}));
+ assert.throws(()=>withdrawalTargets({...bindings,[r3.plan.images[0].tag]:digest('a')}));
+});
 test('lifecycle projections preserve raw records, exact old AMD64 bindings and withdrawal history',async()=>{
  const {validateReleaseEvents,parseReleaseEvents}=await import('../scripts/lib/release-events.mjs');
  const {renderCatalog,resolveTag,tagHistory}=await import('../scripts/lib/releases.mjs');

@@ -13,6 +13,7 @@ import {validateReleaseEvents} from './lib/release-events.mjs';
 const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
 const config=JSON.parse(await readFile(join(root,'config/r2-architecture-migration.json'),'utf8'));
 const original=JSON.parse(await readFile(join(root,'releases/records/v26.8.1-r2.json'),'utf8'));
+const withdrawn=JSON.parse(await readFile(join(root,'releases/records/v26.8.1-r3.json'),'utf8'));
 const identity=profile=>({profile,sourceCommit:config.sourceCommit,keycloakVersion:'26.8.1'});
 function run(command,args,options={}) {
   const result=spawnSync(command,args,{encoding:'utf8',timeout:600000,maxBuffer:10000000,...options});
@@ -24,6 +25,15 @@ export function migrationAction(current,before,expected) {
   if(current===expected) return 'reuse';
   if(current===before) return 'expand';
   throw Error('Destination differs from both the authorized original AMD64 digest and frozen index');
+}
+export function withdrawalTargets(bindings) {
+  const targets=[];
+  for(const image of withdrawn.plan.images) {
+    if(!Object.hasOwn(bindings,image.tag)) continue;
+    if(bindings[image.tag]!==image.digest||Object.entries(bindings).some(([tag,digest])=>tag!==image.tag&&digest===image.digest)) throw Error('r3 withdrawal conflicts with unexpected digest or additional manifest tags');
+    targets.push(image);
+  }
+  return targets;
 }
 export function validateMigrationPlan(plan) {
   if(config.id!=='r2-arm64-v1'||config.tag!=='v26.8.1-r2'||config.sourceCommit!==original.plan.sourceCommit||config.sourceLockSha256!==original.plan.lockSha256||
@@ -90,6 +100,7 @@ async function assemble(input,out) {
     validateSummary(summary,{profile:target.profile,architecture:'arm64',headSha:process.env.TOOLS_COMMIT,runId:Number(process.env.GITHUB_RUN_ID),runAttempt:Number(process.env.GITHUB_RUN_ATTEMPT)});gateSummary(summary);
     if(evidence.sourceCommit!==config.sourceCommit||evidence.toolsCommit!==process.env.TOOLS_COMMIT||evidence.profile!==target.profile||evidence.architecture!=='arm64'||evidence.runId!==Number(process.env.GITHUB_RUN_ID)||evidence.sourceLockSha256!==config.sourceLockSha256||evidence.archiveSha256!==await fileHash(join(native,'keycloak.oci.tar'))) throw Error('Native artifact provenance mismatch');
     const amd=join(work,target.profile,'amd64'),arm=join(work,target.profile,'arm64'),combined=join(work,target.profile,'combined');
+    await mkdir(join(work,target.profile),{recursive:true});
     run('skopeo',['copy','--preserve-digests','docker://'+registry+'@'+target.beforeDigest,'oci:'+amd+':original']);
     run('skopeo',['copy','--preserve-digests','oci-archive:'+join(native,'keycloak.oci.tar'),'oci:'+arm+':native']);
     const reused=await inspectLayout(amd,identity(target.profile),['amd64']), added=await inspectLayout(arm,identity(target.profile),['arm64']);
@@ -126,11 +137,12 @@ async function inspectPackage(path,scan=false) {
 export async function publishMigration({github,context,core,path,out}) {
   if(context.eventName!=='workflow_dispatch'||context.ref!=='refs/heads/main') throw Error('Migration writes require reviewed main dispatch');
   const plan=await inspectPackage(path);
+  if(!equal(JSON.parse(await readFile(join(root,'releases/archives/v26.8.1-r3/publication-record.json'),'utf8')),withdrawn)) throw Error('Original r3 publication must be archived before withdrawal');
   const {data:release}=await github.rest.repos.getReleaseByTag({...context.repo,tag:config.tag});
   if(!equal(await readAsset(github,context.repo,release,'architecture-extension-plan.json'),plan)) throw Error('Release extension plan is not frozen');
   const credentials=await federatedQuayCredentials({username:process.env.QUAY_USERNAME,context,getIDToken:audience=>core.getIDToken(audience),mask:value=>core.setSecret(value)});
   const work=await mkdtemp(join(tmpdir(),'r2-auth-')),auth=join(work,'auth.json');await mkdir(out,{recursive:true});
-  const state={schemaVersion:1,tag:config.tag,runId:context.runId,completedTags:[]};
+  const state={schemaVersion:1,tag:config.tag,runId:context.runId,completedTags:[],withdrawnTags:[]};
   try {
     run('skopeo',['login','--authfile',auth,'--username',credentials.username,'--password-stdin','quay.io'],{input:credentials.token});
     const actions={};
@@ -145,6 +157,22 @@ export async function publishMigration({github,context,core,path,out}) {
       }
       state.completedTags.push(image.tag);writeFileSync(join(out,'attempt.json'),json(state));
     }
+    // Registry deletion expires every tag on a manifest. Refuse any extra binding,
+    // then address only the two archived r3 index digests; never delete children.
+    const tags=JSON.parse(run('skopeo',['list-tags','--authfile',auth,'docker://'+registry])).Tags;
+    if(!Array.isArray(tags)||tags.length>100||new Set(tags).size!==tags.length) throw Error('Unexpected registry tag inventory');
+    const bindings={};
+    for(const tag of tags) {
+      if(!/^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$/.test(tag)) throw Error('Invalid registry tag');
+      bindings[tag]='sha256:'+hash(run('skopeo',['inspect','--authfile',auth,'--raw','docker://'+registry+':'+tag]));
+    }
+    for(const image of withdrawalTargets(bindings)) {
+      run('skopeo',['delete','--authfile',auth,'docker://'+registry+'@'+image.digest]);
+      state.withdrawnTags.push(image.tag);writeFileSync(join(out,'attempt.json'),json(state));
+    }
+    const remaining=JSON.parse(run('skopeo',['list-tags','--authfile',auth,'docker://'+registry])).Tags;
+    if(!Array.isArray(remaining)||withdrawn.plan.images.some(i=>remaining.includes(i.tag))) throw Error('r3 tags remain after withdrawal');
+    state.withdrawnTags=withdrawn.plan.images.map(i=>i.tag);writeFileSync(join(out,'attempt.json'),json(state));
     const event={schemaVersion:1,id:'v26.8.1-r2-arm64',operation:'architecture-expansion',tag:config.tag,recordedAt:new Date().toISOString(),issue:70,runId:context.runId,consumedSourceCommit:plan.toolsCommit,images:plan.images.map(({profile,tag,beforeDigest,digest,children})=>({profile,tag,beforeDigest,digest,children}))};
     await writeFile(join(out,'event.json'),json(event));
   } finally { await unlink(auth).catch(error=>{if(error.code!=='ENOENT') throw error;}); }
