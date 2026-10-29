@@ -77,11 +77,12 @@ jobs:
       matrix:
         profile: ${{ fromJSON(needs.impact.outputs.profiles) }}
     env:
-      # Ubuntu 26.04 /tmp is tmpfs; keep OCI temporary files on the work disk.
-      TMPDIR: ${{ runner.temp }}
       BUILD_PROFILE: ${{ matrix.profile }}
       SCAN_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
+      # runner context is available in steps, not in job-level env.
+      - name: Use disk-backed OCI temporary storage
+        run: printf 'TMPDIR=%s\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false

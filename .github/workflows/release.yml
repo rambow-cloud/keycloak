@@ -77,11 +77,12 @@ jobs:
       matrix:
         profile: ${{ fromJSON(needs.prepare.outputs.profiles) }}
     env:
-      TMPDIR: ${{ runner.temp }}
       BUILD_PROFILE: ${{ matrix.profile }}
       SCAN_HEAD_SHA: ${{ needs.prepare.outputs.source_commit }}
       PREPARED: ${{ needs.prepare.outputs.prepared }}
     steps:
+      - name: Use disk-backed OCI temporary storage
+        run: printf 'TMPDIR=%s\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.prepare.outputs.tools_commit }}
@@ -152,14 +153,14 @@ jobs:
     needs: [prepare, freeze]
     runs-on: ubuntu-26.04
     timeout-minutes: 25
-    env:
-      TMPDIR: ${{ runner.temp }}
     environment: quay-release
     permissions:
       contents: read
       actions: read
       id-token: write
     steps:
+      - name: Use disk-backed OCI temporary storage
+        run: printf 'TMPDIR=%s\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.prepare.outputs.tools_commit }}
