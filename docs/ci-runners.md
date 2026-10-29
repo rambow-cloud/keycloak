@@ -20,7 +20,7 @@ There is no Action-major migration in this change. Existing inputs, immutable pi
 
 ## Temporary storage and validation
 
-Ubuntu 26.04 [defaults `/tmp` to tmpfs](https://github.com/ubuntu/ubuntu-release-notes/blob/main/docs/26.04/summary-for-lts-users.md). OCI-heavy build, release scan and publish jobs set `TMPDIR` to `runner.temp` on the work disk rather than changing mounts or security settings. CI logs the actual OS, temporary filesystem and installed Buildah/Podman/Skopeo versions. The [runner image software inventory](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2604-Readme.md) describes the hosted environment; package versions may change between image deployments.
+Ubuntu 26.04 [defaults `/tmp` to tmpfs](https://github.com/ubuntu/ubuntu-release-notes/blob/main/docs/26.04/summary-for-lts-users.md). OCI-heavy build, release scan and publish steps set `TMPDIR` to `runner.temp` on the work disk rather than changing mounts or security settings. The release workflow uses step-local environment values and never persists transient credentials through `GITHUB_ENV`. CI logs the actual OS, temporary filesystem and installed Buildah/Podman/Skopeo versions. The [runner image software inventory](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2604-Readme.md) describes the hosted environment; package versions may change between image deployments.
 
 The runner migration must pass the existing core/aws builds, rootfs and optimized startup checks, PostgreSQL TLS/authentication/shutdown checks, AWS transport/offline signing checks, exported OCI contract, artifact upload and native Trivy gates. Passing the fixable HIGH/CRITICAL gate is not a zero-CVE claim.
 

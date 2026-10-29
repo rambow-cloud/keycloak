@@ -81,8 +81,6 @@ jobs:
       SCAN_HEAD_SHA: ${{ needs.prepare.outputs.source_commit }}
       PREPARED: ${{ needs.prepare.outputs.prepared }}
     steps:
-      - name: Use disk-backed OCI temporary storage
-        run: printf 'TMPDIR=%s\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.prepare.outputs.tools_commit }}
@@ -104,8 +102,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y skopeo
       - name: Verify exact CI artifact and prepare OCI layout
+        env:
+          TMPDIR: ${{ runner.temp }}
         run: node scripts/release-image.mjs inspect .cache/prepared.json .cache/release-input "$BUILD_PROFILE" .cache/release-scan/evidence.json .cache/release-layout
       - name: Fresh Trivy scan with current policy and databases
+        env:
+          TMPDIR: ${{ runner.temp }}
         run: node scripts/scan-image.mjs .cache/release-layout .cache/release-scan
       - name: Retain release scan evidence before the gate
         if: ${{ !cancelled() }}
@@ -159,8 +161,6 @@ jobs:
       actions: read
       id-token: write
     steps:
-      - name: Use disk-backed OCI temporary storage
-        run: printf 'TMPDIR=%s\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.prepare.outputs.tools_commit }}
@@ -179,6 +179,7 @@ jobs:
       - name: Preserve frozen digests while publishing changed profiles
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
+          TMPDIR: ${{ runner.temp }}
           PLAN: ${{ needs.freeze.outputs.plan }}
           VALIDATION_TOOLS_COMMIT: ${{ needs.prepare.outputs.tools_commit }}
           QUAY_USERNAME: ${{ vars.QUAY_USERNAME }}
