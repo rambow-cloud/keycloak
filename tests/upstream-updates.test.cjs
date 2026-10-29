@@ -3,10 +3,10 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { validateIssue, checkDispatchedPullRequest } = require('../scripts/issue-policy.cjs');
 const lib = import('../scripts/lib/upstream.mjs');
-const bot = { login: 'github-actions[bot]' };
+const bot = { login: 'test-updater[bot]', type: 'Bot', id: 123456, node_id: 'BOT_updater_fixture' };
 const mainSha = 'a'.repeat(40);
 const headSha = 'b'.repeat(40);
-const actionsEditor = { __typename: 'Bot', id: 'MDM6Qm90NDE4OTgyODI=' };
+const actionsEditor = { __typename: 'Bot', id: bot.node_id };
 const footerEditor = { __typename: 'Bot', id: 'BOT_kgDOCWWZcg' };
 const footerFor = number => '\n<!-- codesmith:footer -->\n---\n<a href="https://app.blacksmith.sh/rambow-cloud/codesmith/keycloak/pr/' + number + '?autoLogin=true">View</a>\n<!-- /codesmith:footer -->';
 const footerSnapshot = pr => ({ body: pr.body, headRefOid: pr.head.sha, editor: footerEditor,
@@ -80,18 +80,21 @@ test('generated PR guards refuse edited bodies, files, or commits', async () => 
   const body = pullBody(11, lock, lock, baseFiles, [], headSha);
   const pr = { user: bot, body };
   const commit = { author: bot, sha: headSha };
-  assertBotOwned(pr, commit, baseFiles);
-  assert.throws(() => assertBotOwned({ ...pr, body: body + 'human note' }, commit, baseFiles), /edited/);
-  assert.throws(() => assertBotOwned(pr, commit, { ...baseFiles, 'README.md': 'human change' }), /edited/);
-  assert.throws(() => assertBotOwned(pr, { ...commit, sha: mainSha }, baseFiles), /untracked commits/);
-  assert.throws(() => assertBotOwned(pr, { ...commit, author: { login: 'maintainer' } }, baseFiles), /human/);
+  assertBotOwned(pr, commit, baseFiles, bot);
+  assert.throws(() => assertBotOwned({ ...pr, body: body + 'human note' }, commit, baseFiles, bot), /edited/);
+  assert.throws(() => assertBotOwned(pr, commit, { ...baseFiles, 'README.md': 'human change' }, bot), /edited/);
+  assert.throws(() => assertBotOwned(pr, { ...commit, sha: mainSha }, baseFiles, bot), /untracked commits/);
+  assert.throws(() => assertBotOwned(pr, { ...commit, author: { login: 'maintainer' } }, baseFiles, bot), /human/);
+  for (const author of [{ ...bot, id: bot.id + 1 }, { ...bot, node_id: 'other' }, { ...bot, type: 'User' }]) {
+    assert.throws(() => assertBotOwned(pr, { ...commit, author }, baseFiles, bot), /human\/unknown/);
+  }
 });
 
 async function fixture({ changed = true, existing = false, edited = false, runs = [], warnings = [], releaseVersion = lock.keycloakVersion, staleBase = false,
-  footer = false, editSnapshot = snapshot => snapshot } = {}) {
+  footer = false, editSnapshot = snapshot => snapshot, changedInput = 'runtime' } = {}) {
   const { candidateFiles, pullBody, issueBody } = await lib;
   const calls = [];
-  const next = { ...lock, keycloakVersion: releaseVersion, ...(changed ? { runtime: lock.runtime.split('@')[0] + '@sha256:' + 'c'.repeat(64) } : {}) };
+  const next = { ...lock, keycloakVersion: releaseVersion, ...(changed ? { [changedInput]: lock[changedInput].split('@')[0] + '@sha256:' + 'c'.repeat(64) } : {}) };
   const branchFiles = candidateFiles(baseFiles, next, warnings, 11);
   const pr = { number: 12, node_id: 'PR_test', state: 'open', user: bot, html_url: 'https://example.test/pull/12',
     head: { sha: headSha, ref: 'chore/11-upstream-images', repo: { full_name: 'rambow-cloud/keycloak' } },
@@ -103,6 +106,7 @@ async function fixture({ changed = true, existing = false, edited = false, runs 
       get: async () => ({ data: { default_branch: 'main', full_name: 'rambow-cloud/keycloak' } }),
       getContent: async ({ path, ref }) => ({ data: { encoding: 'base64', content: Buffer.from((ref === headSha ? branchFiles : baseFiles)[path]).toString('base64') } }),
       getLatestRelease: async () => ({ data: { tag_name: releaseVersion } }),
+      createRelease: write('release', {}),
       getCommit: async () => ({ data: { sha: headSha, author: bot, parents: [{ sha: staleBase ? 'old' : mainSha }] } }),
     },
     git: {
@@ -127,7 +131,7 @@ async function fixture({ changed = true, existing = false, edited = false, runs 
     autoMerge = !query.includes('disablePullRequestAutoMerge');
     return {};
   } };
-  return { calls, pr, branchFiles, args: { github, context: { repo: { owner: 'rambow-cloud', repo: 'keycloak' }, ref: 'refs/heads/main' },
+  return { calls, pr, branchFiles, args: { github, identity: bot, context: { repo: { owner: 'rambow-cloud', repo: 'keycloak' }, ref: 'refs/heads/main' },
     core: { info() {}, warning() {} }, resolve: async ref => Object.values(next).find(value => typeof value === 'string' && value.startsWith(ref + '@')),
     inspect: async () => ({ warnings }) } };
 }
@@ -142,11 +146,11 @@ test('updater is quiet on unchanged inputs and dry runs have no writes', async (
   }
 });
 
-test('new updates create an Issue first, dispatch both checks and enable protected auto-merge', async () => {
+test('new App updates create an Issue first and rely on native checks without duplicate dispatch or publication', async () => {
   const { runUpstreamUpdate } = await import('../scripts/upstream-update.mjs');
   const f = await fixture();
   await runUpstreamUpdate(f.args);
-  assert.deepEqual(f.calls.map(c => c.name), ['issue', 'tree', 'commit', 'branch', 'pr', 'dispatch', 'dispatch', 'enable-auto-merge']);
+  assert.deepEqual(f.calls.map(c => c.name), ['issue', 'tree', 'commit', 'branch', 'pr', 'enable-auto-merge']);
   const tree = f.calls.find(c => c.name === 'tree');
   const note = JSON.parse(tree.args.tree.find(e => e.path === 'changes/upstream.json').content);
   assert.equal(note.changes[0].type,'fix');
@@ -154,7 +158,7 @@ test('new updates create an Issue first, dispatch both checks and enable protect
   assert.ok(note.changes[0].summary.includes('runtime digest'));
   validateIssue({ ...f.calls[0].args, number: 11, state: 'open' });
   assert.equal(f.calls.find(c => c.name === 'enable-auto-merge').args.sha, headSha);
-  assert.equal(f.calls.filter(c => c.name === 'dispatch')[1].args.inputs.pull_request_number, '12');
+  assert.equal(f.calls.some(c => c.name === 'dispatch'), false);
 });
 
 test('larger upgrades are drafted and never enabled for auto-merge', async () => {
@@ -165,12 +169,12 @@ test('larger upgrades are drafted and never enabled for auto-merge', async () =>
   assert.equal(f.calls.some(c => c.name === 'enable-auto-merge'), false);
 });
 
-test('unchanged open candidate avoids writes/builds; missing dispatches can be recovered', async () => {
+test('unchanged App candidate avoids duplicate builds and does not automatically retry failed checks', async () => {
   const { runUpstreamUpdate } = await import('../scripts/upstream-update.mjs');
   for (const runs of [[{ head_sha: headSha, conclusion: 'failure' }], []]) {
     const f = await fixture({ existing: true, runs });
     await runUpstreamUpdate(f.args);
-    assert.deepEqual(f.calls.map(c => c.name), runs.length ? ['enable-auto-merge'] : ['dispatch', 'dispatch', 'enable-auto-merge']);
+    assert.deepEqual(f.calls.map(c => c.name), ['enable-auto-merge']);
   }
 });
 
@@ -189,6 +193,62 @@ test('human edits and nondefault updater refs fail before any write', async () =
   await assert.rejects(runUpstreamUpdate(f.args), /edited/);
   assert.deepEqual(f.calls, []);
   await assert.rejects(runUpstreamUpdate({ ...f.args, context: { ...f.args.context, ref: 'refs/heads/untrusted' } }), /default branch/);
+});
+
+test('missing or legacy workflow identity fails closed before any write; dry-run remains read-only', async () => {
+  const { runUpstreamUpdate } = await import('../scripts/upstream-update.mjs');
+  for (const identity of [undefined, { ...bot, login: 'github-actions[bot]' }, { ...bot, type: 'User' }, { ...bot, id: 0 }]) {
+    const f = await fixture();
+    await assert.rejects(runUpstreamUpdate({ ...f.args, identity }), /dedicated GitHub App/);
+    assert.deepEqual(f.calls, []);
+  }
+  const f = await fixture();
+  await runUpstreamUpdate({ ...f.args, identity: undefined, dryRun: true });
+  assert.deepEqual(f.calls, []);
+});
+
+test('legacy or foreign PR authors require an explicit migration without overwrite or approval', async () => {
+  const { runUpstreamUpdate } = await import('../scripts/upstream-update.mjs');
+  for (const user of [{ ...bot, login: 'github-actions[bot]' }, { ...bot, id: bot.id + 1 }, { ...bot, node_id: 'other' }]) {
+    const f = await fixture({ existing: true });
+    f.pr.user = user;
+    await assert.rejects(runUpstreamUpdate(f.args), /not owned by the configured App/);
+    assert.deepEqual(f.calls, []);
+  }
+});
+
+test('App configuration rejects a different minted App and pins the complete bot identity', async () => {
+  const { validateUpdaterApp, updaterApp } = await lib;
+  assert.equal(validateUpdaterApp(updaterApp, updaterApp.slug), updaterApp);
+  for (const config of [{ ...updaterApp, clientId: '' }, { ...updaterApp, appId: 0 }, { ...updaterApp, bot: { ...updaterApp.bot, login: 'other[bot]' } }]) {
+    assert.throws(() => validateUpdaterApp(config), /configuration\/token identity/);
+  }
+  assert.throws(() => validateUpdaterApp(updaterApp, 'different-app'), /configuration\/token identity/);
+  assert.throws(() => validateUpdaterApp({ ...updaterApp, bot: null }), /dedicated GitHub App/);
+});
+
+test('builder-only refresh writes only a branch/PR and cannot create a Release or dispatch publication', async () => {
+  const { runUpstreamUpdate } = await import('../scripts/upstream-update.mjs');
+  const f = await fixture({ changedInput: 'builder' });
+  await runUpstreamUpdate(f.args);
+  const tree = f.calls.find(c => c.name === 'tree');
+  const candidate = JSON.parse(tree.args.tree.find(e => e.path === 'images.lock.json').content);
+  assert.notEqual(candidate.builder, lock.builder);
+  assert.equal(candidate.runtime, lock.runtime);
+  assert.equal(candidate.keycloak, lock.keycloak);
+  assert.equal(f.calls.find(c => c.name === 'branch').args.ref, 'refs/heads/chore/11-upstream-images');
+  assert.equal(f.calls.some(c => ['release', 'dispatch'].includes(c.name)), false);
+  assert.match(f.calls.find(c => c.name === 'pr').args.body, /GitHub App PR events trigger CI/);
+});
+
+test('publication event boundary excludes push, PR, schedule and upstream dispatch events', () => {
+  const { readFileSync } = require('node:fs');
+  const workflow = readFileSync(require('node:path').join(__dirname, '../.github/workflows/release.yml'), 'utf8').replaceAll('\r', '');
+  const triggers = workflow.match(/^on:\n([\s\S]*?)^permissions:/m)?.[1];
+  assert.ok(triggers, 'release workflow must have explicit top-level event mappings');
+  assert.deepEqual([...triggers.matchAll(/^  ([a-z_]+):/gm)].map(m => m[1]), ['release', 'workflow_dispatch']);
+  assert.match(triggers, /types: \[published, released\]/);
+  assert.match(triggers, /release_tag:[\s\S]*?required: true/);
 });
 
 test('plain generated bodies need no footer attribution lookup', async () => {
