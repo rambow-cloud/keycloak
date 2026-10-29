@@ -1,14 +1,15 @@
 import { resolveImageDigest } from './lib/oci.mjs';
-import { marker, managedPaths, chooseVersion, inspectCompatibility, candidateFiles, filesHash, issueBody, pullBody, assertBotOwned, autoMergeEligible } from './lib/upstream.mjs';
+import { marker, managedPaths, chooseVersion, inspectCompatibility, candidateFiles, filesHash, issueBody, pullBody, assertBotOwned, autoMergeEligible, validateUpdaterIdentity, sameUpdater } from './lib/upstream.mjs';
 import policy from './issue-policy.cjs';
 
-// All writes use the short-lived workflow token. Never execute code from an update PR.
-export async function runUpstreamUpdate({ github, context, core, dryRun = false,
+// All writes use a repository-scoped installation token. Never execute update PR code.
+export async function runUpstreamUpdate({ github, context, core, dryRun = false, identity,
   resolve = resolveImageDigest, inspect = inspectCompatibility }) {
   const repo = context.repo;
   const { data: metadata } = await github.rest.repos.get(repo);
   const base = metadata.default_branch;
   if (context.ref !== 'refs/heads/' + base) throw new Error('Run the updater only from the default branch.');
+  if (!dryRun) validateUpdaterIdentity(identity);
   const { data: baseRef } = await github.rest.git.getRef({ ...repo, ref: 'heads/' + base });
   const baseSha = baseRef.object.sha;
   const content = async (path, ref) => {
@@ -48,12 +49,15 @@ export async function runUpstreamUpdate({ github, context, core, dryRun = false,
   let pr = candidates[0];
   let issue;
   if (pr) {
+    if (!sameUpdater(pr.user, identity)) {
+      throw new Error('Existing upstream PR is not owned by the configured App. Preserve its branch and evidence, then close it after review before App migration; no automatic overwrite or approval.');
+    }
     if (!pr.body?.includes(marker)) throw new Error('An upstream update branch is not managed by this updater.');
     const [{ data: commit }, branchFiles] = await Promise.all([
       github.rest.repos.getCommit({ ...repo, ref: pr.head.sha }), readManaged(pr.head.sha),
     ]);
-    const body = await canonicalUpstreamBody({ github, context, pr });
-    assertBotOwned({ ...pr, body }, commit, branchFiles);
+    const body = await canonicalUpstreamBody({ github, context, pr, identity });
+    assertBotOwned({ ...pr, body }, commit, branchFiles, identity);
     [issue] = policy.issueNumbers(pr.body);
     if (policy.issueNumbers(pr.body).length !== 1 || pr.head.ref !== 'chore/' + issue + '-upstream-images') throw new Error('Unexpected update Issue/branch association.');
     const { data: linked } = await github.rest.issues.get({ ...repo, issue_number: issue });
@@ -63,7 +67,7 @@ export async function runUpstreamUpdate({ github, context, core, dryRun = false,
     changed = managedPaths.filter(path => files[path] !== currentFiles[path]);
     if (filesHash(branchFiles) === filesHash(files) && commit.parents.some(parent => parent.sha === baseSha)) {
       report('Existing PR already contains this candidate: ' + pr.html_url);
-      await dispatchMissingChecks(github, repo, pr, report);
+      report('Reusing native PR checks; no duplicate dispatch or automatic retry.');
       await configureAutoMerge(github, repo, pr, eligible, report);
       return { changed: true, pullRequest: pr.html_url, refreshed: false };
     }
@@ -97,14 +101,15 @@ export async function runUpstreamUpdate({ github, context, core, dryRun = false,
     pr = data;
   }
   report('Update PR: ' + pr.html_url);
-  await dispatchMissingChecks(github, repo, pr, report);
+  report('GitHub App PR events trigger required checks; no explicit CI dispatch.');
   await configureAutoMerge(github, repo, pr, eligible, report);
   return { changed: true, pullRequest: pr.html_url, refreshed: true, warnings };
 }
 
 // This is the same bounded automation exception used by the release catalog.
 // Never strip arbitrary trailing text, or trust a footer based on its text alone.
-export async function canonicalUpstreamBody({ github, context, pr }) {
+export async function canonicalUpstreamBody({ github, context, pr, identity }) {
+  validateUpdaterIdentity(identity);
   const body = pr.body ?? '';
   if (!body.includes('<!-- codesmith:footer -->')) return body;
   const parts = /^(.*<!-- generated-body-sha256:[a-f0-9]{64} -->\n)\n(<!-- codesmith:footer -->\n[\s\S]*\n<!-- \/codesmith:footer -->)\n?$/s.exec(body);
@@ -121,12 +126,11 @@ export async function canonicalUpstreamBody({ github, context, pr }) {
     }}}`, { owner: context.repo.owner, name: context.repo.repo, number: pr.number });
   const current = result?.pullRequest;
   const edits = current?.userContentEdits;
-  const actionsBot = 'MDM6Qm90NDE4OTgyODI=';
   const footerBot = 'BOT_kgDOCWWZcg';
   if (current?.body !== body || current?.headRefOid !== pr.head.sha || current?.editor?.__typename !== 'Bot' ||
       current.editor.id !== footerBot || !edits?.totalCount || edits.totalCount !== edits.nodes?.length ||
       edits.pageInfo?.hasNextPage !== false || edits.nodes.some(e => e?.editor?.__typename !== 'Bot' ||
-        ![actionsBot, footerBot].includes(e.editor.id))) {
+        ![identity.node_id, footerBot].includes(e.editor.id))) {
     throw new Error('Upstream PR footer edit history is not exclusively attributable to the pinned automation bots.');
   }
   return parts[1];
@@ -146,8 +150,9 @@ export async function configureAutoMerge(github, repo, pr, eligible, report) {
   }
 }
 
+// Retained for the separate GITHUB_TOKEN publication-record bot only.
+// The App upstream updater must not call this or duplicate native PR CI runs.
 export async function dispatchMissingChecks(github, repo, pr, report) {
-  // GITHUB_TOKEN PR events can require approval. Explicit dispatch runs without a persistent PAT/App secret.
   for (const workflow_id of ['ci.yml', 'issue-policy.yml']) {
     const runs = await github.paginate(github.rest.actions.listWorkflowRuns, { ...repo, workflow_id,
       branch: pr.head.ref, event: 'workflow_dispatch', per_page: 100 });

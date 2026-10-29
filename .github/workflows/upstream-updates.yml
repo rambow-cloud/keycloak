@@ -11,10 +11,7 @@ on:
   repository_dispatch:
     types: [upstream-update]
 permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  actions: write
+  contents: read
 concurrency:
   group: upstream-updates
   cancel-in-progress: false
@@ -23,16 +20,57 @@ jobs:
     if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    environment: upstream-update
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.repository.default_branch }}
           persist-credentials: false
-      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      - name: Validate pinned App configuration
+        id: config
+        if: inputs.dry_run != true
         env:
-          DRY_RUN: ${{ inputs.dry_run || false }}
+          APP_PRIVATE_KEY: ${{ secrets.UPSTREAM_APP_PRIVATE_KEY }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync } from 'node:fs';
+          import { updaterApp, validateUpdaterApp } from './scripts/lib/upstream.mjs';
+          const config = validateUpdaterApp(updaterApp);
+          if (!process.env.APP_PRIVATE_KEY?.trim()) throw new Error('Configure UPSTREAM_APP_PRIVATE_KEY in the main-only upstream-update Environment. No GITHUB_TOKEN write fallback.');
+          appendFileSync(process.env.GITHUB_OUTPUT, 'client_id=' + config.clientId + '\n');
+          NODE
+      - name: Mint repository-scoped installation token
+        id: app-token
+        if: inputs.dry_run != true
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ steps.config.outputs.client_id }}
+          private-key: ${{ secrets.UPSTREAM_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-issues: write
+          permission-pull-requests: write
+      - name: Refresh upstream PR with the dedicated App
+        if: inputs.dry_run != true
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          MINTED_APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const { updaterApp, validateUpdaterApp, sameUpdater } = await import(process.cwd() + '/scripts/lib/upstream.mjs');
+            const app = validateUpdaterApp(updaterApp, process.env.MINTED_APP_SLUG);
+            const { data: bot } = await github.rest.users.getByUsername({ username: app.bot.login });
+            if (!sameUpdater(bot, app.bot)) throw new Error('Pinned GitHub App bot identity changed.');
+            const { runUpstreamUpdate } = await import(process.cwd() + '/scripts/upstream-update.mjs');
+            const result = await runUpstreamUpdate({ github, context, core, identity: app.bot });
+            await core.summary.addHeading('Upstream update result').addCodeBlock(JSON.stringify(result, null, 2), 'json').write();
+      - name: Detect updates without App credentials or writes
+        if: inputs.dry_run == true
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const { runUpstreamUpdate } = await import(process.cwd() + '/scripts/upstream-update.mjs');
-            const result = await runUpstreamUpdate({ github, context, core, dryRun: process.env.DRY_RUN === 'true' });
+            const result = await runUpstreamUpdate({ github, context, core, dryRun: true });
             await core.summary.addHeading('Upstream update result').addCodeBlock(JSON.stringify(result, null, 2), 'json').write();

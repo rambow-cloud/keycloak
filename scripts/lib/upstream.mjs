@@ -5,6 +5,32 @@ export const managedPaths = ['images.lock.json', 'README.md', 'AGENTS.md', 'conf
 export const sha256 = value => createHash('sha256').update(value).digest('hex');
 export const formatJson = value => JSON.stringify(value, null, 2) + '\n';
 export const filesHash = files => sha256(JSON.stringify(managedPaths.map(path => [path, files[path]])));
+// Public identifiers, pinned after registering the private organization App.
+export const updaterApp = Object.freeze({ schemaVersion: 1, appId: 5523068, clientId: 'Iv23li88vLKtqCEQifBK',
+  slug: 'rambow-keycloak-updater', bot: Object.freeze({ login: 'rambow-keycloak-updater[bot]', type: 'Bot',
+    id: 349720571, node_id: 'BOT_kgDOFNhP-w' }) });
+
+export function validateUpdaterIdentity(identity) {
+  if (!identity || identity.type !== 'Bot' || !/^[a-z0-9][a-z0-9-]*\[bot\]$/.test(identity.login ?? '') ||
+      identity.login === 'github-actions[bot]' || !Number.isSafeInteger(identity.id) || identity.id <= 0 ||
+      typeof identity.node_id !== 'string' || !identity.node_id.length) {
+    throw new Error('A pinned dedicated GitHub App bot identity is required; GITHUB_TOKEN writes are disabled.');
+  }
+  return identity;
+}
+
+export const sameUpdater = (actual, expected) => actual?.type === 'Bot' && actual.login === expected.login &&
+  actual.id === expected.id && actual.node_id === expected.node_id;
+
+export function validateUpdaterApp(config, mintedSlug) {
+  validateUpdaterIdentity(config?.bot);
+  if (config.schemaVersion !== 1 || !Number.isSafeInteger(config.appId) || config.appId <= 0 ||
+      !/^Iv[0-9A-Za-z]+$/.test(config.clientId ?? '') || config.bot.login !== config.slug + '[bot]' ||
+      (mintedSlug !== undefined && mintedSlug !== config.slug)) {
+    throw new Error('GitHub App configuration/token identity mismatch.');
+  }
+  return config;
+}
 
 export function chooseVersion(current, release) {
   const valid = value => /^\d+\.\d+\.\d+$/.test(value);
@@ -79,15 +105,16 @@ export function pullBody(issue, previous, next, files, warnings, headSha) {
     '## Linked issues\n\nCloses #' + issue + '\n\n## Problem and resulting behavior\n\nRefresh upstream image inputs while preserving the existing image families and Java major.\n\n' +
     '| Input | Previous | Candidate |\n| --- | --- | --- |\n' + rows + '\n\n' +
     'Sources: [Keycloak release](https://github.com/keycloak/keycloak/releases/tag/' + next.keycloakVersion + '), [distroless](https://github.com/GoogleContainerTools/distroless).\n\n' +
-    '## Validation\n\nThe updater explicitly dispatches CI and Issue policy for this branch. Required checks gate merging; runtime checks cover core/aws images, TLS, authentication and shutdown.\n\n' +
+    '## Validation\n\nGitHub App PR events trigger CI and Issue policy for this branch. Required checks gate merging; runtime checks cover core/aws images, TLS, authentication and shutdown.\n\n' +
     '## Security and compatibility\n\n' + (autoMergeEligible(previous, next, warnings) ? 'Eligible for native auto-merge after required checks: patch/digest changes within reviewed image families.' : '**Maintainer review required.** Auto-merge is disabled for this candidate.') + '\n\n' + (warnings.length ? warnings.map(w => '- **Review required:** ' + w).join('\n') : 'Upstream startup code matches the reviewed baseline and the locked Java major remains the latest supported LTS.') + '\n\n' +
     '## Checklist\n\n- [x] The linked maintenance Issue follows its template.\n- [ ] The required checks and any required maintainer review are complete.\n- [x] No secrets, Docker tooling, protection bypass or deployment were introduced.\n\n' +
     'This PR is managed by the upstream updater. Editing its commits, managed files or generated body stops automatic refresh; close it to start a fresh update after preserving any needed work.\n';
   return body + '<!-- generated-body-sha256:' + sha256(body) + ' -->\n';
 }
 
-export function assertBotOwned(pr, commit, files) {
-  if (pr.user?.login !== 'github-actions[bot]' || commit.author?.login !== 'github-actions[bot]') throw new Error('Update branch has human/unknown commits; refusing to overwrite it.');
+export function assertBotOwned(pr, commit, files, identity) {
+  validateUpdaterIdentity(identity);
+  if (!sameUpdater(pr.user, identity) || !sameUpdater(commit.author, identity)) throw new Error('Update branch has human/unknown commits; refusing to overwrite it.');
   const expectedHead = pr.body?.match(/<!-- generated-head-sha:([a-f0-9]{40}) -->/)?.[1];
   if (!expectedHead || expectedHead !== commit.sha) throw new Error('Update branch contains untracked commits; refusing to overwrite it.');
   const expectedFiles = pr.body?.match(/<!-- generated-files-sha256:([a-f0-9]{64}) -->/)?.[1];

@@ -40,6 +40,9 @@ test('semantic fingerprints and CI scope distinguish metadata, AWS-only inputs, 
   assert.deepEqual(classifyCI(base, source(newSha, {}, { ...lock, awsDependencies: { wrapperVersion: '4.5.1' } })).profiles, ['aws']);
   assert.deepEqual(classifyCI(base, source(newSha, { 'dependencies/aws/dependencies.lock.json': 'new-providers' })).profiles, ['aws']);
   assert.deepEqual(classifyCI(base, source(newSha, {}, { ...lock, runtime: 'runtime@new' })).profiles, ['core','aws']);
+  const builder = source(newSha, {}, { ...lock, builder: 'builder@new' });
+  assert.deepEqual(classifyCI(base, builder).profiles, ['core','aws']);
+  for (const profile of ['core','aws']) assert.notEqual(fingerprint(base, profile), fingerprint(builder, profile));
   assert.deepEqual(classifyCI(base, source(newSha, {}, { ...lock, postgres: 'pg@new' })).imageChanges, []);
   assert.deepEqual(classifyCI(base, source(newSha, {}, { ...lock, postgres: 'pg@new' })).profiles, ['core','aws']);
   assert.deepEqual(classifyCI(base, source(newSha, { 'scripts/verify-image.sh': 'new-check' })).profiles, ['core','aws']);
