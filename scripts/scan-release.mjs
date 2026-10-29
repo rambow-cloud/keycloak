@@ -1,7 +1,8 @@
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { tmpdir } from 'node:os';
 import { lockArchitectures } from './lib/platforms.mjs';
 import { validateSummary, gateSummary } from './lib/trivy.mjs';
 const [preparedPath, layout, output] = process.argv.slice(2);
@@ -9,11 +10,12 @@ const prepared = JSON.parse(await readFile(preparedPath,'utf8'));
 const profile = process.env.BUILD_PROFILE;
 const targets = lockArchitectures(prepared.imageLock);
 const summaries = [];
+const work = await mkdtemp(join(tmpdir(),'rambow-release-scans-'));
 let failed = false;
 for (const architecture of targets) {
   const destination = resolve(output, architecture);
   await mkdir(destination,{recursive:true});
-  const selected = resolve(output, architecture+'-layout');
+  const selected = join(work,architecture);
   const copy = spawnSync('skopeo',['--override-os','linux','--override-arch',architecture,'copy','--preserve-digests','oci:'+resolve(layout),'oci:'+selected+':scan'],{stdio:'inherit',timeout:600000});
   if (copy.status !== 0) throw Error('Cannot select release architecture for scan');
   const env = {...process.env};
@@ -25,6 +27,7 @@ for (const architecture of targets) {
   summaries.push(summary);
   try { if (scan.status !== 0) throw Error('Scanner failed'); gateSummary(summary); }
   catch { failed = true; }
+  await rm(selected,{recursive:true,force:true});
 }
 await writeFile(resolve(output,'summary.json'),JSON.stringify(prepared.imageLock.platforms ? {schemaVersion:3,profile,summaries} : summaries[0],null,2)+'\n');
 if (failed) throw Error('One or more architecture scans failed the release gate');

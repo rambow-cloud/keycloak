@@ -33,6 +33,14 @@ await mkdir(outputDirectory, {recursive:true});
 const archive = join(outputDirectory, 'keycloak.oci.tar');
 const packed = spawnSync('tar', ['-cf',archive,'-C',layout,'oci-layout','index.json','blobs'], {stdio:'inherit'});
 if (packed.status !== 0) throw Error('Cannot archive multi-architecture OCI layout');
+const raw = spawnSync('skopeo',['inspect','--raw','oci-archive:'+archive],{encoding:'utf8',timeout:120000,maxBuffer:10000000});
+if (raw.status !== 0 || 'sha256:'+hash(raw.stdout) !== index.digest) throw Error('Skopeo did not preserve the packaged index digest');
+for (const architecture of architectures) {
+  const config = spawnSync('skopeo',['--override-os','linux','--override-arch',architecture,'inspect','--config','oci-archive:'+archive],{encoding:'utf8',timeout:120000,maxBuffer:10000000});
+  if (config.status !== 0) throw Error('Skopeo cannot select the packaged architecture');
+  const value = JSON.parse(config.stdout);
+  if (value.os !== 'linux' || value.architecture !== architecture) throw Error('Packaged index selects the wrong architecture');
+}
 const archiveSha256 = await fileHash(archive);
 await writeFile(archive+'.sha256',archiveSha256+'  keycloak.oci.tar\n');
 await writeFile(join(outputDirectory, 'images.lock.json'),lock);

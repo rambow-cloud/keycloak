@@ -68,7 +68,7 @@ jobs:
     needs: prepare
     if: needs.prepare.outputs.active == 'true' && needs.prepare.outputs.record_only != 'true'
     runs-on: ubuntu-26.04
-    timeout-minutes: 20
+    timeout-minutes: 35
     permissions:
       contents: read
       actions: read
