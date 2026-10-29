@@ -20,7 +20,7 @@ concurrency:
 jobs:
   prepare:
     if: github.event_name == 'workflow_dispatch' || (!github.event.release.draft && !github.event.release.prerelease)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 40
     permissions:
       contents: read
@@ -67,7 +67,7 @@ jobs:
   scan:
     needs: prepare
     if: needs.prepare.outputs.active == 'true' && needs.prepare.outputs.record_only != 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     permissions:
       contents: read
@@ -102,8 +102,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y skopeo
       - name: Verify exact CI artifact and prepare OCI layout
+        env:
+          TMPDIR: ${{ runner.temp }}
         run: node scripts/release-image.mjs inspect .cache/prepared.json .cache/release-input "$BUILD_PROFILE" .cache/release-scan/evidence.json .cache/release-layout
       - name: Fresh Trivy scan with current policy and databases
+        env:
+          TMPDIR: ${{ runner.temp }}
         run: node scripts/scan-image.mjs .cache/release-layout .cache/release-scan
       - name: Retain release scan evidence before the gate
         if: ${{ !cancelled() }}
@@ -119,7 +123,7 @@ jobs:
   freeze:
     needs: [prepare, scan]
     if: needs.prepare.outputs.preview != 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     permissions:
       contents: write
@@ -149,7 +153,7 @@ jobs:
             core.setOutput('plan', JSON.stringify(plan));
   publish:
     needs: [prepare, freeze]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 25
     environment: quay-release
     permissions:
@@ -175,6 +179,7 @@ jobs:
       - name: Preserve frozen digests while publishing changed profiles
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
+          TMPDIR: ${{ runner.temp }}
           PLAN: ${{ needs.freeze.outputs.plan }}
           VALIDATION_TOOLS_COMMIT: ${{ needs.prepare.outputs.tools_commit }}
           QUAY_USERNAME: ${{ vars.QUAY_USERNAME }}
@@ -201,7 +206,7 @@ jobs:
     if: >-
       !cancelled() && needs.prepare.outputs.active == 'true' && needs.prepare.outputs.preview != 'true' &&
       needs.prepare.outputs.record_only != 'true' && needs.publish.result != 'skipped'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     permissions:
       contents: write
@@ -239,7 +244,7 @@ jobs:
     if: >-
       !cancelled() && needs.prepare.outputs.active == 'true' && needs.prepare.outputs.preview != 'true' &&
       (needs.prepare.outputs.record_only == 'true' || (needs.publish.result == 'success' && needs.audit.result == 'success'))
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 40
     permissions:
       contents: write

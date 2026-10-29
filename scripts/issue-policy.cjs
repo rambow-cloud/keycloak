@@ -50,6 +50,7 @@ async function checkDispatchedPullRequest({ github, context, number }) {
       pr.base.ref !== context.payload.repository.default_branch) {
     throw new Error('Dispatched policy must run on the open local PR head targeting the default branch.');
   }
-  await checkPullRequest({ github, context: { ...context, payload: { ...context.payload, pull_request: pr } } });
+  // @actions/github Context.repo is a prototype getter, not an enumerable field.
+  await checkPullRequest({ github, context: { ...context, repo: context.repo, payload: { ...context.payload, pull_request: pr } } });
 }
 module.exports = { issueNumbers, validateIssue, checkPullRequest, checkDispatchedPullRequest };

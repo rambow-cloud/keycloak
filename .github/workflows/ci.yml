@@ -12,7 +12,7 @@ concurrency:
 jobs:
   impact:
     name: Image impact
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -41,7 +41,7 @@ jobs:
             await core.summary.addHeading('Image work decision').addRaw(result.reason + '\n\n').addCodeBlock(JSON.stringify(result.profiles),'json').write();
   static:
     name: Static checks
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -70,7 +70,7 @@ jobs:
     name: Build ${{ matrix.profile }}
     needs: impact
     if: needs.impact.outputs.build == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 25
     strategy:
       fail-fast: false
@@ -80,11 +80,16 @@ jobs:
       BUILD_PROFILE: ${{ matrix.profile }}
       SCAN_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
+      # runner context is available in steps, not in job-level env.
+      - name: Use disk-backed OCI temporary storage
+        run: printf 'TMPDIR=%s\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Install open-source OCI tools
         run: |
+          cat /etc/os-release
+          findmnt -T "$TMPDIR" -o TARGET,FSTYPE,SIZE,AVAIL
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y buildah podman skopeo openssl
           buildah --version
@@ -137,7 +142,7 @@ jobs:
     name: Build and verify
     if: always()
     needs: [impact, static, build]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 2
     steps:
       - name: Require static checks and both image profiles
