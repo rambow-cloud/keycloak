@@ -17,6 +17,7 @@ for image in "$keycloak" "$builder" "$runtime"; do
   [[ "$image" =~ @sha256:[a-f0-9]{64}$ ]] || { echo 'Base image must be digest-pinned' >&2; exit 1; }
 done
 node scripts/keycloak-dependencies.mjs
+node scripts/opentelemetry-dependencies.mjs
 if [[ "$profile" == aws ]]; then node scripts/aws-dependencies.mjs fetch; fi
 buildah build --target "$profile" --format oci --platform "linux/$architecture" \
   --build-arg "KEYCLOAK_IMAGE=$keycloak" --build-arg "BUILD_IMAGE=$builder" \

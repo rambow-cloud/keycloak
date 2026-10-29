@@ -7,6 +7,17 @@ const image = { profile: 'aws', tag: '26.8.1-r1-aws', digest };
 const record = () => ({ schemaVersion: 1, id: 'SEC-2026-001', recordedAt: '2026-10-26T12:00:00.000Z', kind: 'fix', status: 'fixed-before-publication',
   advisories: ['CVE-2026-12345'], summary: 'Repair a vulnerable component before its first publication.', details: ['Pinned a compatible patched component.'],
   issues: [13], pullRequests: [12], images: [image], references: [{label:'Reviewed repair',url:'https://github.com/rambow-cloud/keycloak/issues/13'}], evidence: [] });
+
+test('ledger membership retains original publication facts and validated expanded index bindings',async()=>{
+ const {ledgerImageCatalog,validateRecords}=await lib;
+ const publications=await Promise.all(['r1','r2','r3'].map(async v=>JSON.parse(await readFile('releases/records/v26.8.1-'+v+'.json','utf8'))));
+ const {parseReleaseEvents}=await import('../scripts/lib/release-events.mjs');
+ const events=parseReleaseEvents(await readFile('releases/events.jsonl','utf8'));
+ const catalog=ledgerImageCatalog(publications,events),r2=publications.find(r=>r.plan.tag==='v26.8.1-r2');
+ for(const images of [r2.plan.images,events.find(e=>e.operation==='architecture-expansion').images]) validateRecords([{...record(),images}],catalog);
+ const altered=events.map(e=>e.operation==='architecture-expansion'?{...e,images:e.images.map(i=>({...i,beforeDigest:digest}))}:e);
+ assert.throws(()=>ledgerImageCatalog(publications,altered));
+});
 test('JSONL rejects missing/partial records and append-only history preserves original lines', async () => {
   const { parseLedger, assertAppendOnly } = await lib;
   const original = JSON.stringify(record()) + '\n';

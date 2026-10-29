@@ -1,0 +1,1 @@
+{"schemaVersion":1,"changes":[{"type":"fix","summary":"Repair excessive CPU consumption while parsing W3C tracestate headers by aligning the existing OpenTelemetry core cohort to official 1.67.0 artifacts before Keycloak optimization.","issues":[79],"profiles":["core","aws"],"cves":["CVE-2026-118259"]}]}

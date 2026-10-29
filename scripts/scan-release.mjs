@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { lockArchitectures } from './lib/platforms.mjs';
 import { validateSummary, gateSummary } from './lib/trivy.mjs';
+import {verifyTelemetryScan,requiresTelemetryRepair} from './opentelemetry-dependencies.mjs';
 const [preparedPath, layout, output] = process.argv.slice(2);
 const prepared = JSON.parse(await readFile(preparedPath,'utf8'));
 const profile = process.env.BUILD_PROFILE;
@@ -25,7 +26,12 @@ for (const architecture of targets) {
   const summary = JSON.parse(await readFile(join(destination,'summary.json'),'utf8'));
   validateSummary(summary,{profile,architecture:env.BUILD_ARCH,headSha:process.env.SCAN_HEAD_SHA,runId:Number(process.env.GITHUB_RUN_ID),runAttempt:Number(process.env.GITHUB_RUN_ATTEMPT)});
   summaries.push(summary);
-  try { if (scan.status !== 0) throw Error('Scanner failed'); gateSummary(summary); }
+  try {
+    if (scan.status !== 0) throw Error('Scanner failed'); gateSummary(summary);
+    if(requiresTelemetryRepair(prepared,profile)) {
+      verifyTelemetryScan(JSON.parse(await readFile(join(destination,'trivy.json'),'utf8')));
+    }
+  }
   catch { failed = true; }
   await rm(selected,{recursive:true,force:true});
 }
