@@ -160,6 +160,7 @@ export async function ensureCatalogPR({ github, context, core, record }) {
     return { merged: true, baseSha };
   }
   const next = validateCatalog([...records, record]);
+  Object.defineProperty(next, 'lifecycle', { value: validateReleaseEvents(records.lifecycle ?? [], next) });
   const files = { [pathFor(record)]: json(record), 'releases/README.md': renderCatalog(next, await readHistory(github, repo, baseSha, next)) };
   const pulls = await github.paginate(github.rest.pulls.list, { ...repo, state: 'open', base: main, per_page: 100 });
   const candidates = pulls.filter(p => p.body?.includes('<!-- catalog-release:' + record.plan.releaseId + ' -->'));
