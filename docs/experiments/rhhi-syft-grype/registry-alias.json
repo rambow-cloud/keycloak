@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-10-30T01:10:55.839Z",
+  "registry": "registry.access.redhat.com",
+  "repository": "hi/openjdk",
+  "alias": "latest-runtime",
+  "digest": "sha256:48196e83cf2c3355e52a29995b97023fbc50e1fc592d1a0a7fd0208c998c1189",
+  "testedRuntimeDigest": "sha256:48196e83cf2c3355e52a29995b97023fbc50e1fc592d1a0a7fd0208c998c1189",
+  "sameAsTested": true
+}
