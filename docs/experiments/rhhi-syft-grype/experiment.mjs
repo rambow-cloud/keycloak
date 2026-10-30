@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const directory=dirname(fileURLToPath(import.meta.url));
 const lock=JSON.parse(fs.readFileSync(resolve(directory,'inputs.lock.json')));
+const candidateByDigest=lock.candidate.reference.replace(/:[^/@]+@/,'@');
 const output=resolve('.cache/rhhi-results');
 const prepared=resolve('.cache/rhhi-prepared');
 const arch=process.arch==='arm64'?'arm64':'amd64';
@@ -53,6 +54,8 @@ function databaseHash() {
 }
 async function prepare() {
   fs.mkdirSync(output,{recursive:true});fs.mkdirSync(prepared,{recursive:true});
+  run('skopeo',['inspect','--raw','docker://'+candidateByDigest],resolve(prepared,'base-index.json'));
+  if('sha256:'+hash(resolve(prepared,'base-index.json'))!==lock.candidate.digest)throw Error('Base index mismatch');
   const bins=await tools();run(bins.grype,['db','update']);
   run(bins.grype,['db','status','-o','json'],resolve(output,'database-status.json'));
   const status=read(resolve(output,'database-status.json'));
@@ -75,8 +78,6 @@ async function prepare() {
   }
   if(!controls[0].found||controls[1].found)throw Error('Vulnerable/fixed advisory controls failed');
   write(resolve(prepared,'database.json'),{status,sha256:dbHash,archiveSha256:hash(resolve(prepared,'database.tar.gz')),controls});
-  run('skopeo',['inspect','--raw','docker://'+lock.candidate.reference],resolve(prepared,'base-index.json'));
-  if('sha256:'+hash(resolve(prepared,'base-index.json'))!==lock.candidate.digest)throw Error('Base index mismatch');
   console.log('One validated database snapshot and positive/negative controls are frozen.');
 }
 async function setup() {
@@ -89,7 +90,7 @@ async function setup() {
   if(databaseHash()!==db.sha256)throw Error('Database snapshot differs');
   const original=read('images.lock.json');write(resolve(output,'production-images.lock.json'),original);
   write('images.lock.json',{...original,runtime:lock.candidate.reference});
-  run('skopeo',['inspect','--config','--override-os','linux','--override-arch',arch,'docker://'+lock.candidate.reference],resolve(output,'base-config.json'));
+  run('skopeo',['inspect','--config','--override-os','linux','--override-arch',arch,'docker://'+candidateByDigest],resolve(output,'base-config.json'));
   const fixtures=read('docs/security/evidence/emudhra-core.json').fixtures;
   const dir=resolve(output,'certificates');fs.mkdirSync(resolve(dir,'chains'),{recursive:true});
   for(const chain of fixtures.chains) {
