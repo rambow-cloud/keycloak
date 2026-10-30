@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "status": "published",
+  "publishedAt": "2026-10-30T00:07:51.026Z",
+  "publishRunId": 40977310522,
+  "validationToolsCommit": "309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+  "plan": {
+    "schemaVersion": 3,
+    "registry": "quay.io/rambow-cloud/keycloak",
+    "tag": "v26.8.1-r4",
+    "releaseId": 428516171,
+    "keycloakVersion": "26.8.1",
+    "revision": 4,
+    "sourceCommit": "309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+    "toolsCommit": "309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+    "sourceRun": {
+      "id": 40976533454,
+      "attempt": 1
+    },
+    "lockSha256": "32b11de6c4b8b9b58300e383578fee87c80ef1d7f664ed2618a568b7fea32010",
+    "imageLock": {
+      "keycloakVersion": "26.8.1",
+      "javaVersion": 25,
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "keycloak": "quay.io/keycloak/keycloak:26.8.1@sha256:a78d6b79572168cb25886b80a8b5b8d4ed4390743e3eecb810538683e209dd6b",
+      "builder": "docker.io/library/eclipse-temurin:25-jdk-noble@sha256:7247bd8d2aeec64efe908dc72396d88101417d24ce3642703728382d96afb965",
+      "runtime": "gcr.io/distroless/java25-debian13:nonroot@sha256:5d3177252775d4b01603470fe21c015393019089904f68724bd37242e4bc6e6d",
+      "postgres": "docker.io/library/postgres:17-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+      "awsDependencies": {
+        "wrapperVersion": "4.5.0",
+        "sdkVersion": "2.46.10",
+        "lockFile": "dependencies/aws/dependencies.lock.json",
+        "rdsCa": {
+          "url": "https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem",
+          "sha256": "90a6f1a7978a1b1b096dca6c57511ca48d3b8cf052f8e704baf358f34ea2f21b"
+        }
+      }
+    },
+    "aliases": [],
+    "previousAliases": {},
+    "images": [
+      {
+        "profile": "core",
+        "inputSha256": "fb9fb19cc5973f2e2475589ae2eedfb8ca6a0153a15ac97f867987b333e747bd",
+        "changes": [
+          {
+            "type": "fix",
+            "summary": "Repair excessive CPU consumption while parsing W3C tracestate headers by aligning the existing OpenTelemetry core cohort to official 1.67.0 artifacts before Keycloak optimization.",
+            "issues": [
+              79
+            ],
+            "cves": [
+              "CVE-2026-118259"
+            ]
+          }
+        ],
+        "artifactId": 12942972514,
+        "artifactName": "keycloak-oci-core-multiarch-309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+        "tag": "26.8.1-r4-core",
+        "digest": "sha256:f44c94db4c96807f8c6c8b1a9eb3d63d94209a1b233ac26a4465c46ee3a8e055",
+        "archiveSha256": "51a900324a75a0b5e74549fd936f10ca73c93aaa7527b4593112a2cdd7bc3d51",
+        "children": [
+          {
+            "architecture": "amd64",
+            "digest": "sha256:50bf02f80d85000543e191eefa935d149460534300550996791ddbdef603734f"
+          },
+          {
+            "architecture": "arm64",
+            "digest": "sha256:603adc44ed194f8c33c6760daca2d3bbd1ee1b65dd21b1e5f87ee0dd49117f02"
+          }
+        ]
+      },
+      {
+        "profile": "aws",
+        "inputSha256": "a4de5c899bd3c139d1466f9419780eda3ca94d80855b19add3b3ed1d398a2a2a",
+        "changes": [
+          {
+            "type": "fix",
+            "summary": "Repair excessive CPU consumption while parsing W3C tracestate headers by aligning the existing OpenTelemetry core cohort to official 1.67.0 artifacts before Keycloak optimization.",
+            "issues": [
+              79
+            ],
+            "cves": [
+              "CVE-2026-118259"
+            ]
+          }
+        ],
+        "artifactId": 12942887944,
+        "artifactName": "keycloak-oci-aws-multiarch-309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+        "tag": "26.8.1-r4-aws",
+        "digest": "sha256:60cf8cf84de4b33cf33c6251ef3e4e5631f0fe8b11fcb29519046e81c170368a",
+        "archiveSha256": "3d764250af66cfc15ee598c536bcdc774ecfd4f41812d277863abf7ba263e0bc",
+        "children": [
+          {
+            "architecture": "amd64",
+            "digest": "sha256:203dc685cd222347d80efbfc2b1162867ff2910983cda4be140b7c83ebd5df05"
+          },
+          {
+            "architecture": "arm64",
+            "digest": "sha256:ba1b49cf56b4c1a219155af1fbbc01c401bf054b097116539fdb0117672db2d0"
+          }
+        ]
+      }
+    ]
+  },
+  "aliasChanges": []
+}
