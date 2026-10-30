@@ -4,6 +4,12 @@
 
 [Detailed history and evidence](history.md) · [Image tags and digests](../../releases/README.md)
 
+## v26.8.1-r4
+
+<a id="sec-2026-006"></a>
+
+- **[CVE-2026-118259](history.md#sec-2026-006)** (`aws`, `core`): Fix excessive CPU consumption in W3C tracestate parsing by upgrading OpenTelemetry core from 1.62.0 to 1.67.0.
+
 ## v26.8.1-r2
 
 <a id="sec-2026-004"></a>

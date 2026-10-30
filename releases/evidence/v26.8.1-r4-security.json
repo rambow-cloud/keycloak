@@ -1,0 +1,1566 @@
+{
+  "schemaVersion": 1,
+  "release": "v26.8.1-r4",
+  "releaseId": 428516171,
+  "recordedAt": "2026-10-30T00:14:32.602Z",
+  "advisory": "CVE-2026-118259",
+  "advisoryUrl": "https://github.com/open-telemetry/opentelemetry-java/security/advisories/GHSA-ccrj-gw8r-854m",
+  "remediation": {
+    "issue": 79,
+    "pullRequest": 80,
+    "sourceCommit": "309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+    "from": "1.62.0",
+    "to": "1.67.0",
+    "incubatorTo": "1.67.0-alpha",
+    "scope": "The existing 14 io.opentelemetry core/API/SDK/exporter artifacts; Quarkus and instrumentation remain at their upstream versions.",
+    "payloadLock": "dependencies/keycloak/opentelemetry.lock.json",
+    "payloadLockSha256": "1c9c62479781e7fac5eb50143415958f2aadcaf3980207519ada140e8e25b2b2",
+    "compatibility": [
+      "Official original and replacement JAR SHA-256 validation before optimization; exact final rootfs JAR integrity.",
+      "Bounded malformed tracestate parsing, trace context/baggage round trip, in-memory SDK span export, metrics/log linkage.",
+      "Tracing-enabled Quarkus augmentation followed by a tracing-disabled final optimized build on both native architectures.",
+      "All four native image runtime suites passed, including verified database TLS, authentication and graceful shutdown."
+    ]
+  },
+  "sourceCI": {
+    "id": 40976533454,
+    "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40976533454",
+    "headSha": "309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 123805835637,
+        "name": "Static checks",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40976533454/job/123805835637",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-29T23:57:16Z",
+        "completedAt": "2026-10-29T23:57:22Z"
+      },
+      {
+        "id": 123805836204,
+        "name": "Image impact",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40976533454/job/123805836204",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-29T23:57:16Z",
+        "completedAt": "2026-10-29T23:57:22Z"
+      },
+      {
+        "id": 123805893062,
+        "name": "Build aws (amd64)",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40976533454/job/123805893062",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-29T23:57:25Z",
+        "completedAt": "2026-10-30T00:02:23Z"
+      },
+      {
+        "id": 123805893065,
+        "name": "Build core (arm64)",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40976533454/job/123805893065",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-29T23:57:27Z",
+        "completedAt": "2026-10-30T00:01:32Z"
+      },
+      {
+        "id": 123805893135,
+        "name": "Build core (amd64)",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40976533454/job/123805893135",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-29T23:57:25Z",
+        "completedAt": "2026-10-30T00:01:25Z"
+      },
+      {
+        "id": 123805893196,
+        "name": "Build aws (arm64)",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40976533454/job/123805893196",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-29T23:57:27Z",
+        "completedAt": "2026-10-30T00:02:03Z"
+      },
+      {
+        "id": 123807712326,
+        "name": "Package core architectures",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40976533454/job/123807712326",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-30T00:02:25Z",
+        "completedAt": "2026-10-30T00:02:51Z"
+      },
+      {
+        "id": 123807712381,
+        "name": "Package aws architectures",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40976533454/job/123807712381",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-30T00:02:26Z",
+        "completedAt": "2026-10-30T00:03:02Z"
+      },
+      {
+        "id": 123807949534,
+        "name": "Build and verify",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40976533454/job/123807949534",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-30T00:03:04Z",
+        "completedAt": "2026-10-30T00:03:07Z"
+      }
+    ]
+  },
+  "publicationCI": {
+    "id": 40977310522,
+    "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40977310522",
+    "headSha": "309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+    "status": "completed",
+    "conclusion": "failure",
+    "jobs": [
+      {
+        "id": 123808436353,
+        "name": "prepare",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40977310522/job/123808436353",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-30T00:04:25Z",
+        "completedAt": "2026-10-30T00:04:37Z"
+      },
+      {
+        "id": 123808521868,
+        "name": "scan (aws)",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40977310522/job/123808521868",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-30T00:04:38Z",
+        "completedAt": "2026-10-30T00:06:04Z"
+      },
+      {
+        "id": 123808522108,
+        "name": "scan (core)",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40977310522/job/123808522108",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-30T00:04:39Z",
+        "completedAt": "2026-10-30T00:06:06Z"
+      },
+      {
+        "id": 123809065873,
+        "name": "freeze",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40977310522/job/123809065873",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-30T00:06:08Z",
+        "completedAt": "2026-10-30T00:06:16Z"
+      },
+      {
+        "id": 123809131315,
+        "name": "publish",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40977310522/job/123809131315",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-30T00:06:20Z",
+        "completedAt": "2026-10-30T00:07:54Z"
+      },
+      {
+        "id": 123809732299,
+        "name": "audit",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40977310522/job/123809732299",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-30T00:07:56Z",
+        "completedAt": "2026-10-30T00:08:02Z"
+      },
+      {
+        "id": 123809783220,
+        "name": "record",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40977310522/job/123809783220",
+        "status": "completed",
+        "conclusion": "failure",
+        "startedAt": "2026-10-30T00:08:04Z",
+        "completedAt": "2026-10-30T00:08:20Z"
+      }
+    ]
+  },
+  "catalogRecovery": {
+    "id": 40978115566,
+    "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40978115566",
+    "headSha": "fa3d7d42db29ea5575b296cb9df082999d29d54d",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 123811091155,
+        "name": "prepare",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40978115566/job/123811091155",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-30T00:11:40Z",
+        "completedAt": "2026-10-30T00:11:47Z"
+      },
+      {
+        "id": 123811149650,
+        "name": "scan",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40978115566/job/123811149650",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-10-30T00:11:48Z",
+        "completedAt": "2026-10-30T00:11:47Z"
+      },
+      {
+        "id": 123811150383,
+        "name": "freeze",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40978115566/job/123811150383",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-10-30T00:11:48Z",
+        "completedAt": "2026-10-30T00:11:48Z"
+      },
+      {
+        "id": 123811150828,
+        "name": "record",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40978115566/job/123811150828",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-30T00:11:50Z",
+        "completedAt": "2026-10-30T00:13:27Z"
+      },
+      {
+        "id": 123811151349,
+        "name": "publish",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40978115566/job/123811151349",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-10-30T00:11:48Z",
+        "completedAt": "2026-10-30T00:11:48Z"
+      },
+      {
+        "id": 123811152691,
+        "name": "audit",
+        "url": "https://github.com/rambow-cloud/keycloak/actions/runs/40978115566/job/123811152691",
+        "status": "completed",
+        "conclusion": "skipped",
+        "startedAt": "2026-10-30T00:11:48Z",
+        "completedAt": "2026-10-30T00:11:48Z"
+      }
+    ]
+  },
+  "catalogPullRequest": 87,
+  "catalogUrl": "https://github.com/rambow-cloud/keycloak/pull/87",
+  "completion": {
+    "asset": "publication-complete.json",
+    "sha256": "6ff26672f98d1e54ce76a9dea7dd2532f7717a4c5fda4f5f056e30e9b8d68ed5",
+    "value": {
+      "schemaVersion": 1,
+      "tag": "v26.8.1-r4",
+      "recordSha256": "6d205f5aa80a7f7a55d66a42c573e587566139d09b2b6512596da2c9b1fba873",
+      "catalog": "https://github.com/rambow-cloud/keycloak/blob/main/releases/README.md"
+    }
+  },
+  "publicationRecordSha256": "6d205f5aa80a7f7a55d66a42c573e587566139d09b2b6512596da2c9b1fba873",
+  "images": [
+    {
+      "profile": "core",
+      "tag": "26.8.1-r4-core",
+      "digest": "sha256:f44c94db4c96807f8c6c8b1a9eb3d63d94209a1b233ac26a4465c46ee3a8e055",
+      "children": [
+        {
+          "architecture": "amd64",
+          "digest": "sha256:50bf02f80d85000543e191eefa935d149460534300550996791ddbdef603734f"
+        },
+        {
+          "architecture": "arm64",
+          "digest": "sha256:603adc44ed194f8c33c6760daca2d3bbd1ee1b65dd21b1e5f87ee0dd49117f02"
+        }
+      ]
+    },
+    {
+      "profile": "aws",
+      "tag": "26.8.1-r4-aws",
+      "digest": "sha256:60cf8cf84de4b33cf33c6251ef3e4e5631f0fe8b11fcb29519046e81c170368a",
+      "children": [
+        {
+          "architecture": "amd64",
+          "digest": "sha256:203dc685cd222347d80efbfc2b1162867ff2910983cda4be140b7c83ebd5df05"
+        },
+        {
+          "architecture": "arm64",
+          "digest": "sha256:ba1b49cf56b4c1a219155af1fbbc01c401bf054b097116539fdb0117672db2d0"
+        }
+      ]
+    }
+  ],
+  "scans": [
+    {
+      "profile": "core",
+      "architecture": "amd64",
+      "indexDigest": "sha256:f44c94db4c96807f8c6c8b1a9eb3d63d94209a1b233ac26a4465c46ee3a8e055",
+      "digest": "sha256:50bf02f80d85000543e191eefa935d149460534300550996791ddbdef603734f",
+      "artifactId": 12942972514,
+      "sourceArtifact": "keycloak-oci-core-multiarch-309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+      "scanArtifact": "release-scan-core-1",
+      "rawReportSha256": "76955e8ad7b8eb63848a8cf8c0e02d24a25579c66c3d77e6800e49de5a1ac024",
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-10-30T19:18:50.969126577Z",
+        "UpdatedAt": "2026-10-29T19:18:50.96912695Z",
+        "DownloadedAt": "2026-10-30T00:05:09.579962225Z"
+      },
+      "javaDatabase": {
+        "Version": 1,
+        "NextUpdate": "2026-11-01T01:08:14.598233916Z",
+        "UpdatedAt": "2026-10-29T01:08:14.598234036Z",
+        "DownloadedAt": "2026-10-30T00:05:28.316090641Z"
+      },
+      "targetedAdvisory": "CVE-2026-118259",
+      "targetedFindings": 0,
+      "openTelemetryPackages": [
+        {
+          "name": "io.opentelemetry:opentelemetry-api",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-api-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-api@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-api-incubator",
+          "version": "1.67.0-alpha",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-api-incubator-1.62.0-alpha.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-api-incubator@1.67.0-alpha"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-context",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-context-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-context@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-exporter-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-exporter-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-exporter-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-exporter-otlp",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-exporter-otlp-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-exporter-otlp@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-exporter-otlp-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-exporter-otlp-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-exporter-otlp-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-extension-autoconfigure-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-extension-autoconfigure@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-extension-autoconfigure-spi-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-extension-autoconfigure-spi@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-logs",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-logs-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-logs@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-metrics",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-metrics-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-metrics@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-trace",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-trace-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-trace@1.67.0"
+        }
+      ],
+      "summary": {
+        "schemaVersion": 2,
+        "profile": "core",
+        "architecture": "amd64",
+        "headSha": "309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+        "runId": 40977310522,
+        "runAttempt": 1,
+        "status": "complete",
+        "scannerVersion": "0.76.1",
+        "createdAt": "2026-10-30T00:05:29.53072173Z",
+        "policy": {
+          "blockingSeverities": [
+            "HIGH",
+            "CRITICAL"
+          ],
+          "blockUnfixed": false
+        },
+        "counts": {
+          "CRITICAL": {
+            "total": 0,
+            "fixable": 0
+          },
+          "HIGH": {
+            "total": 4,
+            "fixable": 0
+          },
+          "MEDIUM": {
+            "total": 39,
+            "fixable": 0
+          },
+          "LOW": {
+            "total": 20,
+            "fixable": 0
+          },
+          "UNKNOWN": {
+            "total": 3,
+            "fixable": 0
+          }
+        },
+        "total": 66,
+        "blocking": 0,
+        "osEosl": false,
+        "findings": [
+          {
+            "id": "CVE-2026-76642",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2025-66382",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "gcc-14-base",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libgcc-s1",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libstdc++6",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-113351",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-27171",
+            "package": "zlib1g",
+            "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-3184",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-42250",
+            "package": "libbz2-1.0",
+            "installed": "1.0.8-6",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-5435",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-5435",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/amd64 (debian 13.7)"
+          }
+        ]
+      }
+    },
+    {
+      "profile": "core",
+      "architecture": "arm64",
+      "indexDigest": "sha256:f44c94db4c96807f8c6c8b1a9eb3d63d94209a1b233ac26a4465c46ee3a8e055",
+      "digest": "sha256:603adc44ed194f8c33c6760daca2d3bbd1ee1b65dd21b1e5f87ee0dd49117f02",
+      "artifactId": 12942972514,
+      "sourceArtifact": "keycloak-oci-core-multiarch-309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+      "scanArtifact": "release-scan-core-1",
+      "rawReportSha256": "8541c792a6e18e1917886a824c1553a6c062e347897d5c4bdc0c2ede904b4fcf",
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-10-30T19:18:50.969126577Z",
+        "UpdatedAt": "2026-10-29T19:18:50.96912695Z",
+        "DownloadedAt": "2026-10-30T00:05:38.688509401Z"
+      },
+      "javaDatabase": {
+        "Version": 1,
+        "NextUpdate": "2026-11-01T01:08:14.598233916Z",
+        "UpdatedAt": "2026-10-29T01:08:14.598234036Z",
+        "DownloadedAt": "2026-10-30T00:06:01.443474078Z"
+      },
+      "targetedAdvisory": "CVE-2026-118259",
+      "targetedFindings": 0,
+      "openTelemetryPackages": [
+        {
+          "name": "io.opentelemetry:opentelemetry-api",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-api-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-api@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-api-incubator",
+          "version": "1.67.0-alpha",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-api-incubator-1.62.0-alpha.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-api-incubator@1.67.0-alpha"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-context",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-context-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-context@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-exporter-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-exporter-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-exporter-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-exporter-otlp",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-exporter-otlp-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-exporter-otlp@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-exporter-otlp-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-exporter-otlp-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-exporter-otlp-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-extension-autoconfigure-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-extension-autoconfigure@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-extension-autoconfigure-spi-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-extension-autoconfigure-spi@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-logs",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-logs-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-logs@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-metrics",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-metrics-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-metrics@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-trace",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-trace-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-trace@1.67.0"
+        }
+      ],
+      "summary": {
+        "schemaVersion": 2,
+        "profile": "core",
+        "architecture": "arm64",
+        "headSha": "309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+        "runId": 40977310522,
+        "runAttempt": 1,
+        "status": "complete",
+        "scannerVersion": "0.76.1",
+        "createdAt": "2026-10-30T00:06:02.609972169Z",
+        "policy": {
+          "blockingSeverities": [
+            "HIGH",
+            "CRITICAL"
+          ],
+          "blockUnfixed": false
+        },
+        "counts": {
+          "CRITICAL": {
+            "total": 0,
+            "fixable": 0
+          },
+          "HIGH": {
+            "total": 4,
+            "fixable": 0
+          },
+          "MEDIUM": {
+            "total": 39,
+            "fixable": 0
+          },
+          "LOW": {
+            "total": 20,
+            "fixable": 0
+          },
+          "UNKNOWN": {
+            "total": 3,
+            "fixable": 0
+          }
+        },
+        "total": 66,
+        "blocking": 0,
+        "osEosl": false,
+        "findings": [
+          {
+            "id": "CVE-2026-76642",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2025-66382",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "gcc-14-base",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libgcc-s1",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libstdc++6",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-113351",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-27171",
+            "package": "zlib1g",
+            "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-3184",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-42250",
+            "package": "libbz2-1.0",
+            "installed": "1.0.8-6",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-5435",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-5435",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-26FVtX/arm64 (debian 13.7)"
+          }
+        ]
+      }
+    },
+    {
+      "profile": "aws",
+      "architecture": "amd64",
+      "indexDigest": "sha256:60cf8cf84de4b33cf33c6251ef3e4e5631f0fe8b11fcb29519046e81c170368a",
+      "digest": "sha256:203dc685cd222347d80efbfc2b1162867ff2910983cda4be140b7c83ebd5df05",
+      "artifactId": 12942887944,
+      "sourceArtifact": "keycloak-oci-aws-multiarch-309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+      "scanArtifact": "release-scan-aws-1",
+      "rawReportSha256": "128ced7cc35ce8634d58b8b5d788ca2194c9682023271519be5766385c4e2a6d",
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-10-30T19:18:50.969126577Z",
+        "UpdatedAt": "2026-10-29T19:18:50.96912695Z",
+        "DownloadedAt": "2026-10-30T00:05:08.336282658Z"
+      },
+      "javaDatabase": {
+        "Version": 1,
+        "NextUpdate": "2026-11-01T01:08:14.598233916Z",
+        "UpdatedAt": "2026-10-29T01:08:14.598234036Z",
+        "DownloadedAt": "2026-10-30T00:05:28.249853517Z"
+      },
+      "targetedAdvisory": "CVE-2026-118259",
+      "targetedFindings": 0,
+      "openTelemetryPackages": [
+        {
+          "name": "io.opentelemetry:opentelemetry-api",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-api-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-api@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-api-incubator",
+          "version": "1.67.0-alpha",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-api-incubator-1.62.0-alpha.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-api-incubator@1.67.0-alpha"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-context",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-context-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-context@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-exporter-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-exporter-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-exporter-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-exporter-otlp",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-exporter-otlp-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-exporter-otlp@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-exporter-otlp-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-exporter-otlp-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-exporter-otlp-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-extension-autoconfigure-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-extension-autoconfigure@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-extension-autoconfigure-spi-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-extension-autoconfigure-spi@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-logs",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-logs-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-logs@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-metrics",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-metrics-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-metrics@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-trace",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-trace-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-trace@1.67.0"
+        }
+      ],
+      "summary": {
+        "schemaVersion": 2,
+        "profile": "aws",
+        "architecture": "amd64",
+        "headSha": "309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+        "runId": 40977310522,
+        "runAttempt": 1,
+        "status": "complete",
+        "scannerVersion": "0.76.1",
+        "createdAt": "2026-10-30T00:05:29.250882602Z",
+        "policy": {
+          "blockingSeverities": [
+            "HIGH",
+            "CRITICAL"
+          ],
+          "blockUnfixed": false
+        },
+        "counts": {
+          "CRITICAL": {
+            "total": 0,
+            "fixable": 0
+          },
+          "HIGH": {
+            "total": 4,
+            "fixable": 0
+          },
+          "MEDIUM": {
+            "total": 39,
+            "fixable": 0
+          },
+          "LOW": {
+            "total": 20,
+            "fixable": 0
+          },
+          "UNKNOWN": {
+            "total": 3,
+            "fixable": 0
+          }
+        },
+        "total": 66,
+        "blocking": 0,
+        "osEosl": false,
+        "findings": [
+          {
+            "id": "CVE-2026-76642",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2025-66382",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "gcc-14-base",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libgcc-s1",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libstdc++6",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-113351",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-27171",
+            "package": "zlib1g",
+            "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-3184",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-42250",
+            "package": "libbz2-1.0",
+            "installed": "1.0.8-6",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-5435",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-5435",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/amd64 (debian 13.7)"
+          }
+        ]
+      }
+    },
+    {
+      "profile": "aws",
+      "architecture": "arm64",
+      "indexDigest": "sha256:60cf8cf84de4b33cf33c6251ef3e4e5631f0fe8b11fcb29519046e81c170368a",
+      "digest": "sha256:ba1b49cf56b4c1a219155af1fbbc01c401bf054b097116539fdb0117672db2d0",
+      "artifactId": 12942887944,
+      "sourceArtifact": "keycloak-oci-aws-multiarch-309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+      "scanArtifact": "release-scan-aws-1",
+      "rawReportSha256": "bde1c8a4cbc919af3e7eb0f2b2be16b54cefc0061b16fa0f7e3cf010ee2e0f01",
+      "database": {
+        "Version": 2,
+        "NextUpdate": "2026-10-30T19:18:50.969126577Z",
+        "UpdatedAt": "2026-10-29T19:18:50.96912695Z",
+        "DownloadedAt": "2026-10-30T00:05:39.42106975Z"
+      },
+      "javaDatabase": {
+        "Version": 1,
+        "NextUpdate": "2026-11-01T01:08:14.598233916Z",
+        "UpdatedAt": "2026-10-29T01:08:14.598234036Z",
+        "DownloadedAt": "2026-10-30T00:05:59.736019646Z"
+      },
+      "targetedAdvisory": "CVE-2026-118259",
+      "targetedFindings": 0,
+      "openTelemetryPackages": [
+        {
+          "name": "io.opentelemetry:opentelemetry-api",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-api-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-api@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-api-incubator",
+          "version": "1.67.0-alpha",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-api-incubator-1.62.0-alpha.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-api-incubator@1.67.0-alpha"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-context",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-context-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-context@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-exporter-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-exporter-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-exporter-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-exporter-otlp",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-exporter-otlp-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-exporter-otlp@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-exporter-otlp-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-exporter-otlp-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-exporter-otlp-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-common",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-common-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-common@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-extension-autoconfigure-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-extension-autoconfigure@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-extension-autoconfigure-spi-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-extension-autoconfigure-spi@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-logs",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-logs-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-logs@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-metrics",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-metrics-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-metrics@1.67.0"
+        },
+        {
+          "name": "io.opentelemetry:opentelemetry-sdk-trace",
+          "version": "1.67.0",
+          "path": "opt/keycloak/lib/lib/main/io.opentelemetry.opentelemetry-sdk-trace-1.62.0.jar",
+          "purl": "pkg:maven/io.opentelemetry/opentelemetry-sdk-trace@1.67.0"
+        }
+      ],
+      "summary": {
+        "schemaVersion": 2,
+        "profile": "aws",
+        "architecture": "arm64",
+        "headSha": "309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+        "runId": 40977310522,
+        "runAttempt": 1,
+        "status": "complete",
+        "scannerVersion": "0.76.1",
+        "createdAt": "2026-10-30T00:06:00.558614161Z",
+        "policy": {
+          "blockingSeverities": [
+            "HIGH",
+            "CRITICAL"
+          ],
+          "blockUnfixed": false
+        },
+        "counts": {
+          "CRITICAL": {
+            "total": 0,
+            "fixable": 0
+          },
+          "HIGH": {
+            "total": 4,
+            "fixable": 0
+          },
+          "MEDIUM": {
+            "total": 39,
+            "fixable": 0
+          },
+          "LOW": {
+            "total": 20,
+            "fixable": 0
+          },
+          "UNKNOWN": {
+            "total": 3,
+            "fixable": 0
+          }
+        },
+        "total": 66,
+        "blocking": 0,
+        "osEosl": false,
+        "findings": [
+          {
+            "id": "CVE-2026-76642",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78408",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78409",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-78410",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "HIGH",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2025-66382",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "gcc-14-base",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libgcc-s1",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-102010",
+            "package": "libstdc++6",
+            "installed": "14.2.0-19",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-113351",
+            "package": "libexpat1",
+            "installed": "2.9.0-1~deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-18374",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19499",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-19542",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-27171",
+            "package": "zlib1g",
+            "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-3184",
+            "package": "libuuid1",
+            "installed": "2.41.5-0+deb13u1",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-42250",
+            "package": "libbz2-1.0",
+            "installed": "1.0.8-6",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-5435",
+            "package": "libc-bin",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          },
+          {
+            "id": "CVE-2026-5435",
+            "package": "libc6",
+            "installed": "2.41-12+deb13u4",
+            "fixed": "",
+            "severity": "MEDIUM",
+            "target": "/home/runner/work/_temp/rambow-release-scans-YdHiZA/arm64 (debian 13.7)"
+          }
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "A targeted dependency override, not a scanner suppression. The existing fixable HIGH/CRITICAL and scan-coverage gates are unchanged.",
+    "All four publication-time scans still report 66 findings: 4 HIGH without available fixes, 39 MEDIUM, 20 LOW and 3 UNKNOWN. This is not a zero-CVE claim.",
+    "Initial publication run scanned, froze, uploaded and audited the images, but failed its catalog task due to #84. PR #85 repaired lifecycle-aware generation; record-only recovery merged guarded bot PR #87 without rebuilding or pushing images.",
+    "Previously published r2 bytes remain unchanged and affected by CVE-2026-118259. The withdrawn r3 revision is not reused.",
+    "No live collector, cloud database, FIPS or custom-extension compatibility certification. Default tracing remains disabled.",
+    "This durable extract retains all summary findings, selected package identities, database metadata and raw-report hashes. Full scanner inventories are in the Actions artifacts and may expire. This is publication-time evidence, not a continuously updated vulnerability dashboard.",
+    "Temporary override must be reviewed or retired when Keycloak or the original core dependency inventory changes."
+  ]
+}
