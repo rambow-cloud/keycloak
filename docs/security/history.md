@@ -15,16 +15,17 @@ Git-backed JSONL records; no database service. This page documents reviewed repa
 | [SEC-2026-003](#sec-2026-003) | CVE-2026-102554, GHSA-xxph-c9ww-hj94 | Fix pending publication; listed images are affected | `26.8.1-r1-core`, `26.8.1-r1-aws` | [#44](https://github.com/rambow-cloud/keycloak/issues/44) |
 | [SEC-2026-004](#sec-2026-004) | CVE-2026-102554, GHSA-xxph-c9ww-hj94 | Fixed before first publication | `26.8.1-r2-core`, `26.8.1-r2-aws` | [#44](https://github.com/rambow-cloud/keycloak/issues/44), [#48](https://github.com/rambow-cloud/keycloak/issues/48) |
 | [SEC-2026-005](#sec-2026-005) | CVE-2026-118259, GHSA-ccrj-gw8r-854m | Fix pending publication; listed images are affected | `26.8.1-r2-core`, `26.8.1-r2-aws` | [#79](https://github.com/rambow-cloud/keycloak/issues/79) |
+| [SEC-2026-006](#sec-2026-006) | CVE-2026-118259, GHSA-ccrj-gw8r-854m | Fixed before first publication | `26.8.1-r4-core`, `26.8.1-r4-aws` | [#79](https://github.com/rambow-cloud/keycloak/issues/79), [#81](https://github.com/rambow-cloud/keycloak/issues/81), [#84](https://github.com/rambow-cloud/keycloak/issues/84) |
 
 ## CVE and security event index
 
 - **CVE-2026-102554**: [SEC-2026-003](#sec-2026-003), [SEC-2026-004](#sec-2026-004)
-- **CVE-2026-118259**: [SEC-2026-005](#sec-2026-005)
+- **CVE-2026-118259**: [SEC-2026-005](#sec-2026-005), [SEC-2026-006](#sec-2026-006)
 - **CVE-2026-54399**: [SEC-2026-001](#sec-2026-001)
 - **CVE-2026-54428**: [SEC-2026-001](#sec-2026-001)
 - **CVE-2026-64607**: [SEC-2026-001](#sec-2026-001)
 - **EMUDHRA-2026-10**: [SEC-2026-002](#sec-2026-002)
-- **GHSA-ccrj-gw8r-854m**: [SEC-2026-005](#sec-2026-005)
+- **GHSA-ccrj-gw8r-854m**: [SEC-2026-005](#sec-2026-005), [SEC-2026-006](#sec-2026-006)
 - **GHSA-xxph-c9ww-hj94**: [SEC-2026-003](#sec-2026-003), [SEC-2026-004](#sec-2026-004)
 
 ## SEC-2026-001
@@ -158,6 +159,8 @@ Prepare a reviewed OpenTelemetry core override for the tracestate CPU-consumptio
 
 Recorded (UTC): `2026-10-29T23:41:35.769Z`. Result: **Fix pending publication; listed images are affected**.
 
+**Later corrections:** [SEC-2026-006](#sec-2026-006). Read these before relying on this historical conclusion.
+
 - The listed r2 index digests are affected published images, with OpenTelemetry API 1.62.0 on both amd64/arm64. This source repair does not modify or repair their bytes.
 - The minimal API/context/common-only upgrade was rejected by the dependency probe because SDK 1.62.0 requires the removed API-internal ConfigUtil class. The bounded alternative aligns the existing 14 OpenTelemetry core/API/SDK/exporter artifacts to official 1.67.0; API incubator uses 1.67.0-alpha. Quarkus and instrumentation versions remain unchanged.
 - Original and replacement Maven Central JAR checksums are pinned and verified before optimization. Existing Quarkus filenames remain, but embedded payload/version metadata changes. No JAR is rebuilt or edited; no additional sender or provider is introduced.
@@ -179,6 +182,45 @@ Evidence and sources:
 - [Official fixed release](<https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.67.0>)
 - [Reviewed remediation Issue](<https://github.com/rambow-cloud/keycloak/issues/79>)
 - [Published r2 scan evidence](<https://github.com/rambow-cloud/keycloak/blob/main/releases/evidence/v26.8.1-r2-arm64.json>)
+
+## SEC-2026-006
+
+Publish the OpenTelemetry tracestate CPU-consumption repair in the multiarchitecture core/aws r4 tags.
+
+Recorded (UTC): `2026-10-30T00:14:32.602Z`. Result: **Fixed before first publication**.
+
+Corrects [SEC-2026-005](#sec-2026-005). The earlier record remains visible.
+
+- Both listed r4 tags first shipped the repaired OpenTelemetry core cohort on amd64 and arm64. The immutable index digests below cover both exact child manifests retained in the publication record and durable report.
+- Align all 14 existing io.opentelemetry core/API/SDK/exporter artifacts from 1.62.0 to official 1.67.0; API incubator uses 1.67.0-alpha. The minimal API/context/common-only candidate was rejected because SDK 1.62.0 depends on a removed API-internal class. Quarkus and instrumentation remain unchanged.
+- The override verifies original and replacement JAR hashes, preserves the existing dependency inventory and distribution filenames, and verifies final rootfs bytes. Embedded Maven metadata, runtime probes and all four Trivy inventories confirm actual version 1.67.0 despite the original 1.62.0 filenames.
+- Source commit 309369edbfd43e4dd2c577fe700b1db0dc0c1439 passed exact main CI 40976533454: native core/aws builds on amd64/arm64, bounded malformed-header parsing, trace/baggage and SDK export probes, tracing-enabled Quarkus augmentation, final tracing-disabled optimization and runtime verification.
+- Publication run 40977310522 reused those exact OCI artifacts, freshly scanned all four children, froze their digests and uploaded/audited both indexes with digest preservation. Every scan identifies all 14 repaired core modules, no CVE-2026-118259 and zero blocking findings.
+- Every publication-time scan retains 66 findings: 4 HIGH without available fixes, 39 MEDIUM, 20 LOW and 3 UNKNOWN. Existing fixable HIGH/CRITICAL and coverage gates remain unchanged. This is not a zero-CVE, exploitability or live collector/cloud/custom-extension certification.
+- The first catalog task correctly rejected lifecycle-stale Markdown. Issue #84 / PR #85 fixed generation; record-only recovery 40978115566 completed guarded bot PR #87 and the immutable completion attachment without rebuilding, rescanning or pushing images.
+- This correction completes SEC-2026-005 while preserving its original pending record. Existing r2 images remain unchanged and affected; withdrawn r3 is not reused. The temporary override must be reviewed or retired when Keycloak or its original module inventory changes.
+
+| Profile | Published tag | Digest |
+| --- | --- | --- |
+| core | `26.8.1-r4-core` | `sha256:f44c94db4c96807f8c6c8b1a9eb3d63d94209a1b233ac26a4465c46ee3a8e055` |
+| aws | `26.8.1-r4-aws` | `sha256:60cf8cf84de4b33cf33c6251ef3e4e5631f0fe8b11fcb29519046e81c170368a` |
+
+Issues: [#79](https://github.com/rambow-cloud/keycloak/issues/79), [#81](https://github.com/rambow-cloud/keycloak/issues/81), [#84](https://github.com/rambow-cloud/keycloak/issues/84).
+
+Reference PRs: [#80](https://github.com/rambow-cloud/keycloak/pull/80), [#85](https://github.com/rambow-cloud/keycloak/pull/85), [#87](https://github.com/rambow-cloud/keycloak/pull/87).
+
+Evidence and sources:
+
+- [Official public advisory](<https://github.com/open-telemetry/opentelemetry-java/security/advisories/GHSA-ccrj-gw8r-854m>)
+- [Official repaired OpenTelemetry release](<https://github.com/open-telemetry/opentelemetry-java/releases/tag/v1.67.0>)
+- [Reviewed remediation PR](<https://github.com/rambow-cloud/keycloak/pull/80>)
+- [Exact published source CI](<https://github.com/rambow-cloud/keycloak/actions/runs/40976533454>)
+- [Fresh scans, upload and audit](<https://github.com/rambow-cloud/keycloak/actions/runs/40977310522>)
+- [Record-only publication recovery](<https://github.com/rambow-cloud/keycloak/actions/runs/40978115566>)
+- [Guarded publication catalog PR](<https://github.com/rambow-cloud/keycloak/pull/87>)
+- [Formal Release and immutable attachments](<https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r4>)
+- [Exact reviewed artifact lock](<https://github.com/rambow-cloud/keycloak/blob/309369edbfd43e4dd2c577fe700b1db0dc0c1439/dependencies/keycloak/opentelemetry.lock.json>)
+- [Durable four-image security report](<https://github.com/rambow-cloud/keycloak/blob/main/releases/evidence/v26.8.1-r4-security.json>)
 
 ## Maintain and query
 

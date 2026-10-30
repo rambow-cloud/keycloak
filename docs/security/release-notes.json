@@ -2,6 +2,16 @@
   "schemaVersion": 1,
   "notes": [
     {
+      "release": "v26.8.1-r4",
+      "record": "SEC-2026-006",
+      "fixes": [
+        {
+          "advisory": "CVE-2026-118259",
+          "summary": "Fix excessive CPU consumption in W3C tracestate parsing by upgrading OpenTelemetry core from 1.62.0 to 1.67.0."
+        }
+      ]
+    },
+    {
       "release": "v26.8.1-r2",
       "record": "SEC-2026-004",
       "fixes": [
