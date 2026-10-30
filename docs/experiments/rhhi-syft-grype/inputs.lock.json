@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "issue": 89,
+  "baseCommit": "96d086ee5a878f082e591aafb0fbbcb2a4984992",
+  "candidate": {
+    "reference": "registry.access.redhat.com/hi/openjdk:25-runtime@sha256:48196e83cf2c3355e52a29995b97023fbc50e1fc592d1a0a7fd0208c998c1189",
+    "digest": "sha256:48196e83cf2c3355e52a29995b97023fbc50e1fc592d1a0a7fd0208c998c1189",
+    "children": [
+      {
+        "architecture": "amd64",
+        "digest": "sha256:9099e379dfe515be44719bd25098b39041abe852950ab71b1473a63b651fa03c"
+      },
+      {
+        "architecture": "arm64",
+        "digest": "sha256:7142fc3779d81ca0f98fd407f6044f13e97eb7723fd8f90d0a1b70b4c4249414"
+      }
+    ]
+  },
+  "baseline": {
+    "release": "v26.8.1-r4",
+    "images": [
+      {
+        "profile": "core",
+        "tag": "26.8.1-r4-core",
+        "digest": "sha256:f44c94db4c96807f8c6c8b1a9eb3d63d94209a1b233ac26a4465c46ee3a8e055",
+        "children": [
+          {
+            "architecture": "amd64",
+            "digest": "sha256:50bf02f80d85000543e191eefa935d149460534300550996791ddbdef603734f"
+          },
+          {
+            "architecture": "arm64",
+            "digest": "sha256:603adc44ed194f8c33c6760daca2d3bbd1ee1b65dd21b1e5f87ee0dd49117f02"
+          }
+        ]
+      },
+      {
+        "profile": "aws",
+        "tag": "26.8.1-r4-aws",
+        "digest": "sha256:60cf8cf84de4b33cf33c6251ef3e4e5631f0fe8b11fcb29519046e81c170368a",
+        "children": [
+          {
+            "architecture": "amd64",
+            "digest": "sha256:203dc685cd222347d80efbfc2b1162867ff2910983cda4be140b7c83ebd5df05"
+          },
+          {
+            "architecture": "arm64",
+            "digest": "sha256:ba1b49cf56b4c1a219155af1fbbc01c401bf054b097116539fdb0117672db2d0"
+          }
+        ]
+      }
+    ]
+  },
+  "syft": {
+    "version": "1.55.0",
+    "architectures": {
+      "amd64": {
+        "filename": "syft_1.55.0_linux_amd64.tar.gz",
+        "sha256": "bb65249542db5fedeeb4d3f9b018b75e7264dbfbbb10486f044581a92f90490d"
+      },
+      "arm64": {
+        "filename": "syft_1.55.0_linux_arm64.tar.gz",
+        "sha256": "929bd163db2d7cd2255d3bcb8967208079813d7b46b0c952f7b794d8e2c7d304"
+      }
+    }
+  },
+  "grype": {
+    "version": "0.121.0",
+    "architectures": {
+      "amd64": {
+        "filename": "grype_0.121.0_linux_amd64.tar.gz",
+        "sha256": "64e07133d3486115de647a66581461dccf5c732748a0a3119077395565f15519"
+      },
+      "arm64": {
+        "filename": "grype_0.121.0_linux_arm64.tar.gz",
+        "sha256": "86f570f75ca947ea3dd6486309232bcff6d78e44ba081ae75ab14eab72be3dae"
+      }
+    }
+  }
+}
