@@ -11,7 +11,11 @@ const prepared=resolve('.cache/rhhi-prepared');
 const arch=process.arch==='arm64'?'arm64':'amd64';
 const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 const write=(p,v)=>{fs.mkdirSync(dirname(p),{recursive:true});fs.writeFileSync(p,JSON.stringify(v,null,2)+'\n');};
-const hash=p=>createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const hash=p=>{
+  const digest=createHash('sha256'),fd=fs.openSync(p,'r'),buffer=Buffer.alloc(4*1024*1024);
+  try {let bytes;while((bytes=fs.readSync(fd,buffer,0,buffer.length,null))>0)digest.update(buffer.subarray(0,bytes));return digest.digest('hex');}
+  finally {fs.closeSync(fd);}
+};
 function run(command,args,file,env={}) {
   const fd=file?fs.openSync(file,'w'):undefined;
   try {
@@ -146,7 +150,6 @@ async function scan() {
       catch(error){certificateStatus='failed';write(resolve(dir,'certificate-failure.json'),{error:error.message});}
       const sbom=resolve(dir,'inventory.json'),report=resolve(dir,'grype.json');
       run(bins.syft,['oci-archive:'+archive,'-o','syft-json='+sbom]);run(bins.grype,['sbom:'+sbom,'-o','json'],report);
-      if(databaseHash()!==db.sha256)throw Error('Database drift during scans');
       const inventory=read(sbom),grype=read(report),summary=summarize(grype,inventory,kind);
       const row={kind,profile,architecture:arch,...summary,digest:info.Digest,archiveSha256:hash(archive),inventorySha256:hash(sbom),reportSha256:hash(report),databaseSha256:db.sha256,database:grype.descriptor.db,
         java:read(resolve(dir,'java.json')),certificateStatus,runtimeStatus:kind==='rhhi'?process.env.RUNTIME_RESULT:'previously-validated-r4',runtimeResultScope:kind==='rhhi'?'Current native runtime suite':'Exact published r4 bytes; prior native runtime evidence retained in main',
@@ -155,6 +158,7 @@ async function scan() {
     }catch(error){const row={kind,profile,architecture:arch,status:'failed',errors:[error.message]};rows.push(row);write(resolve(dir,'failure.json'),row);}
   }
   const issues=[];
+  if(databaseHash()!==db.sha256)issues.push('Database drift during scans');
   if(rows.some(r=>r.status!=='complete'))issues.push('Incomplete scan or coverage');
   if(rows.every(r=>r.applicationPackages)&&JSON.stringify(rows[0].applicationPackages)!==JSON.stringify(rows[1].applicationPackages))issues.push('Application inventories differ');
   write(resolve(output,'comparison.json'),{schemaVersion:1,branch:process.env.GITHUB_REF_NAME,sourceCommit:process.env.GITHUB_SHA,runId:Number(process.env.GITHUB_RUN_ID),runAttempt:Number(process.env.GITHUB_RUN_ATTEMPT),profile,architecture:arch,database:db,issues,rows});
