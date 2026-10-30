@@ -6,10 +6,37 @@ Registry: `quay.io/rambow-cloud/keycloak`. Formal releases only; no `latest` tag
 
 | Release | Keycloak | Profile | Image tag | Digest | Aliases | Published (UTC) |
 | --- | --- | --- | --- | --- | --- | --- |
+| [v26.8.1-r4](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r4) | 26.8.1 | core | `26.8.1-r4-core` | `sha256:f44c94db4c96807f8c6c8b1a9eb3d63d94209a1b233ac26a4465c46ee3a8e055` | — | 2026-10-30T00:07:51.026Z |
+| [v26.8.1-r4](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r4) | 26.8.1 | aws | `26.8.1-r4-aws` | `sha256:60cf8cf84de4b33cf33c6251ef3e4e5631f0fe8b11fcb29519046e81c170368a` | — | 2026-10-30T00:07:51.026Z |
 | [v26.8.1-r2](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r2) | 26.8.1 | core | `26.8.1-r2-core` | `sha256:53d85ad1f5ed2838d300c0475b93b386388ea73636adf4537fc792dd14c0d09a` | — | 2026-10-28T20:08:15.664Z |
 | [v26.8.1-r2](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r2) | 26.8.1 | aws | `26.8.1-r2-aws` | `sha256:2cea43c26ef0676d922f68de30504a6d9355a420c4c9544cda40aa10ab166129` | — | 2026-10-28T20:08:15.664Z |
 | [v26.8.1-r1](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r1) | 26.8.1 | core | `26.8.1-r1-core` | `sha256:e0975379e3f2080cc4b9a4e852ce3341c54041e8a733a529b01cca2922beaa32` | — | 2026-10-26T02:41:36.090Z |
 | [v26.8.1-r1](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r1) | 26.8.1 | aws | `26.8.1-r1-aws` | `sha256:0771ae5db0bc40e057ce51d2609d50a56a0d867a66411e411179ecf12f9608a7` | — | 2026-10-26T02:41:36.090Z |
+
+## v26.8.1-r4
+
+[Source commit](https://github.com/rambow-cloud/keycloak/commit/309369edbfd43e4dd2c577fe700b1db0dc0c1439) · [Source CI](https://github.com/rambow-cloud/keycloak/actions/runs/40976533454) · [Publication and fresh scans](https://github.com/rambow-cloud/keycloak/actions/runs/40977310522)
+
+### `26.8.1-r4-core` (core)
+
+- **fix:** Repair excessive CPU consumption while parsing W3C tracestate headers by aligning the existing OpenTelemetry core cohort to official 1.67.0 artifacts before Keycloak optimization. ([#79](https://github.com/rambow-cloud/keycloak/issues/79))
+
+Architectures: `linux/amd64` (`sha256:50bf02f80d85000543e191eefa935d149460534300550996791ddbdef603734f`), `linux/arm64` (`sha256:603adc44ed194f8c33c6760daca2d3bbd1ee1b65dd21b1e5f87ee0dd49117f02`). The tag and pull reference select the OCI index.
+
+```sh
+podman pull quay.io/rambow-cloud/keycloak@sha256:f44c94db4c96807f8c6c8b1a9eb3d63d94209a1b233ac26a4465c46ee3a8e055
+```
+
+### `26.8.1-r4-aws` (aws)
+
+- **fix:** Repair excessive CPU consumption while parsing W3C tracestate headers by aligning the existing OpenTelemetry core cohort to official 1.67.0 artifacts before Keycloak optimization. ([#79](https://github.com/rambow-cloud/keycloak/issues/79))
+
+Architectures: `linux/amd64` (`sha256:203dc685cd222347d80efbfc2b1162867ff2910983cda4be140b7c83ebd5df05`), `linux/arm64` (`sha256:ba1b49cf56b4c1a219155af1fbbc01c401bf054b097116539fdb0117672db2d0`). The tag and pull reference select the OCI index.
+
+```sh
+podman pull quay.io/rambow-cloud/keycloak@sha256:60cf8cf84de4b33cf33c6251ef3e4e5631f0fe8b11fcb29519046e81c170368a
+```
+
 
 ## v26.8.1-r2
 
