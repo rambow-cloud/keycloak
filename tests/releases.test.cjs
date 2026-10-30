@@ -342,11 +342,17 @@ test('ordinary PRs cannot rewrite published records or add records without publi
   await checkRecordChanges({ ...f, pr: { number: 1, head: { sha } } });
 });
 
-test('catalog creation is Issue-first and scopes native auto-merge to generated files with explicit checks', async () => {
+test('catalog creation is Issue-first and scopes native auto-merge to generated files with explicit checks', async t => {
+  for (const lifecycle of [false, true]) await t.test(lifecycle ? 'retains expansion and withdrawal events' : 'initial publication', async () => {
   const { ensureCatalogPR } = await catalog;
+  const { readFileSync, readdirSync } = require('node:fs');
   const { validateIssue } = require('../scripts/issue-policy.cjs');
-  const record = await recordFixture();
-  const f = await apiFixture({ assets: { 'publication-record.json': record } });
+  const previous = lifecycle ? readdirSync('releases/records').filter(n => /^v26\.8\.1-r[123]\.json$/.test(n))
+    .map(n => JSON.parse(readFileSync('releases/records/' + n, 'utf8'))) : [];
+  const record = await recordFixture(lifecycle ? await planFixture({ tag: 'v26.8.1-r4', revision: 4, releaseId: 44,
+    images: profileImages().map(i => ({ ...i, tag: '26.8.1-r4-' + i.profile })) }) : undefined);
+  if (lifecycle) { record.publishedAt = '2026-10-30T01:00:00.000Z'; record.publishRunId = 2004; }
+  const f = await apiFixture({ records: previous, assets: { 'publication-record.json': record } });
   const head = 'f'.repeat(40);
   let files = {};
   let pr;
@@ -365,9 +371,16 @@ test('catalog creation is Issue-first and scopes native auto-merge to generated 
     return pr;
   }) };
   const getContent = f.github.rest.repos.getContent;
-  f.github.rest.repos.getContent = async args => args.ref === head && files[args.path]
-    ? { data: { encoding: 'base64', size: files[args.path].length, content: Buffer.from(files[args.path]).toString('base64') } } : getContent(args);
-  f.github.rest.git.getTree = async args => ({ data: { tree: args.tree_sha === head ? [{ path: 'releases/records/' + record.plan.tag + '.json', type: 'blob' }] : [] } });
+  f.github.rest.repos.getContent = async args => {
+    const text = args.ref === head && files[args.path] ? files[args.path] : lifecycle &&
+      (args.path === 'releases/events.jsonl' || args.path.startsWith('releases/history/')) ? readFileSync(args.path, 'utf8') : null;
+    return text === null ? getContent(args) : { data: { encoding: 'base64', size: text.length, content: Buffer.from(text).toString('base64') } };
+  };
+  f.github.rest.git.getTree = async args => ({ data: { tree: [
+    ...previous.map(r => ({ path: 'releases/records/' + r.plan.tag + '.json', type: 'blob' })),
+    ...(lifecycle ? [{ path: 'releases/events.jsonl', type: 'blob' }] : []),
+    ...(args.tree_sha === head ? [{ path: 'releases/records/' + record.plan.tag + '.json', type: 'blob' }] : [])
+  ] } });
   const paginate = f.github.paginate;
   f.github.paginate = async (method, args) => {
     if (method === f.github.rest.pulls.list) return [];
@@ -384,9 +397,19 @@ test('catalog creation is Issue-first and scopes native auto-merge to generated 
   assert.ok(f.calls.findIndex(c => c.name === 'commit') < f.calls.findIndex(c => c.name === 'branch'));
   assert.ok(f.calls.findIndex(c => c.name === 'branch') < f.calls.findIndex(c => c.name === 'pr'));
   validateIssue({ ...f.calls[0].args, state: 'open', number: 77 });
-  assert.deepEqual(Object.keys(files).sort(), ['releases/README.md', 'releases/records/v26.8.1-r1.json']);
+  assert.deepEqual(Object.keys(files).sort(), ['releases/README.md', 'releases/records/' + record.plan.tag + '.json']);
+  if (lifecycle) {
+    const { parseReleaseEvents } = await import('../scripts/lib/release-events.mjs');
+    const events = parseReleaseEvents(readFileSync('releases/events.jsonl', 'utf8'));
+    assert.doesNotMatch(files['releases/README.md'], /## v26\.8\.1-r3\n/);
+    assert.match(files['releases/README.md'], /## Withdrawn releases/);
+    for (const image of events.find(e => e.operation === 'architecture-expansion').images) {
+      assert.ok(files['releases/README.md'].includes(image.digest));
+    }
+  }
   assert.equal(f.calls.filter(c => c.name === 'dispatch').length, 2);
   assert.equal(f.calls.at(-1).name, 'enable-auto-merge');
+  });
 });
 
 test('the required catalog policy revokes native auto-merge after a human edit', async () => {
