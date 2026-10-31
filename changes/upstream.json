@@ -3,9 +3,9 @@
   "changes": [
     {
       "type": "maintenance",
-      "summary": "Refresh runtime digest from 5d3177252775d4b0 to fc6f4aec634ee433.",
+      "summary": "Refresh keycloak digest from a78d6b79572168cb to 3f3c5f8e03c61477.",
       "issues": [
-        90
+        92
       ],
       "profiles": [
         "core",
