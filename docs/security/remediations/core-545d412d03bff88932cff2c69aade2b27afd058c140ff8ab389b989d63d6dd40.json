@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "key": "545d412d03bff88932cff2c69aade2b27afd058c140ff8ab389b989d63d6dd40",
+  "issue": 98,
+  "profile": "core",
+  "cves": [
+    "CVE-2026-119210",
+    "CVE-2026-119276",
+    "CVE-2026-119280",
+    "CVE-2026-119281"
+  ],
+  "targets": [
+    {
+      "profile": "core",
+      "architecture": "amd64",
+      "tag": "26.8.1-r4-core",
+      "digest": "sha256:50bf02f80d85000543e191eefa935d149460534300550996791ddbdef603734f",
+      "indexDigest": "sha256:f44c94db4c96807f8c6c8b1a9eb3d63d94209a1b233ac26a4465c46ee3a8e055",
+      "release": "v26.8.1-r4",
+      "sourceCommit": "309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+      "reference": "quay.io/rambow-cloud/keycloak@sha256:50bf02f80d85000543e191eefa935d149460534300550996791ddbdef603734f"
+    },
+    {
+      "profile": "core",
+      "architecture": "arm64",
+      "tag": "26.8.1-r4-core",
+      "digest": "sha256:603adc44ed194f8c33c6760daca2d3bbd1ee1b65dd21b1e5f87ee0dd49117f02",
+      "indexDigest": "sha256:f44c94db4c96807f8c6c8b1a9eb3d63d94209a1b233ac26a4465c46ee3a8e055",
+      "release": "v26.8.1-r4",
+      "sourceCommit": "309369edbfd43e4dd2c577fe700b1db0dc0c1439",
+      "reference": "quay.io/rambow-cloud/keycloak@sha256:603adc44ed194f8c33c6760daca2d3bbd1ee1b65dd21b1e5f87ee0dd49117f02"
+    }
+  ],
+  "scanRun": 41316031348,
+  "scanAttempt": 1,
+  "monitorCommit": "afeeabb8eb337b8c86341ac150df1cd2801486bb",
+  "candidate": {
+    "keycloak": "quay.io/keycloak/keycloak:26.8.1@sha256:3f3c5f8e03c614774b4bd9173b88391fefa4153bfc010d8012d59ad825377332",
+    "runtime": "gcr.io/distroless/java25-debian13:nonroot@sha256:a90a5fadd78dc37b643da72dca2f744ef67eba625eca7227a5b375b548e6b1c2"
+  },
+  "status": "candidate-pending-verification"
+}

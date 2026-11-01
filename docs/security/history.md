@@ -16,11 +16,16 @@ Git-backed JSONL records; no database service. This page documents reviewed repa
 | [SEC-2026-004](#sec-2026-004) | CVE-2026-102554, GHSA-xxph-c9ww-hj94 | Fixed before first publication | `26.8.1-r2-core`, `26.8.1-r2-aws` | [#44](https://github.com/rambow-cloud/keycloak/issues/44), [#48](https://github.com/rambow-cloud/keycloak/issues/48) |
 | [SEC-2026-005](#sec-2026-005) | CVE-2026-118259, GHSA-ccrj-gw8r-854m | Fix pending publication; listed images are affected | `26.8.1-r2-core`, `26.8.1-r2-aws` | [#79](https://github.com/rambow-cloud/keycloak/issues/79) |
 | [SEC-2026-006](#sec-2026-006) | CVE-2026-118259, GHSA-ccrj-gw8r-854m | Fixed before first publication | `26.8.1-r4-core`, `26.8.1-r4-aws` | [#79](https://github.com/rambow-cloud/keycloak/issues/79), [#81](https://github.com/rambow-cloud/keycloak/issues/81), [#84](https://github.com/rambow-cloud/keycloak/issues/84) |
+| [SEC-2026-007](#sec-2026-007) | CVE-2026-119210, CVE-2026-119276, CVE-2026-119280, CVE-2026-119281 | Fix pending publication; listed images are affected | `26.8.1-r4-core`, `26.8.1-r4-aws` | [#98](https://github.com/rambow-cloud/keycloak/issues/98) |
 
 ## CVE and security event index
 
 - **CVE-2026-102554**: [SEC-2026-003](#sec-2026-003), [SEC-2026-004](#sec-2026-004)
 - **CVE-2026-118259**: [SEC-2026-005](#sec-2026-005), [SEC-2026-006](#sec-2026-006)
+- **CVE-2026-119210**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-119276**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-119280**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-119281**: [SEC-2026-007](#sec-2026-007)
 - **CVE-2026-54399**: [SEC-2026-001](#sec-2026-001)
 - **CVE-2026-54428**: [SEC-2026-001](#sec-2026-001)
 - **CVE-2026-64607**: [SEC-2026-001](#sec-2026-001)
@@ -221,6 +226,28 @@ Evidence and sources:
 - [Formal Release and immutable attachments](<https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r4>)
 - [Exact reviewed artifact lock](<https://github.com/rambow-cloud/keycloak/blob/309369edbfd43e4dd2c577fe700b1db0dc0c1439/dependencies/keycloak/opentelemetry.lock.json>)
 - [Durable four-image security report](<https://github.com/rambow-cloud/keycloak/blob/main/releases/evidence/v26.8.1-r4-security.json>)
+
+## SEC-2026-007
+
+Prepare supported upstream input updates for fixable CVEs found by the published-image monitor; candidate verification and publication are pending.
+
+Recorded (UTC): `2026-11-01T14:25:51.945Z`. Result: **Fix pending publication; listed images are affected**.
+
+- The listed published image digests are affected baselines, not repaired images. All claimed CVEs must be absent in full native candidate scans before merge.
+- Candidate 545d412d03bff88932cff2c69aade2b27afd058c140ff8ab389b989d63d6dd40; baseline scan 41316031348 attempt 1. Exact architecture-bound inputs and CVEs are retained in docs/security/remediations/.
+- No suppressions or arbitrary dependency overrides. A source merge does not publish images. A later formal Release must record exact repaired digests and append a ledger correction; do not mark this pending record as a published fix.
+
+| Profile | Published tag | Digest |
+| --- | --- | --- |
+| core | `26.8.1-r4-core` | `sha256:f44c94db4c96807f8c6c8b1a9eb3d63d94209a1b233ac26a4465c46ee3a8e055` |
+| aws | `26.8.1-r4-aws` | `sha256:60cf8cf84de4b33cf33c6251ef3e4e5631f0fe8b11fcb29519046e81c170368a` |
+
+Issues: [#98](https://github.com/rambow-cloud/keycloak/issues/98).
+
+Evidence and sources:
+
+- [Published baseline scan and full evidence](<https://github.com/rambow-cloud/keycloak/actions/runs/41316031348>)
+- [CVE remediation Issue](<https://github.com/rambow-cloud/keycloak/issues/98>)
 
 ## Maintain and query
 
