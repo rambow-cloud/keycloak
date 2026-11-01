@@ -31,6 +31,8 @@ for (const architecture of targets) {
     if(requiresTelemetryRepair(prepared,profile)) {
       verifyTelemetryScan(JSON.parse(await readFile(join(destination,'trivy.json'),'utf8')));
     }
+    const proof = spawnSync(process.execPath,[fileURLToPath(new URL('./verify-cve-remediation.mjs',import.meta.url)),join(destination,'trivy.json'),preparedPath],{stdio:'inherit',env,timeout:60000});
+    if (proof.status !== 0) throw Error('CVE remediation publication proof failed');
   }
   catch { failed = true; }
   await rm(selected,{recursive:true,force:true});

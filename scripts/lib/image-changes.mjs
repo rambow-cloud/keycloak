@@ -12,11 +12,16 @@ const metadata = /^(?:docs\/|releases\/|changes\/|\.github\/(?:ISSUE_TEMPLATE\/|
 const bookkeeping = /^scripts\/(?:r2-architecture-migration|quay-release|release-catalog|releases|upstream-update|lock-images|issue-policy|trivy-comment)\.(?:mjs|cjs)$|^scripts\/lib\/(?:release-policy|release-events|image-changes|releases|quay-publish|quay-auth|upstream)\.mjs$|^config\/r2-architecture-migration\.json$|^\.github\/workflows\/(?!ci\.yml$)[^/]+\.yml$|^tests\/[^/]+\.test\.cjs$/;
 const validation = /^scripts\/(?:verify-|scan-image|scan-release|package-images|platform|trivy-gate|release-image|check-upstream-compatibility)|^scripts\/lib\/(?:trivy|oci|image-changes|multiarch|platforms)\.mjs$|^config\/(?:trivy|upstream-compatibility)\.json$|^\.github\/workflows\/ci\.yml$|^tests\//;
 export function sourceProfiles(path) {
+  if (/^scripts\/(?:cve-monitor|cve-update)\.mjs$|^scripts\/lib\/cve-monitor\.mjs$/.test(path)) return [];
   if (metadata.test(path) || bookkeeping.test(path) || validation.test(path)) return [];
   if (/^dependencies\/aws\/|^scripts\/aws-dependencies\.mjs$/.test(path)) return ['aws'];
   return imageProfiles;
 }
 export function validationProfiles(path) {
+  if (path === 'scripts/lib/cve-monitor.mjs') return imageProfiles;
+  const request = /^docs\/security\/remediations\/(core|aws)-[a-f0-9]{64}\.json$/.exec(path);
+  if (request) return [request[1]];
+  if (/^scripts\/(?:cve-monitor|cve-update)\.mjs$|^scripts\/lib\/cve-monitor\.mjs$/.test(path)) return [];
   if (bookkeeping.test(path) || metadata.test(path)) return [];
   if (path === 'tests/AwsHttpTransport.java') return ['aws'];
   return validation.test(path) ? imageProfiles : [];
