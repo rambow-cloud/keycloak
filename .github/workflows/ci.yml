@@ -148,6 +148,7 @@ jobs:
         run: |
           node scripts/trivy-gate.mjs .cache/trivy-report/summary.json
           node scripts/opentelemetry-dependencies.mjs verify-scan .cache/trivy-report/trivy.json
+          node scripts/verify-cve-remediation.mjs .cache/trivy-report/trivy.json
   package:
     name: Package ${{ matrix.profile }} architectures
     needs: [impact, build]
