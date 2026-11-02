@@ -10,6 +10,10 @@ export async function readText(github, repo, path, ref) {
   if (Array.isArray(data) || data.encoding !== 'base64' || data.size > 2000000) throw new Error('Expected bounded text file: ' + path);
   return Buffer.from(data.content, 'base64').toString('utf8');
 }
+// Full report arrays stay in immutable assets, not process environment strings.
+export function runtimeProofReference(proof) {
+  return {schemaVersion:1,sha256:hash(json(proof)),images:proof.images.map(({profile,children})=>({profile,children}))};
+}
 export async function readCatalog(github, repo, ref) {
   const { data } = await github.rest.git.getTree({ ...repo, tree_sha: ref, recursive: '1' });
   if (data.truncated) throw new Error('Cannot validate a truncated Git tree.');
@@ -178,7 +182,7 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
             imageLock, lockSha256: hash(lockText), aliases: activeAliases,
             previousAliases: Object.fromEntries(activeAliases.map(a => [a.tag, (frozen?.previousAliases ?? previousAliases)[a.tag]])),
             sourceRun: { id: run.id, attempt: run.run_attempt }, images: selected.map(i => ({ ...intent.images.find(n => n.profile === i.profile), ...i })), frozen,
-            ...(runtimeProof?{runtimeProof}: {}) };
+            ...(runtimeProof?{runtimeProof:runtimeProofReference(runtimeProof)}: {}) };
         }
         dispatchedAfterId = run.id;
         run = null;
@@ -209,7 +213,7 @@ export function makeFrozenPlan(prepared, scans) {
     keycloakVersion: prepared.keycloakVersion, revision: prepared.revision, sourceCommit: prepared.sourceCommit,
     toolsCommit: prepared.frozen?.toolsCommit ?? prepared.toolsCommit, sourceRun: prepared.sourceRun,
     lockSha256: prepared.lockSha256, imageLock: prepared.imageLock, aliases: prepared.aliases,
-    previousAliases: prepared.previousAliases, images,...(prepared.runtimeProof?{runtimeComparisonSha256:hash(json(prepared.runtimeProof))}: {}) };
+    previousAliases: prepared.previousAliases, images,...(prepared.runtimeProof?{runtimeComparisonSha256:prepared.runtimeProof.sha256}: {}) };
   validatePlan(plan);
   if (prepared.frozen && !equal(prepared.frozen, plan)) throw new Error('Freshly inspected artifacts differ from the frozen publication plan.');
   return plan;

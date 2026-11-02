@@ -56,11 +56,55 @@ test('compact durable evidence preserves findings and package inventory without 
   const {compactReport,compareReports}=await lib;const f=await fixture(),p=f.pairs[0];
   assert.deepEqual(compareReports(compactReport(p.before),compactReport(p.after),p.target,f.context,policy),compareReports(p.before,p.after,p.target,f.context,policy));
 });
+test('large runtime reports cross process boundaries only as bounded hash/child references',async()=>{
+  const {runtimeProofReference}=await import('../scripts/quay-release.mjs');const {hash,json}=await import('../scripts/lib/releases.mjs');
+  const proof={schemaVersion:1,images:['core','aws'].map(profile=>({profile,children:['amd64','arm64'].map(architecture=>({architecture,digest:candidateDigest})),
+    pairs:[{before:{inventory:'x'.repeat(300000)},after:{inventory:'y'.repeat(300000)}}]}))};
+  const reference=runtimeProofReference(proof);
+  assert.ok(Buffer.byteLength(json(proof))>1000000);
+  assert.ok(Buffer.byteLength(JSON.stringify(reference))<2048);
+  assert.equal(reference.sha256,hash(json(proof)));
+  assert.deepEqual(reference.images[0].children,proof.images[0].children);
+  assert.equal(JSON.stringify(reference).includes('inventory'),false);
+  const changed=structuredClone(proof);changed.images[0].pairs[0].after.inventory='changed';
+  assert.notEqual(runtimeProofReference(changed).sha256,reference.sha256);
+});
+test('publication freezing preserves the full report hash and rejects substituted native children',async()=>{
+  const {runtimeProofReference,makeFrozenPlan}=await import('../scripts/quay-release.mjs');
+  const prepared={...structuredClone(record.plan),runtimeProof:runtimeProofReference({images:record.plan.images.map(i=>({profile:i.profile,children:i.children}))})};
+  const scans=prepared.images.map(i=>({profile:i.profile,sourceCommit:prepared.sourceCommit,sourceRunId:prepared.sourceRun.id,artifactId:i.artifactId,
+    lockSha256:prepared.lockSha256,digest:i.digest,archiveSha256:i.archiveSha256,children:structuredClone(i.children)}));
+  assert.equal(makeFrozenPlan(prepared,scans).runtimeComparisonSha256,prepared.runtimeProof.sha256);
+  scans[0].children[0].digest='sha256:'+'0'.repeat(64);
+  assert.throws(()=>makeFrozenPlan(prepared,scans),/compared native child/);
+});
 test('Release event validation excludes fork/PR runs, failed CI and other workflows',async()=>{
   const {trustedRun}=await import('../scripts/runtime-release.mjs');
   const run={repository:{full_name:'rambow-cloud/keycloak'},head_repository:{full_name:'rambow-cloud/keycloak'},path:'.github/workflows/ci.yml',status:'completed',conclusion:'success',head_sha:sha,event:'push',head_branch:'main'};
   assert.equal(trustedRun(run,'rambow-cloud/keycloak','ci.yml','main'),run);
   for(const patch of [{event:'pull_request'},{head_branch:'branch'},{head_repository:{full_name:'fork/keycloak'}},{conclusion:'failure'},{path:'.github/workflows/untrusted.yml'}]) assert.throws(()=>trustedRun({...run,...patch},'rambow-cloud/keycloak','ci.yml','main'));
+});
+test('automated PR/fork sources skip read-only before any publication API; manual invalid sources still fail',async()=>{
+  const {prepareRuntimeRelease}=await import('../scripts/runtime-release.mjs');
+  const base={repository:{full_name:'rambow-cloud/keycloak'},head_repository:{full_name:'rambow-cloud/keycloak'},path:'.github/workflows/ci.yml',status:'completed',conclusion:'success',head_sha:sha,event:'pull_request',head_branch:'fix/106-distroless-example'};
+  const context={repo:{owner:'rambow-cloud',repo:'keycloak'},ref:'refs/heads/main',eventName:'workflow_run'};
+  for(const patch of [{},{event:'push',head_branch:'other'},{event:'push',head_branch:'main',head_repository:{full_name:'fork/keycloak'}},{path:'.github/workflows/unknown.yml'}]) {
+    const github={rest:{repos:{get:async()=>({data:{full_name:'rambow-cloud/keycloak',default_branch:'main'}})},actions:{getWorkflowRun:async()=>({data:{...base,...patch}})}}};
+    assert.equal((await prepareRuntimeRelease({github,context,runId:1})).skip,true);
+    await assert.rejects(prepareRuntimeRelease({github,context:{...context,eventName:'workflow_dispatch'},runId:1}),/trusted/);
+  }
+});
+test('empty metadata-only CI artifacts skip, but partial, expired, wrong-attempt and oversized image evidence fail closed',async()=>{
+  const {runtimeArtifacts}=await import('../scripts/runtime-release.mjs');const f=await fixture();const run={head_sha:sha,run_attempt:1};
+  const artifacts=[...f.request.baselines.map((t,n)=>({id:n+1,name:'trivy-'+t.profile+'-'+t.architecture+'-1',size_in_bytes:1000,expired:false})),
+    ...['core','aws'].map((p,n)=>({id:10+n,name:'keycloak-oci-'+p+'-multiarch-'+sha,size_in_bytes:1000000,expired:false}))];
+  assert.equal(runtimeArtifacts([],f.request,run),null);
+  assert.equal(runtimeArtifacts([{name:'metadata-only'}],f.request,run),null);
+  assert.equal(runtimeArtifacts(artifacts,f.request,run).length,4);
+  assert.throws(()=>runtimeArtifacts(artifacts.slice(1),f.request,run),/Missing/);
+  for(const patch of [{expired:true},{name:'trivy-core-amd64-2'},{size_in_bytes:30000001}]) {
+    const altered=structuredClone(artifacts);Object.assign(altered[0],patch);assert.throws(()=>runtimeArtifacts(altered,f.request,run));
+  }
 });
 test('Release notes explicitly retain no-repair outcomes and never turn introduced CVEs into repairs',async()=>{
   const {buildRuntimeReport,runtimeReleaseBody}=await import('../scripts/runtime-release.mjs');const f=await fixture();
