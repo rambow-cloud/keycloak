@@ -10,7 +10,8 @@ const repoName='rambow-cloud/keycloak';
 export function trustedRun(run,repo,workflow,main) {
   if(run.repository?.full_name!==repo||run.head_repository?.full_name!==repo||run.path!=='.github/workflows/'+workflow||
      run.status!=='completed'||run.conclusion!=='success'||!isSha(run.head_sha)||
-     workflow==='ci.yml'&&(!['push','workflow_dispatch'].includes(run.event)||run.head_branch!==main)) throw Error('Expected successful trusted exact-source main CI');
+     workflow==='ci.yml'&&(!['push','workflow_dispatch'].includes(run.event)||run.head_branch!==main)||
+     workflow==='release.yml'&&(!['release','workflow_dispatch'].includes(run.event)||run.event==='workflow_dispatch'&&run.head_branch!==main||run.event==='release'&&!/^v\d+\.\d+\.\d+-r[1-9]\d*$/.test(run.head_branch))) throw Error('Expected successful trusted exact-source main CI');
   return run;
 }
 export function runtimeArtifacts(artifacts,request,run) {
@@ -25,10 +26,11 @@ export function runtimeArtifacts(artifacts,request,run) {
   for(const profile of Object.keys(request.from)) if(artifacts.filter(a=>a.name==='keycloak-oci-'+profile+'-multiarch-'+run.head_sha&&!a.expired).length!==1) throw Error('Missing exact-source multiarchitecture artifact');
   return selected;
 }
-export async function prepareRuntimeRelease({github,context,runId,inspect=inspectCompatibility}) {
+export async function prepareRuntimeRelease({github,context,runId,releaseTag,inspect=inspectCompatibility}) {
   const repo=context.repo;
   const {data:metadata}=await github.rest.repos.get(repo);
   if(metadata.full_name!==repoName||context.ref!=='refs/heads/'+metadata.default_branch) throw Error('Runtime release tooling runs only on main');
+  if(releaseTag) {parseRelease(releaseTag);if(context.eventName!=='workflow_dispatch') throw Error('Explicit report recovery tags require main workflow dispatch');}
   const {data:run}=await github.rest.actions.getWorkflowRun({...repo,run_id:runId});
   if(context.eventName==='workflow_run') {
     try {trustedRun(run,repoName,run.path==='.github/workflows/release.yml'?'release.yml':'ci.yml',metadata.default_branch);}
@@ -36,14 +38,20 @@ export async function prepareRuntimeRelease({github,context,runId,inspect=inspec
   }
   if(run.path==='.github/workflows/release.yml') {
     trustedRun(run,repoName,'release.yml',metadata.default_branch);
-    if(!/^v\d+\.\d+\.\d+-r[1-9]\d*$/.test(run.head_branch)) return {skip:true,reason:'Manual Quay recovery needs explicit formal-tag documentation review'};
-    const {data:release}=await github.rest.repos.getReleaseByTag({...repo,tag:run.head_branch});
+    const tag=releaseTag||(/^v\d+\.\d+\.\d+-r[1-9]\d*$/.test(run.head_branch)?run.head_branch:null);
+    if(!tag) return {skip:true,reason:'Manual Quay recovery needs an explicit formal report tag'};
+    const {data:release}=await github.rest.repos.getReleaseByTag({...repo,tag});
     const report=await readAsset(github,repo,release,'runtime-comparison.json');
     if(!report) return {skip:true,reason:'Not a distroless automatic Release'};
     const record=await readAsset(github,repo,release,'publication-record.json'),complete=await readAsset(github,repo,release,'publication-complete.json');
-    if(!record||!complete||json(complete)!==json(completionAsset(record))) throw Error('Runtime publication is not catalog-complete');
+    if(!record||!complete) {
+      if(context.eventName==='workflow_run') return {skip:true,reason:'Formal publication/catalog is not complete yet; defer documentation'};
+      throw Error('Runtime publication is not catalog-complete');
+    }
+    if(record.plan?.tag!==release.tag_name||record.plan?.releaseId!==release.id||json(complete)!==json(completionAsset(record))) throw Error('Runtime publication completion evidence conflicts');
     return {mode:'documentation',releaseId:release.id,tag:release.tag_name,runId:run.id};
   }
+  if(releaseTag) throw Error('An explicit report tag requires a trusted Quay release source run');
   trustedRun(run,repoName,'ci.yml',metadata.default_branch);
   const publishers=await github.paginate(github.rest.actions.listWorkflowRuns,{...repo,workflow_id:'release.yml',per_page:30});
   if(publishers.some(r=>r.status!=='completed')) return {skip:true,reason:'A prior formal publication is still active; recover after its catalog completes'};
