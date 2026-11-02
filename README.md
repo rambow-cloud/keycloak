@@ -4,23 +4,21 @@ Minimal Keycloak OCI images for PostgreSQL deployments, with a **distroless Java
 
 ## Current images
 
-Current published release: [v26.8.1-r4](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r4). Keycloak **26.8.1**, Java **25 LTS**, Linux **amd64 and arm64**.
+Published profiles are OCI indexes selecting native Linux amd64 or arm64. See [recorded digests and validation](releases/README.md).
 
-There are **two r4 tags**, one per profile. Each points to an OCI index that automatically selects **amd64** or **arm64**; architecture-suffixed tags are unnecessary. Both architectures include the OpenTelemetry security repair. Historical r2 tags retain their existing multiarchitecture bindings; r1 remains amd64-only. See [architecture support](docs/architectures.md).
+| Profile | Latest published tag | Image reference |
+| --- | --- | --- |
+| aws | `26.8.1-r5-aws` | `quay.io/rambow-cloud/keycloak:26.8.1-r5-aws` |
+| core | `26.8.1-r5-core` | `quay.io/rambow-cloud/keycloak:26.8.1-r5-core` |
 
-| Profile | Latest published tag | Image reference | Purpose |
-| --- | --- | --- | --- |
-| core | `26.8.1-r4-core` | `quay.io/rambow-cloud/keycloak:26.8.1-r4-core` | PostgreSQL with the native JDBC driver. |
-| aws | `26.8.1-r4-aws` | `quay.io/rambow-cloud/keycloak:26.8.1-r4-aws` | RDS PostgreSQL with the AWS JDBC Wrapper, IAM authentication support and a pinned RDS CA bundle. |
-
-Pull either profile with Podman:
+Pull a profile with Podman:
 
 ```sh
-podman pull quay.io/rambow-cloud/keycloak:26.8.1-r4-core
-podman pull quay.io/rambow-cloud/keycloak:26.8.1-r4-aws
+podman pull quay.io/rambow-cloud/keycloak:26.8.1-r5-aws
+podman pull quay.io/rambow-cloud/keycloak:26.8.1-r5-core
 ```
 
-Use [digest-pinned references](releases/README.md) for deployments. The reviewed r2 architecture expansion changed its tag bindings to indexes while preserving original AMD64 digests; [binding history](releases/events.jsonl) retains this transition and the r3 withdrawal. New revisions require a feature, explicit CVE repair or a reviewed [distroless runtime digest update with measured CVE history](docs/distroless-updates.md); builder-only maintenance does not trigger publication. No `latest` tag is published. See [security release notes](docs/security/README.md) for fixes in each version.
+Runtime digest updates publish with a [paired CVE comparison](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r5). No `latest` tag is published.
 
 ## Features
 
