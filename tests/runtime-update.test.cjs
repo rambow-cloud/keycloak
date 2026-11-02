@@ -106,6 +106,26 @@ test('empty metadata-only CI artifacts skip, but partial, expired, wrong-attempt
     const altered=structuredClone(artifacts);Object.assign(altered[0],patch);assert.throws(()=>runtimeArtifacts(altered,f.request,run));
   }
 });
+test('early duplicate publication callbacks defer and explicit recovery tags require complete matching evidence',async()=>{
+  const {prepareRuntimeRelease}=await import('../scripts/runtime-release.mjs');const {completionAsset}=await import('../scripts/quay-release.mjs');
+  let complete=false,conflict=false,event='release',branch=record.plan.tag;
+  const release={id:record.plan.releaseId,tag_name:record.plan.tag};
+  const data={1:{schemaVersion:1},2:record,3:completionAsset(record)};
+  const github={paginate:async(method,args)=>(await method(args)).data,rest:{repos:{
+    get:async()=>({data:{full_name:'rambow-cloud/keycloak',default_branch:'main'}}),getReleaseByTag:async a=>{assert.equal(a.tag,record.plan.tag);return {data:release};},
+    listReleaseAssets:async()=>({data:[{id:1,name:'runtime-comparison.json',size:10},...(complete?[{id:2,name:'publication-record.json',size:1000},{id:3,name:'publication-complete.json',size:200}]:[])]}),
+    getReleaseAsset:async a=>({data:Buffer.from(JSON.stringify(conflict&&a.asset_id===3?{...data[3],recordSha256:'bad'}:data[a.asset_id]))})},
+    actions:{getWorkflowRun:async()=>({data:{id:2,repository:{full_name:'rambow-cloud/keycloak'},head_repository:{full_name:'rambow-cloud/keycloak'},path:'.github/workflows/release.yml',status:'completed',conclusion:'success',head_sha:sha,event,head_branch:branch}})}}};
+  const context={repo:{owner:'rambow-cloud',repo:'keycloak'},ref:'refs/heads/main',eventName:'workflow_run'};
+  assert.equal((await prepareRuntimeRelease({github,context,runId:2})).skip,true);
+  const manual={...context,eventName:'workflow_dispatch'};
+  await assert.rejects(prepareRuntimeRelease({github,context:manual,runId:2,releaseTag:record.plan.tag}),/not catalog-complete/);
+  complete=true;event='workflow_dispatch';branch='main';
+  assert.equal((await prepareRuntimeRelease({github,context:manual,runId:2,releaseTag:record.plan.tag})).mode,'documentation');
+  await assert.rejects(prepareRuntimeRelease({github,context:manual,runId:2,releaseTag:'latest'}),/Release tag/);
+  conflict=true;await assert.rejects(prepareRuntimeRelease({github,context:manual,runId:2,releaseTag:record.plan.tag}),/conflicts/);
+  conflict=false;event='pull_request';await assert.rejects(prepareRuntimeRelease({github,context:manual,runId:2,releaseTag:record.plan.tag}),/trusted/);
+});
 test('Release notes explicitly retain no-repair outcomes and never turn introduced CVEs into repairs',async()=>{
   const {buildRuntimeReport,runtimeReleaseBody}=await import('../scripts/runtime-release.mjs');const f=await fixture();
   const prepared={request:f.request,sourceCommit:sha,sourceRun:{id:1,attempt:1},lock:f.lock};

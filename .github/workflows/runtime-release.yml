@@ -9,6 +9,11 @@ on:
         description: Successful main CI run ID, or successful formal Quay release run ID
         type: string
         required: true
+      release_tag:
+        description: Optional formal Release tag for documentation after main-only Quay recovery
+        type: string
+        required: false
+        default: ''
 permissions:
   contents: read
   actions: read
@@ -41,11 +46,12 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           SOURCE_RUN: ${{ github.event.workflow_run.id || inputs.source_run }}
+          RELEASE_TAG: ${{ inputs.release_tag || '' }}
         with:
           script: |
             const {prepareRuntimeRelease}=await import(process.cwd()+'/scripts/runtime-release.mjs');
             if(!/^[1-9][0-9]*$/.test(process.env.SOURCE_RUN)) throw Error('A valid source run is required');
-            const prepared=await prepareRuntimeRelease({github,context,runId:Number(process.env.SOURCE_RUN)});
+            const prepared=await prepareRuntimeRelease({github,context,runId:Number(process.env.SOURCE_RUN),releaseTag:process.env.RELEASE_TAG||undefined});
             core.setOutput('prepared',JSON.stringify(prepared));core.setOutput('active',!prepared.skip);
             core.setOutput('mode',prepared.mode??'');core.setOutput('source_run',prepared.sourceRun?.id??'');
             core.setOutput('artifacts',prepared.selected?.map(a=>a.id).join(',')??'');
