@@ -16,11 +16,15 @@ Unchanged identities and existing candidate Issues/PRs are preserved without ano
 
 [Distroless runtime release](https://github.com/rambow-cloud/keycloak/actions/workflows/runtime-release.yml) accepts successful main CI completion or a manually supplied successful source run ID on main. It validates repository/workflow/event/source-main ancestry, complete expected native report artifacts, exact attempts, current publication bindings and packaged multiarchitecture artifact availability. Only trusted default-branch code parses reports with the App token; artifact JSON is never executed. Read-only comparison jobs receive neither App nor registry credentials.
 
+Automatic PR/fork/non-main CI completions are ineligible and skipped before any credentialed job. Successful main metadata-only CI without image artifacts also skips; it is not scan evidence. Partial, expired, wrong-attempt or malformed image artifacts still fail closed. Explicitly supplied invalid manual source runs remain errors.
+
 After independent report validation, the pinned updater App creates a draft `v<Keycloak>-r<N>` Release, uploads immutable `runtime-comparison.json`, and makes it formal. The next revision accounts for both recorded publications and existing Release tags; collisions and conflicting evidence fail. Release creation serializes with itself and defers while an earlier Quay publication is active, without occupying/cancelling the publisher's concurrency slot. Recover a deferred source run after that catalog completes. Existing matching Releases are preserved, not recreated. A draft interrupted before completion can be recovered from the same source evidence; an expired or changed source attempt requires explicit review, not an old-success fallback.
 
 Release notes list runtime pins and actual per-profile resolved/introduced CVEs. **No CVE repairs were detected** is an acceptable, explicit runtime-update result. Upstream changelogs are supplemental context; they do not replace actual final-image comparison evidence.
 
 The existing Quay workflow handles the formal Release. It reuses exact source OCI artifacts, freshly scans every selected architecture with the current policy/database, requires all claimed repaired CVEs still absent, and checks its inspected child digests equal the compared children before freezing/publishing. The frozen plan includes the runtime comparison hash and measured CVE history. Immutable tags, OIDC-only Quay authentication, partial-upload recovery and required catalog PR completion remain unchanged. A newer fixable HIGH/CRITICAL advisory can still block publication after comparison.
+
+Only the validated report hash and expected per-profile children cross job outputs/environment variables. Full findings and inventories remain in the immutable Release asset and source artifacts; this avoids Linux environment-string limits while preserving the complete evidence binding.
 
 Open the formal Release to view its notes and download `runtime-comparison.json`; the report includes exact source CI links. Full original raw reports expire with source CI artifacts; the compact immutable Release attachment remains available.
 

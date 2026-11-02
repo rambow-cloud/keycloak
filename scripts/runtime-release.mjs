@@ -13,11 +13,27 @@ export function trustedRun(run,repo,workflow,main) {
      workflow==='ci.yml'&&(!['push','workflow_dispatch'].includes(run.event)||run.head_branch!==main)) throw Error('Expected successful trusted exact-source main CI');
   return run;
 }
+export function runtimeArtifacts(artifacts,request,run) {
+  // Successful metadata-only CI is an intentional skip, never clean scan evidence.
+  if(!artifacts.some(a=>/^(?:trivy-|keycloak-oci-)/.test(a.name))) return null;
+  const selected=request.baselines.map(t=>{
+    const name='trivy-'+t.profile+'-'+t.architecture+'-'+run.run_attempt;
+    const matches=artifacts.filter(a=>a.name===name&&!a.expired);
+    if(matches.length!==1||matches[0].size_in_bytes>30000000) throw Error('Missing or oversized paired scan artifact: '+name);
+    return {name,id:matches[0].id};
+  });
+  for(const profile of Object.keys(request.from)) if(artifacts.filter(a=>a.name==='keycloak-oci-'+profile+'-multiarch-'+run.head_sha&&!a.expired).length!==1) throw Error('Missing exact-source multiarchitecture artifact');
+  return selected;
+}
 export async function prepareRuntimeRelease({github,context,runId,inspect=inspectCompatibility}) {
   const repo=context.repo;
   const {data:metadata}=await github.rest.repos.get(repo);
   if(metadata.full_name!==repoName||context.ref!=='refs/heads/'+metadata.default_branch) throw Error('Runtime release tooling runs only on main');
   const {data:run}=await github.rest.actions.getWorkflowRun({...repo,run_id:runId});
+  if(context.eventName==='workflow_run') {
+    try {trustedRun(run,repoName,run.path==='.github/workflows/release.yml'?'release.yml':'ci.yml',metadata.default_branch);}
+    catch {return {skip:true,reason:'Automated source workflow/event is not eligible for runtime publication'};}
+  }
   if(run.path==='.github/workflows/release.yml') {
     trustedRun(run,repoName,'release.yml',metadata.default_branch);
     if(!/^v\d+\.\d+\.\d+-r[1-9]\d*$/.test(run.head_branch)) return {skip:true,reason:'Manual Quay recovery needs explicit formal-tag documentation review'};
@@ -45,14 +61,8 @@ export async function prepareRuntimeRelease({github,context,runId,inspect=inspec
   const {warnings}=await inspect(lock.keycloakVersion,lock.javaVersion,JSON.parse(await readText(github,repo,'config/upstream-compatibility.json',metadata.default_branch)));
   if(warnings.length) throw Error('Runtime automatic release requires reviewed compatibility: '+warnings.join(' '));
   const artifacts=await github.paginate(github.rest.actions.listWorkflowRunArtifacts,{...repo,run_id:run.id,per_page:100});
-  const selected=request.baselines.map(t=>{
-    const name='trivy-'+t.profile+'-'+t.architecture+'-'+run.run_attempt;
-    const matches=artifacts.filter(a=>a.name===name&&!a.expired);
-    if(matches.length!==1||matches[0].size_in_bytes>30000000) throw Error('Missing or oversized paired scan artifact: '+name);
-    return {name,id:matches[0].id};
-  });
-  // Both packaged profile artifacts must exist before creating a Release.
-  for(const profile of Object.keys(request.from)) if(artifacts.filter(a=>a.name==='keycloak-oci-'+profile+'-multiarch-'+run.head_sha&&!a.expired).length!==1) throw Error('Missing exact-source multiarchitecture artifact');
+  const selected=runtimeArtifacts(artifacts,request,run);
+  if(!selected) return {skip:true,reason:'Successful metadata-only CI produced no image artifacts; no comparison or publication attempted'};
   return {mode:'release',sourceCommit:run.head_sha,sourceRun:{id:run.id,attempt:run.run_attempt},request,lock,selected};
 }
 export async function readPairs(prepared,directory) {
