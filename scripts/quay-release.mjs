@@ -3,6 +3,7 @@ import { registry, repository, profiles, json, hash, equal, parseRelease, canoni
 import { assessRelease as assessImageRelease, readJSON } from './lib/image-changes.mjs';
 import { lockArchitectures } from './lib/platforms.mjs';
 import { parseReleaseEvents, validateReleaseEvents } from './lib/release-events.mjs';
+import {aggregatePairs,validateRequest,runtimeIntent} from './lib/runtime-update.mjs';
 
 export async function readText(github, repo, path, ref) {
   const { data } = await github.rest.repos.getContent({ ...repo, path, ref });
@@ -130,6 +131,20 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
   }
   const intent = frozen ? { images: frozen.images, profiles: frozen.images.map(i => i.profile) }
     : await assessRelease({ github, repo, sourceCommit, records });
+  let runtimeProof;
+  if(!preview&&intent.images.some(i=>i.changes?.some(c=>c.type==='runtime-update'))) {
+    runtimeProof=await readAsset(github,repo,release,'runtime-comparison.json');
+    if(!runtimeProof||runtimeProof.sourceCommit!==sourceCommit||hash(json(runtimeProof.imageLock))!==hash(json(imageLock))) throw Error('Runtime update requires immutable exact-source comparison evidence');
+    const request=validateRequest(JSON.parse(await readText(github,repo,'config/runtime-update.json',sourceCommit)).request);
+    if(json(request)!==json(runtimeProof.request)||runtimeIntent(records,imageLock)?.id!==request.id) throw Error('Runtime comparison request or published baseline mismatch');
+    const policy=JSON.parse(await readText(github,repo,'config/trivy.json',toolsCommit));
+    const images=aggregatePairs(request,runtimeProof.images.flatMap(i=>i.pairs),{monitorCommit:sourceCommit,runId:runtimeProof.sourceRun.id,runAttempt:runtimeProof.sourceRun.attempt},policy);
+    if(json(images)!==json(runtimeProof.images)) throw Error('Runtime comparison claims do not match the paired reports');
+    if(images.length!==intent.images.length||intent.images.some(i=>!images.some(n=>n.profile===i.profile))) throw Error('Runtime publication profile mismatch');
+    for(const image of intent.images) image.changes=image.changes.map(c=>c.type!=='runtime-update'?c:{...c,
+      summary:'Refresh the reviewed distroless runtime digest; paired native scans '+(images.find(i=>i.profile===image.profile).resolved.length?'no longer detect '+images.find(i=>i.profile===image.profile).resolved.length+' CVEs.':'detect no resolved CVEs.'),
+      ...(images.find(i=>i.profile===image.profile).resolved.length?{cves:images.find(i=>i.profile===image.profile).resolved}:{})});
+  }
   if (!intent.profiles.length) {
     core.info('No image fix/feature since the published input fingerprints; skipping builds, scans and publication.');
     return { skipped: true, preview, tag, toolsCommit, sourceCommit, reason: 'No changed image inputs or new profile feature/fix.' };
@@ -157,11 +172,13 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
           if (dispatched || preview) throw error;
         }
         if (selected) {
+          if(runtimeProof&&(run.id!==runtimeProof.sourceRun.id||run.run_attempt!==runtimeProof.sourceRun.attempt)) throw Error('Runtime comparison source CI changed; use the frozen source evidence');
           if (frozen && selected.some(i => !frozen.images.some(f => f.profile === i.profile && f.artifactId === i.artifactId))) throw new Error('Frozen artifact IDs changed.');
           return { ...version, preview, toolsCommit, sourceCommit, releaseId: release.id,
             imageLock, lockSha256: hash(lockText), aliases: activeAliases,
             previousAliases: Object.fromEntries(activeAliases.map(a => [a.tag, (frozen?.previousAliases ?? previousAliases)[a.tag]])),
-            sourceRun: { id: run.id, attempt: run.run_attempt }, images: selected.map(i => ({ ...intent.images.find(n => n.profile === i.profile), ...i })), frozen };
+            sourceRun: { id: run.id, attempt: run.run_attempt }, images: selected.map(i => ({ ...intent.images.find(n => n.profile === i.profile), ...i })), frozen,
+            ...(runtimeProof?{runtimeProof}: {}) };
         }
         dispatchedAfterId = run.id;
         run = null;
@@ -184,6 +201,7 @@ export function makeFrozenPlan(prepared, scans) {
     const scan = scans.find(s => s.profile === image.profile);
     if (!scan || scan.sourceCommit !== prepared.sourceCommit || scan.sourceRunId !== prepared.sourceRun.id ||
         scan.artifactId !== image.artifactId || scan.lockSha256 !== prepared.lockSha256) throw new Error('Scan evidence does not match source artifact.');
+    if(prepared.runtimeProof&&json(scan.children)!==json(prepared.runtimeProof.images.find(i=>i.profile===image.profile)?.children)) throw Error('Fresh publication artifacts differ from compared native child digests');
     return { ...image, tag: canonicalTag(prepared.tag, image.profile), digest: scan.digest, archiveSha256: scan.archiveSha256,
       ...(lockArchitectures(prepared.imageLock).length > 1 ? {children:scan.children} : {}) };
   });
@@ -191,7 +209,7 @@ export function makeFrozenPlan(prepared, scans) {
     keycloakVersion: prepared.keycloakVersion, revision: prepared.revision, sourceCommit: prepared.sourceCommit,
     toolsCommit: prepared.frozen?.toolsCommit ?? prepared.toolsCommit, sourceRun: prepared.sourceRun,
     lockSha256: prepared.lockSha256, imageLock: prepared.imageLock, aliases: prepared.aliases,
-    previousAliases: prepared.previousAliases, images };
+    previousAliases: prepared.previousAliases, images,...(prepared.runtimeProof?{runtimeComparisonSha256:hash(json(prepared.runtimeProof))}: {}) };
   validatePlan(plan);
   if (prepared.frozen && !equal(prepared.frozen, plan)) throw new Error('Freshly inspected artifacts differ from the frozen publication plan.');
   return plan;

@@ -24,8 +24,7 @@ export async function runUpstreamUpdate({ github, context, core, dryRun = false,
   const baseline = JSON.parse(await content('config/upstream-compatibility.json', baseSha));
   const { data: release } = await github.rest.repos.getLatestRelease({ owner: 'keycloak', repo: 'keycloak' });
   const version = chooseVersion(current.keycloakVersion, release);
-  const refs = { keycloak: 'quay.io/keycloak/keycloak:' + version,
-    runtime: current.runtime.split('@')[0], builder: current.builder.split('@')[0] };
+  const refs = { keycloak: 'quay.io/keycloak/keycloak:' + version, builder: current.builder.split('@')[0] };
   const resolved = Object.fromEntries(await Promise.all(Object.entries(refs).map(async ([key, ref]) => [key, await resolve(ref, fetch, lockArchitectures(current))])));
   const next = { ...current, keycloakVersion: version, ...resolved };
   const { warnings } = await inspect(version, current.javaVersion, baseline);

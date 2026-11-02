@@ -117,7 +117,7 @@ jobs:
       - name: Scan built image with checksum-pinned Trivy
         id: scan
         if: ${{ !cancelled() && steps.export_image.outcome == 'success' }}
-        run: node scripts/scan-image.mjs .cache/trivy-image .cache/trivy-report
+        run: node scripts/compare-runtime.mjs .cache/trivy-image .cache/trivy-report
       - name: Upload vulnerability reports before enforcing the gate
         if: ${{ !cancelled() && steps.scan.outcome != 'skipped' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

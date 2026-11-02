@@ -33,6 +33,11 @@ async function checkPullRequest({ github, context }) {
     validateIssue(issue);
     console.log('Validated issue #' + issue_number + ': ' + issue.title);
   }
+  if(/^fix\/\d+-distroless-[a-f0-9]{16}$/.test(pr.head?.ref??'')) {
+    const {checkRuntimePullRequest}=await import('./runtime-update.mjs');
+    const {data:current}=await github.rest.pulls.get({...context.repo,pull_number:pr.number});
+    await checkRuntimePullRequest({github,context,pr:current});
+  }
   if (/^chore\/[1-9]\d*-record-release-/.test(pr.head?.ref || '')) {
     const { checkCatalogPullRequest } = await import('./release-catalog.mjs');
     const { data: current } = await github.rest.pulls.get({ ...context.repo, pull_number: pr.number });
