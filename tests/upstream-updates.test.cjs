@@ -91,7 +91,7 @@ test('generated PR guards refuse edited bodies, files, or commits', async () => 
 });
 
 async function fixture({ changed = true, existing = false, edited = false, runs = [], warnings = [], releaseVersion = lock.keycloakVersion, staleBase = false,
-  footer = false, editSnapshot = snapshot => snapshot, changedInput = 'runtime' } = {}) {
+  footer = false, editSnapshot = snapshot => snapshot, changedInput = 'builder' } = {}) {
   const { candidateFiles, pullBody, issueBody } = await lib;
   const calls = [];
   const next = { ...lock, keycloakVersion: releaseVersion, ...(changed ? { [changedInput]: lock[changedInput].split('@')[0] + '@sha256:' + 'c'.repeat(64) } : {}) };
@@ -155,7 +155,7 @@ test('new App updates create an Issue first and rely on native checks without du
   const note = JSON.parse(tree.args.tree.find(e => e.path === 'changes/upstream.json').content);
   assert.equal(note.changes[0].type,'maintenance');
   assert.deepEqual(note.changes[0].issues,[11]);
-  assert.ok(note.changes[0].summary.includes('runtime digest'));
+  assert.ok(note.changes[0].summary.includes('builder digest'));
   validateIssue({ ...f.calls[0].args, number: 11, state: 'open' });
   assert.equal(f.calls.find(c => c.name === 'enable-auto-merge').args.sha, headSha);
   assert.equal(f.calls.some(c => c.name === 'dispatch'), false);

@@ -6,15 +6,16 @@ Building and validating a candidate does not authorize a new public image revisi
 | --- | --- | --- |
 | New feature | Affected profiles | Eligible |
 | CVE repair with explicit CVE IDs | Affected profiles | Eligible |
+| Same-family distroless runtime digest update with explicit pins and paired evidence | Native comparisons and runtime checks | Eligible, including no observed CVE repair |
 | Ordinary bug fix | Affected profiles | Not a release trigger |
-| Builder, dependency or base-image maintenance without an identified CVE repair | Affected input validation | Not a release trigger |
+| Builder, dependency or other base-image maintenance without an identified CVE repair | Affected input validation | Not a release trigger |
 | CI, scanner or runtime-test changes | Relevant validation | Not a release trigger |
 | Documentation/catalog changes | Static checks | Not a release trigger |
 | Missing architecture on an existing version | Build only the missing architecture; rescan existing children | Extend existing tags; no revision increment |
 
 A CVE repair fragment uses `type: "fix"` and `cves: ["CVE-YYYY-NNNN"]`, plus its substantive summary, profiles and local Issues. A feature uses `type: "feature"`. All referenced Issues still require standalone PR closing lines. Ordinary `fix` notes remain usable for reviewed history but cannot trigger publication alone. When a release is eligible, its notes retain other reviewed fixes actually delivered with it.
 
-The updater emits `maintenance` notes for detected upstream versions/digests. A version bump or builder hash is not evidence of a new feature or repaired CVE. A maintainer must add the reviewed feature/CVE declaration before a revision is eligible. Updating source versions must not rewrite the homepage's actually published tags.
+The generic updater emits `maintenance` notes for Keycloak/builder changes. A version bump or builder hash is not evidence of a new feature or repaired CVE. The dedicated [distroless updater](distroless-updates.md) emits immutable `runtime-update` fragments with exact changed same-family runtime pins and native same-database comparisons. A digest change authorizes that bounded runtime revision, while actual scan evidence determines which CVEs, if any, were repaired. Updating source versions must not rewrite the homepage's actually published tags.
 
 An existing-release architecture extension uses `release: false` in its feature note. It preserves the original payload/base/provider pins and existing architecture manifests, builds only missing architectures, and freshly scans every child before protected publication. Its bounded migration accepts only the reviewed old digest or its own frozen replacement index. It does not make the general publisher mutable.
 

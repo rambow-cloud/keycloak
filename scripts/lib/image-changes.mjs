@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import policy from '../issue-policy.cjs';
 import { revisionChanges } from './release-policy.mjs';
 import { activeReleaseRecords } from './release-events.mjs';
+import { validateRuntimeChange } from './runtime-update.mjs';
 
 export const imageProfiles = ['core', 'aws'];
 const sha256 = value => createHash('sha256').update(value).digest('hex');
@@ -12,12 +13,15 @@ const metadata = /^(?:docs\/|releases\/|changes\/|\.github\/(?:ISSUE_TEMPLATE\/|
 const bookkeeping = /^scripts\/(?:r2-architecture-migration|quay-release|release-catalog|releases|upstream-update|lock-images|issue-policy|trivy-comment)\.(?:mjs|cjs)$|^scripts\/lib\/(?:release-policy|release-events|image-changes|releases|quay-publish|quay-auth|upstream)\.mjs$|^config\/r2-architecture-migration\.json$|^\.github\/workflows\/(?!ci\.yml$)[^/]+\.yml$|^tests\/[^/]+\.test\.cjs$/;
 const validation = /^scripts\/(?:verify-|scan-image|scan-release|package-images|platform|trivy-gate|release-image|check-upstream-compatibility)|^scripts\/lib\/(?:trivy|oci|image-changes|multiarch|platforms)\.mjs$|^config\/(?:trivy|upstream-compatibility)\.json$|^\.github\/workflows\/ci\.yml$|^tests\//;
 export function sourceProfiles(path) {
+  if (/^scripts\/(?:runtime-update|runtime-release|compare-runtime)\.mjs$/.test(path)||path==='config/runtime-update.json'||path==='scripts/lib/runtime-update.mjs') return [];
   if (/^scripts\/(?:cve-monitor|cve-update)\.mjs$|^scripts\/lib\/cve-monitor\.mjs$/.test(path)) return [];
   if (metadata.test(path) || bookkeeping.test(path) || validation.test(path)) return [];
   if (/^dependencies\/aws\/|^scripts\/aws-dependencies\.mjs$/.test(path)) return ['aws'];
   return imageProfiles;
 }
 export function validationProfiles(path) {
+  if(path==='scripts/compare-runtime.mjs'||path==='scripts/lib/runtime-update.mjs') return imageProfiles;
+  if (/^scripts\/(?:runtime-update|runtime-release)\.mjs$/.test(path)||path==='config/runtime-update.json') return [];
   if (path === 'scripts/lib/cve-monitor.mjs') return imageProfiles;
   const request = /^docs\/security\/remediations\/(core|aws)-[a-f0-9]{64}\.json$/.exec(path);
   if (request) return [request[1]];
@@ -29,11 +33,12 @@ export function validationProfiles(path) {
 export function validateChanges(changes, {allowMaintenance=false} = {}) {
   if (!Array.isArray(changes) || !changes.length || changes.length > 100) throw new Error('Every image tag needs nonempty fix/feature changes.');
   for (const c of changes) {
-    if (!(allowMaintenance ? ['fix','feature','maintenance'] : ['fix','feature']).includes(c.type) || typeof c.summary !== 'string' || c.summary.trim() !== c.summary ||
+    if (!(allowMaintenance ? ['fix','feature','maintenance','runtime-update'] : ['fix','feature','runtime-update']).includes(c.type) || typeof c.summary !== 'string' || c.summary.trim() !== c.summary ||
         c.summary.length < 20 || c.summary.length > 600 || /[\x00-\x1f\x7f<>]/.test(c.summary) ||
         /^(?:no (?:image )?(?:changes?|updates?)\b|nothing\b)|^(?:n\/?a|none|todo|tbd|placeholder|updates?|fix(?:es)?)\b[.! ]*$/i.test(c.summary) ||
         !Array.isArray(c.issues) || !c.issues.length || c.issues.length > 20 || c.issues.some(n => !Number.isSafeInteger(n) || n < 1) ||
         new Set(c.issues).size !== c.issues.length || c.release !== undefined && typeof c.release!=='boolean' || c.cves !== undefined && (!Array.isArray(c.cves) || !c.cves.length || new Set(c.cves).size!==c.cves.length || c.cves.some(id=>!/^CVE-\d{4}-\d{4,}$/.test(id)))) throw new Error('Changes require a substantive summary, valid CVEs and local Issue numbers.');
+    if(c.type==='runtime-update') validateRuntimeChange(c.runtime,c.profiles??Object.keys(c.runtime?.from??{}));
   }
   return changes;
 }
@@ -112,7 +117,7 @@ export async function changedNotes({ github, repo, base, source, selected, check
   for (const path of paths) {
     const f = validateFragment(await readJSON(github, repo, path, source.ref), { allowEmpty: path === 'changes/upstream.json' });
     for (const change of f.changes) for (const profile of selected.filter(p => change.profiles.includes(p))) {
-      byProfile[profile].push({ type: change.type, summary: change.summary, issues: change.issues, ...(change.cves ? {cves:change.cves} : {}), ...(change.release===false ? {release:false} : {}) });
+      byProfile[profile].push({ type: change.type, summary: change.summary, issues: change.issues, ...(change.runtime ? {runtime:{to:change.runtime.to,from:{[profile]:change.runtime.from[profile]}}} : {}), ...(change.cves ? {cves:change.cves} : {}), ...(change.release===false ? {release:false} : {}) });
     }
   }
   for (const profile of selected) validateChanges(byProfile[profile],{allowMaintenance:true});
@@ -149,7 +154,8 @@ export async function assessRelease({ github, repo, sourceCommit, records }) {
     }
     const inputSha256 = fingerprint(source, profile);
     if (previous && inputSha256 === (expansion ? fingerprint(base,profile) : previous.inputSha256 ?? fingerprint(base, profile))) continue;
-    const notes=(await changedNotes({ github, repo, base, source, selected: [profile], checkedIssues }))[profile];
+    const notes=(await changedNotes({ github, repo, base, source, selected: [profile], checkedIssues }))[profile].filter(c=>c.type!=='runtime-update'||
+      c.runtime.to===source.lock.runtime&&c.runtime.from[profile]===base?.lock.runtime&&base.lock.runtime!==source.lock.runtime);
     if (!revisionChanges(notes).length) continue;
     const changes=notes.filter(c=>c.type!=='maintenance'&&c.release!==false);
     images.push({ profile, inputSha256, changes });
@@ -171,6 +177,10 @@ export async function assessCI({ github, context, assessReleaseForCI }) {
   if (!base || /^0+$/.test(base)) return { profiles: imageProfiles, reason: 'No reliable diff baseline; conservative validation.' };
   const [old, current] = await Promise.all([snapshot(github, repo, base), snapshot(github, repo, head)]);
   const impact = classifyCI(old, current);
+  if(impact.changed.includes('config/runtime-update.json')) {
+    const config=await readJSON(github,repo,'config/runtime-update.json',head);
+    if(config.request) impact.profiles=imageProfiles.filter(p=>impact.profiles.includes(p)||Object.hasOwn(config.request.from,p));
+  }
   if (impact.imageChanges.length) await changedNotes({ github, repo, base: old, source: current, selected: impact.imageChanges });
   return { profiles: impact.profiles, reason: impact.profiles.length ? 'Image inputs or their validation changed.' : 'No image fix/feature or validation change; image builds skipped.' };
 }

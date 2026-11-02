@@ -64,7 +64,9 @@ jobs:
             const { data: bot } = await github.rest.users.getByUsername({ username: app.bot.login });
             if (!sameUpdater(bot, app.bot)) throw new Error('Pinned GitHub App bot identity changed.');
             const { runUpstreamUpdate } = await import(process.cwd() + '/scripts/upstream-update.mjs');
-            const result = await runUpstreamUpdate({ github, context, core, identity: app.bot });
+            const { runRuntimeUpdate } = await import(process.cwd() + '/scripts/runtime-update.mjs');
+            const runtime = await runRuntimeUpdate({github,context,core,identity:app.bot});
+            const result = runtime.changed ? {runtime} : {runtime,upstream:await runUpstreamUpdate({ github, context, core, identity: app.bot })};
             await core.summary.addHeading('Upstream update result').addCodeBlock(JSON.stringify(result, null, 2), 'json').write();
       - name: Detect updates without App credentials or writes
         if: inputs.dry_run == true
@@ -72,5 +74,6 @@ jobs:
         with:
           script: |
             const { runUpstreamUpdate } = await import(process.cwd() + '/scripts/upstream-update.mjs');
-            const result = await runUpstreamUpdate({ github, context, core, dryRun: true });
+            const {runRuntimeUpdate} = await import(process.cwd()+'/scripts/runtime-update.mjs');
+            const result = {runtime:await runRuntimeUpdate({github,context,core,dryRun:true}),upstream:await runUpstreamUpdate({ github, context, core, dryRun: true })};
             await core.summary.addHeading('Upstream update result').addCodeBlock(JSON.stringify(result, null, 2), 'json').write();

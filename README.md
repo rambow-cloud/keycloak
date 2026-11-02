@@ -20,7 +20,7 @@ podman pull quay.io/rambow-cloud/keycloak:26.8.1-r4-core
 podman pull quay.io/rambow-cloud/keycloak:26.8.1-r4-aws
 ```
 
-Use [digest-pinned references](releases/README.md) for deployments. The reviewed r2 architecture expansion changed its tag bindings to indexes while preserving original AMD64 digests; [binding history](releases/events.jsonl) retains this transition and the r3 withdrawal. New revisions require a feature or explicit CVE repair; maintenance alone does not trigger publication. No `latest` tag is published. See [security release notes](docs/security/README.md) for fixes in each version.
+Use [digest-pinned references](releases/README.md) for deployments. The reviewed r2 architecture expansion changed its tag bindings to indexes while preserving original AMD64 digests; [binding history](releases/events.jsonl) retains this transition and the r3 withdrawal. New revisions require a feature, explicit CVE repair or a reviewed [distroless runtime digest update with measured CVE history](docs/distroless-updates.md); builder-only maintenance does not trigger publication. No `latest` tag is published. See [security release notes](docs/security/README.md) for fixes in each version.
 
 ## Features
 

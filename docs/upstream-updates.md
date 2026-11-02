@@ -4,7 +4,7 @@ The [Upstream updates workflow](https://github.com/rambow-cloud/keycloak/actions
 
 The updater selects the latest stable Keycloak release without downgrading, and resolves immutable digests for that release, the existing distroless nonroot Java/Debian family, and the existing Temurin JDK family. It preserves PostgreSQL test images, AWS JARs and the RDS CA lock. Java majors, Debian families, AWS dependencies and test-database upgrades require separate maintenance Issues and review.
 
-An upstream update merge does not itself publish a registry image or create a GitHub Release. [Quay publication](quay-releases.md) accepts only formal Release `published`/`released` events or explicit recovery using an existing Release tag on main. There is no push, PR, schedule or upstream-update publication trigger. A builder digest change validates both profiles and changes their build-input fingerprints; a later deliberately created Release may therefore publish both with a new revision and frozen nonempty change history. A successful updater run or merge alone never starts that publication.
+The dedicated [distroless runtime updater](distroless-updates.md) creates immutable runtime fragments and paired scan requests, independently of generic Keycloak/builder maintenance. Successful exact-source main CI for that bounded runtime request may create the next formal Release, even with no observed CVE repair. [Quay publication](quay-releases.md) still accepts only formal Release events or explicit recovery; ordinary main pushes never directly upload images. Builder-only changes validate affected profiles and remain release-ineligible.
 
 ## Issue-first updates and merge policy
 
