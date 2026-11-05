@@ -1,4 +1,4 @@
-# Aligned with Keycloak 26.8.1 kc.sh; re-check on every Keycloak upgrade.
+# Aligned with Keycloak 26.8.2 kc.sh; re-check on every Keycloak upgrade.
 -Dkc.home.dir=/opt/keycloak
 -Djboss.server.config.dir=/opt/keycloak/conf
 -Djava.util.logging.manager=org.jboss.logmanager.LogManager

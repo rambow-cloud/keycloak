@@ -3,9 +3,9 @@
   "changes": [
     {
       "type": "maintenance",
-      "summary": "Refresh builder digest from 7247bd8d2aeec64e to 95e350ad1eb738f9.",
+      "summary": "Upgrade Keycloak from 26.8.1 to 26.8.2.",
       "issues": [
-        102
+        121
       ],
       "profiles": [
         "core",
