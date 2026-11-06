@@ -16,14 +16,44 @@ Git-backed JSONL records; no database service. This page documents reviewed repa
 | [SEC-2026-004](#sec-2026-004) | CVE-2026-102554, GHSA-xxph-c9ww-hj94 | Fixed before first publication | `26.8.1-r2-core`, `26.8.1-r2-aws` | [#44](https://github.com/rambow-cloud/keycloak/issues/44), [#48](https://github.com/rambow-cloud/keycloak/issues/48) |
 | [SEC-2026-005](#sec-2026-005) | CVE-2026-118259, GHSA-ccrj-gw8r-854m | Fix pending publication; listed images are affected | `26.8.1-r2-core`, `26.8.1-r2-aws` | [#79](https://github.com/rambow-cloud/keycloak/issues/79) |
 | [SEC-2026-006](#sec-2026-006) | CVE-2026-118259, GHSA-ccrj-gw8r-854m | Fixed before first publication | `26.8.1-r4-core`, `26.8.1-r4-aws` | [#79](https://github.com/rambow-cloud/keycloak/issues/79), [#81](https://github.com/rambow-cloud/keycloak/issues/81), [#84](https://github.com/rambow-cloud/keycloak/issues/84) |
+| [SEC-2026-007](#sec-2026-007) | CVE-2026-92358, CVE-2026-105305, CVE-2026-107623, CVE-2026-107889, CVE-2026-111497, CVE-2026-112208, CVE-2026-107123, CVE-2026-107124, CVE-2026-107602, CVE-2026-110931, CVE-2026-97367, CVE-2026-97174, CVE-2026-114232, CVE-2026-97847, CVE-2026-96547, CVE-2026-96457, CVE-2026-96460, CVE-2026-97848, CVE-2026-109081, CVE-2026-92857, CVE-2026-103112, CVE-2026-97175, CVE-2026-96447, CVE-2026-82965, CVE-2026-96448, CVE-2026-92855, CVE-2026-92856, CVE-2026-19688, CVE-2026-117691 | Fixed before first publication | `26.8.2-r1-core`, `26.8.2-r1-aws` | [#123](https://github.com/rambow-cloud/keycloak/issues/123), [#125](https://github.com/rambow-cloud/keycloak/issues/125) |
 
 ## CVE and security event index
 
 - **CVE-2026-102554**: [SEC-2026-003](#sec-2026-003), [SEC-2026-004](#sec-2026-004)
+- **CVE-2026-103112**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-105305**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-107123**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-107124**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-107602**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-107623**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-107889**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-109081**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-110931**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-111497**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-112208**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-114232**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-117691**: [SEC-2026-007](#sec-2026-007)
 - **CVE-2026-118259**: [SEC-2026-005](#sec-2026-005), [SEC-2026-006](#sec-2026-006)
+- **CVE-2026-19688**: [SEC-2026-007](#sec-2026-007)
 - **CVE-2026-54399**: [SEC-2026-001](#sec-2026-001)
 - **CVE-2026-54428**: [SEC-2026-001](#sec-2026-001)
 - **CVE-2026-64607**: [SEC-2026-001](#sec-2026-001)
+- **CVE-2026-82965**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-92358**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-92855**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-92856**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-92857**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-96447**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-96448**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-96457**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-96460**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-96547**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-97174**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-97175**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-97367**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-97847**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-97848**: [SEC-2026-007](#sec-2026-007)
 - **EMUDHRA-2026-10**: [SEC-2026-002](#sec-2026-002)
 - **GHSA-ccrj-gw8r-854m**: [SEC-2026-005](#sec-2026-005), [SEC-2026-006](#sec-2026-006)
 - **GHSA-xxph-c9ww-hj94**: [SEC-2026-003](#sec-2026-003), [SEC-2026-004](#sec-2026-004)
@@ -221,6 +251,33 @@ Evidence and sources:
 - [Formal Release and immutable attachments](<https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r4>)
 - [Exact reviewed artifact lock](<https://github.com/rambow-cloud/keycloak/blob/309369edbfd43e4dd2c577fe700b1db0dc0c1439/dependencies/keycloak/opentelemetry.lock.json>)
 - [Durable four-image security report](<https://github.com/rambow-cloud/keycloak/blob/main/releases/evidence/v26.8.1-r4-security.json>)
+
+## SEC-2026-007
+
+Publish Keycloak 26.8.2 with upstream-declared server security repairs in both validated multiarchitecture profiles.
+
+Recorded (UTC): `2026-11-06T11:25:57.144Z`. Result: **Fixed before first publication**.
+
+- The official upstream security release supplies the repair attribution. Native source inventories confirm Keycloak 26.8.2; all listed advisory IDs are absent from each of the four complete Trivy reports. This does not establish local exploit reproduction.
+- The immutable publication record binds the exact successful main source and its two indexes/four native children. The publisher freshly scanned the same OCI artifacts before digest-preserving Quay upload.
+- Retain Guava 33.7.2-jre and coherent fourteen-module OpenTelemetry 1.67.0 repairs after independently verifying the original 26.8.2 distribution JAR hashes. These existing repairs are not claimed as newly introduced fixes.
+- Unfixed HIGH operating-system findings and MariaDB JDBC 3.5.10 advisories remain. Standalone CLI/SAML-adapter, pre-26.8.1 and unsupported database-specific claims are excluded. Live cloud and vulnerability-specific exploitation were not tested.
+
+| Profile | Published tag | Digest |
+| --- | --- | --- |
+| core | `26.8.2-r1-core` | `sha256:140de1c080cd9204b5d2cbebe1b46dfab53a773ff64a5b59a0bd21a88cfbf02e` |
+| aws | `26.8.2-r1-aws` | `sha256:8578b50f216c103c2ded45929eba89529d1b60dcbf1befb67d69df793ac57942` |
+
+Issues: [#123](https://github.com/rambow-cloud/keycloak/issues/123), [#125](https://github.com/rambow-cloud/keycloak/issues/125).
+
+Reference PRs: [#124](https://github.com/rambow-cloud/keycloak/pull/124).
+
+Evidence and sources:
+
+- [Official Keycloak 26.8.2 security release](<https://github.com/keycloak/keycloak/releases/tag/26.8.2>)
+- [Formal publication and immutable record](<https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r1>)
+- [Exact native source CI](<https://github.com/rambow-cloud/keycloak/actions/runs/42208382303>)
+- [Persistent source audit, native scan hashes and remaining findings](<https://github.com/rambow-cloud/keycloak/blob/main/releases/evidence/v26.8.2-r1-security.json>)
 
 ## Maintain and query
 

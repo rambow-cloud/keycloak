@@ -2,6 +2,128 @@
   "schemaVersion": 1,
   "notes": [
     {
+      "release": "v26.8.2-r1",
+      "record": "SEC-2026-007",
+      "fixes": [
+        {
+          "advisory": "CVE-2026-92358",
+          "summary": "Invalidate fallback proofs after account linking."
+        },
+        {
+          "advisory": "CVE-2026-105305",
+          "summary": "Apply client ACR requirements to device authorization."
+        },
+        {
+          "advisory": "CVE-2026-107623",
+          "summary": "Preserve logout revocation settings during client registration updates."
+        },
+        {
+          "advisory": "CVE-2026-107889",
+          "summary": "Correct login-page HTML sanitization."
+        },
+        {
+          "advisory": "CVE-2026-111497",
+          "summary": "Correct bundled Brotli decoder memory safety."
+        },
+        {
+          "advisory": "CVE-2026-112208",
+          "summary": "Discard stale authentication state during organization login."
+        },
+        {
+          "advisory": "CVE-2026-107123",
+          "summary": "Harden SAML request processing against denial of service."
+        },
+        {
+          "advisory": "CVE-2026-107124",
+          "summary": "Validate logout hints against the intended session."
+        },
+        {
+          "advisory": "CVE-2026-107602",
+          "summary": "Bound SAML key-information parsing work."
+        },
+        {
+          "advisory": "CVE-2026-110931",
+          "summary": "Bound SAML authority parsing memory usage."
+        },
+        {
+          "advisory": "CVE-2026-97367",
+          "summary": "Protect session claims from client-registration mapper substitution."
+        },
+        {
+          "advisory": "CVE-2026-97174",
+          "summary": "Validate CIBA subject parameters before issuing tokens."
+        },
+        {
+          "advisory": "CVE-2026-114232",
+          "summary": "Enforce resource ownership in UMA permission requests."
+        },
+        {
+          "advisory": "CVE-2026-97847",
+          "summary": "Protect token principals from delegated client-manager changes."
+        },
+        {
+          "advisory": "CVE-2026-96547",
+          "summary": "Prevent attribute mappers from fabricating realm roles."
+        },
+        {
+          "advisory": "CVE-2026-96457",
+          "summary": "Preserve group permission denials during group moves."
+        },
+        {
+          "advisory": "CVE-2026-96460",
+          "summary": "Enforce expiration limits on exchanged tokens."
+        },
+        {
+          "advisory": "CVE-2026-97848",
+          "summary": "Protect resource-role claims from JSON mapper injection."
+        },
+        {
+          "advisory": "CVE-2026-109081",
+          "summary": "Restrict default-role changes by client creators."
+        },
+        {
+          "advisory": "CVE-2026-92857",
+          "summary": "Protect reserved subject and audience claims from mappers."
+        },
+        {
+          "advisory": "CVE-2026-103112",
+          "summary": "Close the authentication account-takeover race."
+        },
+        {
+          "advisory": "CVE-2026-97175",
+          "summary": "Require verified identity-provider email before automatic account linking."
+        },
+        {
+          "advisory": "CVE-2026-96447",
+          "summary": "Prevent identity rebinding after client recreation."
+        },
+        {
+          "advisory": "CVE-2026-82965",
+          "summary": "Bound XML processing at SAML resolution endpoints."
+        },
+        {
+          "advisory": "CVE-2026-96448",
+          "summary": "Apply delegated role permissions to composite roles."
+        },
+        {
+          "advisory": "CVE-2026-92855",
+          "summary": "Require proof for SAML holder-of-key assertions."
+        },
+        {
+          "advisory": "CVE-2026-92856",
+          "summary": "Honor SAML proxy restrictions during identity brokering."
+        },
+        {
+          "advisory": "CVE-2026-19688",
+          "summary": "Enforce audience validation for administrative API tokens."
+        },
+        {
+          "advisory": "CVE-2026-117691",
+          "summary": "Validate encoded SAML redirect parameter signatures."
+        }
+      ]
+    },
+    {
       "release": "v26.8.1-r4",
       "record": "SEC-2026-006",
       "fixes": [
