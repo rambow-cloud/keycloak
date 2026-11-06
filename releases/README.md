@@ -6,6 +6,8 @@ Registry: `quay.io/rambow-cloud/keycloak`. Formal releases only; no `latest` tag
 
 | Release | Keycloak | Profile | Image tag | Digest | Aliases | Published (UTC) |
 | --- | --- | --- | --- | --- | --- | --- |
+| [v26.8.2-r1](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r1) | 26.8.2 | core | `26.8.2-r1-core` | `sha256:140de1c080cd9204b5d2cbebe1b46dfab53a773ff64a5b59a0bd21a88cfbf02e` | — | 2026-11-06T11:22:19.473Z |
+| [v26.8.2-r1](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r1) | 26.8.2 | aws | `26.8.2-r1-aws` | `sha256:8578b50f216c103c2ded45929eba89529d1b60dcbf1befb67d69df793ac57942` | — | 2026-11-06T11:22:19.473Z |
 | [v26.8.1-r5](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r5) | 26.8.1 | core | `26.8.1-r5-core` | `sha256:cc9bc0a1a0fba4b6f322c47c737e9477b2af98bf0759f5593886779991b2edb3` | — | 2026-11-02T14:41:11.129Z |
 | [v26.8.1-r5](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r5) | 26.8.1 | aws | `26.8.1-r5-aws` | `sha256:b5ec721475ebaa8302668f3b915800d3e4b2c940cf5570488783dd371e420d34` | — | 2026-11-02T14:41:11.129Z |
 | [v26.8.1-r4](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r4) | 26.8.1 | core | `26.8.1-r4-core` | `sha256:f44c94db4c96807f8c6c8b1a9eb3d63d94209a1b233ac26a4465c46ee3a8e055` | — | 2026-10-30T00:07:51.026Z |
@@ -14,6 +16,31 @@ Registry: `quay.io/rambow-cloud/keycloak`. Formal releases only; no `latest` tag
 | [v26.8.1-r2](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r2) | 26.8.1 | aws | `26.8.1-r2-aws` | `sha256:2cea43c26ef0676d922f68de30504a6d9355a420c4c9544cda40aa10ab166129` | — | 2026-10-28T20:08:15.664Z |
 | [v26.8.1-r1](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r1) | 26.8.1 | core | `26.8.1-r1-core` | `sha256:e0975379e3f2080cc4b9a4e852ce3341c54041e8a733a529b01cca2922beaa32` | — | 2026-10-26T02:41:36.090Z |
 | [v26.8.1-r1](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r1) | 26.8.1 | aws | `26.8.1-r1-aws` | `sha256:0771ae5db0bc40e057ce51d2609d50a56a0d867a66411e411179ecf12f9608a7` | — | 2026-10-26T02:41:36.090Z |
+
+## v26.8.2-r1
+
+[Source commit](https://github.com/rambow-cloud/keycloak/commit/65c3e58180b17e1f6a3cb0d8791c64dbe65a1e7c) · [Source CI](https://github.com/rambow-cloud/keycloak/actions/runs/42208382303) · [Publication and fresh scans](https://github.com/rambow-cloud/keycloak/actions/runs/42209219773)
+
+### `26.8.2-r1-core` (core)
+
+- **fix:** Upgrade Keycloak from 26.8.1 to 26.8.2 to incorporate upstream account-linking, device authorization ACR, OIDC client-registration and login-page sanitization security fixes; preserve the reviewed Guava and OpenTelemetry repairs. ([#123](https://github.com/rambow-cloud/keycloak/issues/123))
+
+Architectures: `linux/amd64` (`sha256:7e12fa98587668ec47a1b4ce470deb93432cd8bacceb02848db8872f190bb9ba`), `linux/arm64` (`sha256:eeed077e531549ca54a5822be9669821c5fd3d480b28608634f76cd9b3a72c63`). The tag and pull reference select the OCI index.
+
+```sh
+podman pull quay.io/rambow-cloud/keycloak@sha256:140de1c080cd9204b5d2cbebe1b46dfab53a773ff64a5b59a0bd21a88cfbf02e
+```
+
+### `26.8.2-r1-aws` (aws)
+
+- **fix:** Upgrade Keycloak from 26.8.1 to 26.8.2 to incorporate upstream account-linking, device authorization ACR, OIDC client-registration and login-page sanitization security fixes; preserve the reviewed Guava and OpenTelemetry repairs. ([#123](https://github.com/rambow-cloud/keycloak/issues/123))
+
+Architectures: `linux/amd64` (`sha256:9cab5ba49bc935487b071568376eba862531250359cfa6d73efcf10f321bcf64`), `linux/arm64` (`sha256:d1ef16ad4d614c8590f8d9e370241a7db5ba6990edbd8fd429e5291dc71edd90`). The tag and pull reference select the OCI index.
+
+```sh
+podman pull quay.io/rambow-cloud/keycloak@sha256:8578b50f216c103c2ded45929eba89529d1b60dcbf1befb67d69df793ac57942
+```
+
 
 ## v26.8.1-r5
 
