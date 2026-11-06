@@ -6,16 +6,17 @@ const {join}=require('node:path');
 const {createHash}=require('node:crypto');
 const lib=import('../scripts/opentelemetry-dependencies.mjs');
 const actual=JSON.parse(require('node:fs').readFileSync('dependencies/keycloak/opentelemetry.lock.json','utf8'));
+const currentVersion=JSON.parse(require('node:fs').readFileSync('images.lock.json','utf8')).keycloakVersion;
 const bytes=Buffer.from('reviewed test artifact'),sha=createHash('sha256').update(bytes).digest('hex');
-const fixture=()=>({...actual,modules:actual.modules.map(m=>({...m,upstreamSha256:'a'.repeat(64),sha256:sha}))});
+const fixture=()=>({...actual,keycloakVersion:'26.8.1',modules:actual.modules.map(m=>({...m,upstreamSha256:'a'.repeat(64),sha256:sha}))});
 test('OpenTelemetry exception locks a complete coherent artifact inventory and rejects source/version drift',async()=>{
  const {validateTelemetryOverride}=await lib;
- const targets=validateTelemetryOverride(actual,'26.8.1');assert.equal(targets.length,14);
+ const targets=validateTelemetryOverride(actual,currentVersion);assert.equal(targets.length,14);
  assert(targets.every(t=>new URL(t.url).origin==='https://repo.maven.apache.org'&&t.path.startsWith('lib/lib/main/io.opentelemetry.')));
  assert(targets.find(t=>t.artifactId==='opentelemetry-api-incubator').url.includes('/1.67.0-alpha/'));
- for(const patch of [{version:'1.66.0'},{version:actual.upstreamVersion},{upstreamVersion:'1.68.0'},{version:'../../x'},{url:'https://evil.invalid'},{modules:actual.modules.slice(1)},{modules:[actual.modules[0],...actual.modules.slice(0,-1)]}]) assert.throws(()=>validateTelemetryOverride({...actual,...patch},'26.8.1'));
- assert.throws(()=>validateTelemetryOverride(actual,'26.8.2'),/review\/retire/);
- assert.throws(()=>validateTelemetryOverride({...actual,modules:actual.modules.map((m,i)=>i?m:{...m,sha256:'bad'})},'26.8.1'));
+ for(const patch of [{version:'1.66.0'},{version:actual.upstreamVersion},{upstreamVersion:'1.68.0'},{version:'../../x'},{url:'https://evil.invalid'},{modules:actual.modules.slice(1)},{modules:[actual.modules[0],...actual.modules.slice(0,-1)]}]) assert.throws(()=>validateTelemetryOverride({...actual,...patch},currentVersion));
+ assert.throws(()=>validateTelemetryOverride(actual,'0.0.0'),/review\/retire/);
+ assert.throws(()=>validateTelemetryOverride({...actual,modules:actual.modules.map((m,i)=>i?m:{...m,sha256:'bad'})},currentVersion));
 });
 test('pinned cohort downloads reuse good cache and regenerate integrity manifests only after complete verification',async()=>{
  const {prepareTelemetryOverride}=await lib,lock=fixture(),output=await mkdtemp(join(tmpdir(),'rambow-otel-'));let count=0;

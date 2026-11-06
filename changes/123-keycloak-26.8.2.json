@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "changes": [
+    {
+      "type": "fix",
+      "summary": "Upgrade Keycloak from 26.8.1 to 26.8.2 to incorporate upstream account-linking, device authorization ACR, OIDC client-registration and login-page sanitization security fixes; preserve the reviewed Guava and OpenTelemetry repairs.",
+      "issues": [
+        123
+      ],
+      "profiles": [
+        "core",
+        "aws"
+      ],
+      "cves": [
+        "CVE-2026-92358",
+        "CVE-2026-105305",
+        "CVE-2026-107623",
+        "CVE-2026-107889"
+      ]
+    }
+  ]
+}
