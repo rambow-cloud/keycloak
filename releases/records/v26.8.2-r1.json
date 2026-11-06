@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "status": "published",
+  "publishedAt": "2026-11-06T11:22:19.473Z",
+  "publishRunId": 42209219773,
+  "validationToolsCommit": "65c3e58180b17e1f6a3cb0d8791c64dbe65a1e7c",
+  "plan": {
+    "schemaVersion": 3,
+    "registry": "quay.io/rambow-cloud/keycloak",
+    "tag": "v26.8.2-r1",
+    "releaseId": 436412155,
+    "keycloakVersion": "26.8.2",
+    "revision": 1,
+    "sourceCommit": "65c3e58180b17e1f6a3cb0d8791c64dbe65a1e7c",
+    "toolsCommit": "65c3e58180b17e1f6a3cb0d8791c64dbe65a1e7c",
+    "sourceRun": {
+      "id": 42208382303,
+      "attempt": 1
+    },
+    "lockSha256": "f1f9d20b3ae3f986f0ee8ef7fce0e85a530c67634645732b8ce045bb3a0a04b5",
+    "imageLock": {
+      "keycloakVersion": "26.8.2",
+      "javaVersion": 25,
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "keycloak": "quay.io/keycloak/keycloak:26.8.2@sha256:3879c623248408de29a5303178b5816c77e8dfef3890c361f8c0bbeaa979ba3b",
+      "builder": "docker.io/library/eclipse-temurin:25-jdk-noble@sha256:95e350ad1eb738f943e141640f7e3d797e483359a3b33c3864255bfd1ad71f8a",
+      "runtime": "gcr.io/distroless/java25-debian13:nonroot@sha256:a90a5fadd78dc37b643da72dca2f744ef67eba625eca7227a5b375b548e6b1c2",
+      "postgres": "docker.io/library/postgres:17-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+      "awsDependencies": {
+        "wrapperVersion": "4.5.0",
+        "sdkVersion": "2.46.10",
+        "lockFile": "dependencies/aws/dependencies.lock.json",
+        "rdsCa": {
+          "url": "https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem",
+          "sha256": "90a6f1a7978a1b1b096dca6c57511ca48d3b8cf052f8e704baf358f34ea2f21b"
+        }
+      }
+    },
+    "aliases": [],
+    "previousAliases": {},
+    "images": [
+      {
+        "profile": "core",
+        "inputSha256": "b9e6c6238b2b38e8f57bb09728484f8b83742113d8ddd0ebba2dd096e3bdc84e",
+        "changes": [
+          {
+            "type": "fix",
+            "summary": "Upgrade Keycloak from 26.8.1 to 26.8.2 to incorporate upstream account-linking, device authorization ACR, OIDC client-registration and login-page sanitization security fixes; preserve the reviewed Guava and OpenTelemetry repairs.",
+            "issues": [
+              123
+            ],
+            "cves": [
+              "CVE-2026-92358",
+              "CVE-2026-105305",
+              "CVE-2026-107623",
+              "CVE-2026-107889"
+            ]
+          }
+        ],
+        "artifactId": 13498292179,
+        "artifactName": "keycloak-oci-core-multiarch-65c3e58180b17e1f6a3cb0d8791c64dbe65a1e7c",
+        "tag": "26.8.2-r1-core",
+        "digest": "sha256:140de1c080cd9204b5d2cbebe1b46dfab53a773ff64a5b59a0bd21a88cfbf02e",
+        "archiveSha256": "b68518029dfc67fae541cb87719edd0206da895f8d7285aa70d100839badc2b6",
+        "children": [
+          {
+            "architecture": "amd64",
+            "digest": "sha256:7e12fa98587668ec47a1b4ce470deb93432cd8bacceb02848db8872f190bb9ba"
+          },
+          {
+            "architecture": "arm64",
+            "digest": "sha256:eeed077e531549ca54a5822be9669821c5fd3d480b28608634f76cd9b3a72c63"
+          }
+        ]
+      },
+      {
+        "profile": "aws",
+        "inputSha256": "d14fc938768372fb899fcb8b50f5f29909dc2b4a2823c2011998640ed42ab778",
+        "changes": [
+          {
+            "type": "fix",
+            "summary": "Upgrade Keycloak from 26.8.1 to 26.8.2 to incorporate upstream account-linking, device authorization ACR, OIDC client-registration and login-page sanitization security fixes; preserve the reviewed Guava and OpenTelemetry repairs.",
+            "issues": [
+              123
+            ],
+            "cves": [
+              "CVE-2026-92358",
+              "CVE-2026-105305",
+              "CVE-2026-107623",
+              "CVE-2026-107889"
+            ]
+          }
+        ],
+        "artifactId": 13497757159,
+        "artifactName": "keycloak-oci-aws-multiarch-65c3e58180b17e1f6a3cb0d8791c64dbe65a1e7c",
+        "tag": "26.8.2-r1-aws",
+        "digest": "sha256:8578b50f216c103c2ded45929eba89529d1b60dcbf1befb67d69df793ac57942",
+        "archiveSha256": "8b87b05cd10ea496ed622475cf25796ddccc93009f6f468a0e42f81be14cc384",
+        "children": [
+          {
+            "architecture": "amd64",
+            "digest": "sha256:9cab5ba49bc935487b071568376eba862531250359cfa6d73efcf10f321bcf64"
+          },
+          {
+            "architecture": "arm64",
+            "digest": "sha256:d1ef16ad4d614c8590f8d9e370241a7db5ba6990edbd8fd429e5291dc71edd90"
+          }
+        ]
+      }
+    ]
+  },
+  "aliasChanges": []
+}
