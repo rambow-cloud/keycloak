@@ -14,15 +14,15 @@ import { json,hash } from './lib/releases.mjs';
 const [imageArg,outputArg]=process.argv.slice(2),image=resolve(imageArg??'.cache/trivy-image'),output=resolve(outputArg??'.cache/trivy-report');
 const profile=process.env.BUILD_PROFILE,architecture=process.env.BUILD_ARCH;
 const headSha=process.env.SCAN_HEAD_SHA??process.env.GITHUB_SHA,runId=Number(process.env.GITHUB_RUN_ID),runAttempt=Number(process.env.GITHUB_RUN_ATTEMPT??1);
-const run=(cmd,args)=>{const r=spawnSync(cmd,args,{stdio:'inherit',timeout:900000});if(r.status!==0) throw Error(cmd+' failed');};
+const run=(cmd,args,env=process.env)=>{const r=spawnSync(cmd,args,{stdio:'inherit',timeout:900000,env});if(r.status!==0) throw Error(cmd+' failed');};
 await mkdir(output,{recursive:true});
 const config=JSON.parse(await readFile('config/runtime-update.json','utf8'));
 const lock=JSON.parse(await readFile('images.lock.json','utf8'));
 const records=await Promise.all((await readdir('releases/records')).filter(n=>n.endsWith('.json')).map(async n=>JSON.parse(await readFile('releases/records/'+n,'utf8'))));
 Object.defineProperty(records,'lifecycle',{value:validateReleaseEvents(parseReleaseEvents(await readFile('releases/events.jsonl','utf8')),records)});
-const active=runtimeIntent(records,lock);
+const active=config.request?.to===lock.runtime ? runtimeIntent(records,lock) : null;
 if(!config.request||!active||config.request.to!==lock.runtime||!Object.hasOwn(config.request.from,profile)) {
-  run(process.execPath,[fileURLToPath(new URL('./scan-image.mjs',import.meta.url)),image,output]);
+  run(process.execPath,[fileURLToPath(new URL('./scan-image.mjs',import.meta.url)),image,output],{...process.env,SCAN_RUNTIME:lock.runtime});
 } else {
   try {
     const request=validateRequest(config.request);

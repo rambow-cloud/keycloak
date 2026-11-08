@@ -19,7 +19,7 @@ for (const architecture of targets) {
   const selected = join(work,architecture);
   const copy = spawnSync('skopeo',['--override-os','linux','--override-arch',architecture,'copy','--preserve-digests','oci:'+resolve(layout),'oci:'+selected+':scan'],{stdio:'inherit',timeout:600000});
   if (copy.status !== 0) throw Error('Cannot select release architecture for scan');
-  const env = {...process.env};
+  const env = {...process.env, SCAN_RUNTIME:prepared.imageLock.runtime};
   if (prepared.imageLock.platforms) env.BUILD_ARCH = architecture;
   else delete env.BUILD_ARCH;
   const scan = spawnSync(process.execPath,[fileURLToPath(new URL('./scan-image.mjs',import.meta.url)),selected,destination],{stdio:'inherit',env,timeout:900000});

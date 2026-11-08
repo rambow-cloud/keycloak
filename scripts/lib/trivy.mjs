@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
+import { isRambowRuntime } from './runtime-sbom.mjs';
 
 export const profiles = ['core', 'aws'];
 export const severities = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'UNKNOWN'];
@@ -14,13 +15,23 @@ export function validatePolicy(policy) {
       policy.blockingSeverities.some(s => !severities.includes(s)) || typeof policy.blockUnfixed !== 'boolean') throw new Error('Invalid Trivy policy');
 }
 
-export function summarize(report, { profile, architecture, headSha, runId, runAttempt, policy }) {
+export function hasScanCoverage(report, runtime, requireInventory = false) {
+  if (report.SchemaVersion !== 2 || report.ArtifactType !== 'container_image' || !Array.isArray(report.Results)) return false;
+  const java = report.Results.some(r => r.Class === 'lang-pkgs' && r.Type === 'jar' && (!requireInventory || r.Packages?.length));
+  const os = report.Metadata?.OS;
+  if (isRambowRuntime(runtime)) {
+    return os?.Family === 'amazon' && os.Name === '2023' && report.RuntimeSbom?.reference === runtime &&
+      report.RuntimeSbom.architecture === report.Metadata.ImageConfig?.architecture && /^[a-f0-9]{64}$/.test(report.RuntimeSbom.sha256) &&
+      report.Results.some(r => r.Class === 'os-pkgs' && r.Type === 'amazon' && r.Packages?.length) && java;
+  }
+  return os?.Family === 'debian' && report.Results.some(r => r.Class === 'os-pkgs' && (!requireInventory || r.Packages?.length)) && java;
+}
+
+export function summarize(report, { profile, architecture, headSha, runId, runAttempt, policy, runtime }) {
   validatePolicy(policy);
   if (architecture && (!['amd64','arm64'].includes(architecture) || report.Metadata?.ImageConfig?.architecture !== architecture || report.Metadata?.ImageConfig?.os !== 'linux')) throw Error('Scan image architecture does not match the requested Linux target');
   if (!profiles.includes(profile) || !/^[a-f0-9]{40}$/.test(headSha) || !Number.isSafeInteger(runId) || !Number.isSafeInteger(runAttempt)) throw new Error('Invalid scan context');
-  if (report.SchemaVersion !== 2 || report.ArtifactType !== 'container_image' || !Array.isArray(report.Results) ||
-      report.Metadata?.OS?.Family !== 'debian' || !report.Results.some(r => r.Class === 'os-pkgs') ||
-      !report.Results.some(r => r.Class === 'lang-pkgs' && r.Type === 'jar')) throw new Error('Missing expected Debian or Java scan coverage');
+  if (!hasScanCoverage(report, runtime, isRambowRuntime(runtime))) throw new Error('Missing expected OS or Java scan coverage');
   const unique = new Map();
   for (const result of report.Results) {
     if (result.Vulnerabilities !== undefined && !Array.isArray(result.Vulnerabilities)) throw new Error('Invalid vulnerability list');
@@ -46,6 +57,7 @@ export function summarize(report, { profile, architecture, headSha, runId, runAt
     if (policy.blockingSeverities.includes(finding.severity) && (policy.blockUnfixed || finding.fixed.trim())) blocking++;
   }
   return { schemaVersion: architecture ? 2 : 1, profile, ...(architecture ? {architecture} : {}), headSha, runId, runAttempt, status: 'complete', scannerVersion: policy.version,
+    ...(isRambowRuntime(runtime) ? { osCoverage: 'al2023-sbom' } : {}),
     createdAt: report.CreatedAt, policy: { blockingSeverities: policy.blockingSeverities, blockUnfixed: policy.blockUnfixed },
     counts, total: findings.length, blocking, osEosl: report.Metadata.OS.EOSL === true,
     findings: findings.slice(0, maxFindings) };
@@ -55,7 +67,8 @@ export function validateSummary(summary, { profile, architecture, headSha, runId
   if ((architecture ? summary.schemaVersion !== 2 || summary.architecture !== architecture || !['amd64','arm64'].includes(architecture) : summary.schemaVersion !== 1) || summary.profile !== profile || summary.headSha !== headSha ||
       summary.runId !== runId || summary.runAttempt !== runAttempt || !['complete', 'error'].includes(summary.status)) throw new Error('Scan summary does not match this run/profile/commit');
   if (summary.status === 'error') return summary;
-  if (!/^\d+\.\d+\.\d+$/.test(summary.scannerVersion) || typeof summary.osEosl !== 'boolean') throw new Error('Invalid scanner metadata');
+  if (!/^\d+\.\d+\.\d+$/.test(summary.scannerVersion) || typeof summary.osEosl !== 'boolean' ||
+      (summary.osCoverage !== undefined && summary.osCoverage !== 'al2023-sbom')) throw new Error('Invalid scanner metadata');
   const safeCount = n => Number.isSafeInteger(n) && n >= 0 && n <= 1000000;
   if (!safeCount(summary.total) || !safeCount(summary.blocking) || summary.blocking > summary.total ||
       !Array.isArray(summary.findings) || summary.findings.length > maxFindings || summary.findings.length > summary.total) throw new Error('Invalid summary totals');
@@ -161,7 +174,10 @@ export function renderReport(summaries, { runUrl, headSha, runId, runAttempt, co
     body += '| ' + profile + ' | ' + severities.map(s => summary.counts[s].total + ' (' + summary.counts[s].fixable + ' fixable)').join(' | ') +
       ' | ' + summary.blocking + ' | ' + (summary.osEosl ? '**EOL OS**' : 'Complete') + ' |\n';
   }
-  body += '\nCounts are deduplicated vulnerability/package/version/target findings, not unique CVE IDs. All severities and unfixed findings remain in the JSON artifacts.\n';
+  body += '\nCounts are deduplicated vulnerability/package/version/target findings. Raw reports retain all findings returned by the scanner.\n';
+  if (rows.some(target => summaries[target]?.osCoverage === 'al2023-sbom')) {
+    body += '\nAL2023 OS coverage uses the pinned runtime SBOM and the Amazon Linux advisory feed. Unfixed AL2023 vulnerabilities and JVM advisories can be absent from that feed.\n';
+  }
   for (const profile of rows) {
     if (!planned.includes(profile)) continue;
     const summary = summaries[profile];

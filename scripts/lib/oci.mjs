@@ -2,7 +2,8 @@ import { createHash } from 'node:crypto';
 import { assertBasePlatforms } from './platforms.mjs';
 
 export async function resolveImageDigest(reference, fetcher = fetch, requiredArchitectures = []) {
-  if (!/^(quay\.io|gcr\.io|docker\.io)\/[\w./-]+:[\w.-]+(?:@sha256:[a-f0-9]{64})?$/.test(reference)) throw new Error('Invalid or unapproved OCI reference: ' + reference);
+  const approved = /^(?:(?:quay\.io|gcr\.io|docker\.io)\/[\w./-]+|ghcr\.io\/rambow-cloud\/java):[\w.-]+(?:@sha256:[a-f0-9]{64})?$/;
+  if (!approved.test(reference)) throw new Error('Invalid or unapproved OCI reference: ' + reference);
   const [tagged, pinned] = reference.split('@');
   const [host, ...parts] = tagged.split('/');
   const [repository, tag] = parts.join('/').split(':');

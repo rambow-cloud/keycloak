@@ -1,6 +1,6 @@
 import { resolveImageDigest } from './lib/oci.mjs';
 import { readCatalog,readText } from './quay-release.mjs';
-import { runtimeIntent,validateRequest } from './lib/runtime-update.mjs';
+import { runtimeIntent,validateRequest,isAutomaticRuntime } from './lib/runtime-update.mjs';
 import { json,hash } from './lib/releases.mjs';
 import { updaterApp,sameUpdater,inspectCompatibility,autoMergeEligible } from './lib/upstream.mjs';
 import { configureAutoMerge } from './upstream-update.mjs';
@@ -13,6 +13,7 @@ export async function runRuntimeUpdate({github,context,core,identity,dryRun=fals
   const {data:ref}=await github.rest.git.getRef({...repo,ref:'heads/'+metadata.default_branch});
   const sha=ref.object.sha;
   const text=await readText(github,repo,'images.lock.json',sha),lock=JSON.parse(text);
+  if(!isAutomaticRuntime(lock.runtime)) return {changed:false,status:'runtime-requires-manual-review'};
   const next={...lock,runtime:await resolve(lock.runtime.split('@')[0],fetch,['amd64','arm64'])};
   const records=await readCatalog(github,repo,sha),intent=runtimeIntent(records,next);
   if(!intent) return {changed:false};
