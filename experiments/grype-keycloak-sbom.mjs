@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { nativeArchitecture } from '../scripts/lib/platforms.mjs';
 import { readRuntimeSbom } from '../scripts/lib/runtime-sbom.mjs';
+import { validateTelemetryOverride } from '../scripts/opentelemetry-dependencies.mjs';
 
 const architecture = process.env.PROBE_ARCH;
 assert.equal(process.platform, 'linux');
@@ -20,6 +21,7 @@ const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const { plan } = await readJson('releases/records/v26.8.2-r2.json');
 const guava = await readJson('dependencies/keycloak/overrides.lock.json');
 const otel = await readJson('dependencies/keycloak/opentelemetry.lock.json');
+const telemetryArtifacts = validateTelemetryOverride(otel, plan.keycloakVersion);
 const inventory = await readRuntimeSbom(plan.imageLock.runtime, architecture);
 const originalPath = join(output, 'runtime.cdx.json');
 await copyFile(inventory.path, originalPath);
@@ -61,13 +63,35 @@ async function readBlob(layout, digest) {
   return JSON.parse(bytes);
 }
 
-function mergeSboms(java, reference, digest) {
+function verifiedJavaInventory(java) {
   assert.equal(java.bomFormat, 'CycloneDX');
-  assert.ok(java.components?.length, 'Syft found no Java packages');
-  assert.ok(java.components.every(component => component.type !== 'operating-system' &&
-    !component.purl?.startsWith('pkg:rpm/')), 'The Java catalog contains OS entries');
+  const packages = java.components.filter(component => component.properties?.some(property =>
+    property.name === 'syft:package:type' && property.value === 'java-archive'));
+  assert.ok(packages.length, 'Syft found no Java archives');
+  const corrections = [];
+  for (const artifact of telemetryArtifacts) {
+    // The optimized distribution keeps the original filenames after replacing the JAR bytes.
+    const path = '/opt/keycloak/' + artifact.path;
+    const file = java.components.find(component => component.type === 'file' && component.name === path);
+    assert.ok(file?.hashes.some(entry => entry.alg === 'SHA-256' && entry.content === artifact.sha256),
+      'Syft file hash does not confirm the reviewed OpenTelemetry JAR at ' + path);
+    const index = packages.findIndex(component => component.name === artifact.artifactId &&
+      component.properties.some(property => property.name === 'syft:location:0:path' && property.value === path));
+    assert.ok(index >= 0, 'Missing Syft package for ' + path);
+    const component = packages[index];
+    const version = artifact.url.split('/').at(-2);
+    const purl = 'pkg:maven/io.opentelemetry/' + artifact.artifactId + '@' + version;
+    const { cpe, properties, ...data } = component;
+    packages[index] = { ...data, group: 'io.opentelemetry', version, purl,
+      properties: properties.filter(property => property.name !== 'syft:cpe23') };
+    corrections.push({ path, sha256: artifact.sha256, originalPurl: component.purl, purl });
+  }
+  return { packages, corrections };
+}
+
+function mergeSboms(java, packages, reference, digest) {
   const root = { type: 'container', name: reference, version: digest, 'bom-ref': reference };
-  const components = [os, ...rpms, ...java.components];
+  const components = [os, ...rpms, ...packages];
   const refs = new Set(components.map(component => component['bom-ref']));
   assert.ok(!refs.has(undefined) && !refs.has(reference) && refs.size === components.length,
     'Combined inventory has missing or duplicate component references');
@@ -77,7 +101,7 @@ function mergeSboms(java, reference, digest) {
     metadata: { ...java.metadata, component: root },
     components,
     dependencies: [
-      { ref: reference, dependsOn: [os['bom-ref'], ...java.components.map(component => component['bom-ref'])] },
+      { ref: reference, dependsOn: [os['bom-ref'], ...packages.map(component => component['bom-ref'])] },
       { ref: os['bom-ref'], dependsOn: rpms.map(component => component['bom-ref']) },
       ...(java.dependencies ?? []).filter(edge => edge.ref !== javaRoot && refs.has(edge.ref))
         .map(edge => ({ ref: edge.ref, dependsOn: (edge.dependsOn ?? []).filter(ref => refs.has(ref)) })),
@@ -120,7 +144,9 @@ for (const profile of ['core', 'aws']) {
     '-o', 'cyclonedx-json=' + javaPath, '-o', 'syft-json=' + join(directory, 'java.syft.json')]);
   await rm(layout, { recursive: true });
   const java = await readJson(javaPath);
-  const maven = java.components.filter(component => component.purl?.startsWith('pkg:maven/'));
+  const { packages, corrections } = verifiedJavaInventory(java);
+  await writeJson(join(directory, 'java-corrections.json'), corrections);
+  const maven = packages.filter(component => component.purl?.startsWith('pkg:maven/'));
   const hasMaven = (name, version) => maven.some(component => component.purl.split('?')[0] ===
     'pkg:maven/' + name + '@' + version);
   const expected = [
@@ -135,7 +161,7 @@ for (const profile of ['core', 'aws']) {
     profile === 'aws', 'Unexpected AWS JDBC wrapper coverage');
 
   const mergedPath = join(directory, 'combined.cdx.json');
-  await writeJson(mergedPath, mergeSboms(java, reference, digest));
+  await writeJson(mergedPath, mergeSboms(java, packages, reference, digest));
   const result = run(grype, ['sbom:' + mergedPath, '--distro', 'amzn:2023', '-vv', '-o', 'json'], grypeEnv);
   await writeFile(join(directory, 'grype.log'), result.stderr);
   await writeFile(join(directory, 'grype.json'), result.stdout);
@@ -152,7 +178,8 @@ for (const profile of ['core', 'aws']) {
       'Grype did not read ' + name + '@' + version);
   }
   const summary = {
-    architecture, profile, digest, rpmCount: rpms.length, javaComponents: java.components.length,
+    architecture, profile, digest, rpmCount: rpms.length, javaComponents: packages.length,
+    verifiedTelemetryJars: corrections.length,
     syftMavenIdentities: mavenIdentities.size,
     grypeMavenIdentities: [...imported].filter(purl => purl.startsWith('pkg:maven/')).length,
     matches: report.matches.length,
