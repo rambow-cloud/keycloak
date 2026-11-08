@@ -1,0 +1,574 @@
+{
+  "schemaVersion": 1,
+  "release": "v26.8.2-r2",
+  "runtime": "ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:c5ab8cec00b8a1d999e5663b26a5f11646183a1b99ea82676f1fed4a02eee51f",
+  "sourceCommit": "bc7b4e9041725ed9c1a2e8c0245006391645f5af",
+  "sourceRunId": 42516840659,
+  "publishRunId": 42517316376,
+  "monitorRunId": 42517932371,
+  "monitorRunAttempt": 1,
+  "publicationRecordSha256": "93d43585d2c89ef0c47e96b8e52bc80e1551b15ec746df5dbe703da1c33a0e18",
+  "issues": [
+    130,
+    131,
+    134
+  ],
+  "pullRequest": 133,
+  "images": [
+    {
+      "profile": "core",
+      "tag": "26.8.2-r2-core",
+      "digest": "sha256:32ee7e8ac0414da4f79dac38402b2226519b2600074c6bd72221f908fce1a2b4",
+      "children": [
+        {
+          "architecture": "amd64",
+          "digest": "sha256:fed4cc5b376ef9505df6783d680658c99fe5feb0b8b7722622c616be8563add5",
+          "publication": {
+            "scannerVersion": "0.76.1",
+            "imageConfigDigest": "sha256:8c2f4400613eda42f12920da0a25fbbd79f682f15adc0d195e0ebe14d2dd1a40",
+            "runtimeSbom": {
+              "reference": "ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:c5ab8cec00b8a1d999e5663b26a5f11646183a1b99ea82676f1fed4a02eee51f",
+              "architecture": "amd64",
+              "baseManifest": "sha256:43d29ce4c92e6b6a09e45fd668b91ffa3e042f20efaf6c3ac65a1c28d7a0a5c3",
+              "baseConfig": "sha256:dd1ee8731663f3398d63dcb39485350c8a7c0c795cae807b5c0c890b9814b473",
+              "sha256": "9abe383c35c2c12b7815223d5c5c30341da81b0437561a76b2eb89a191e564ad"
+            },
+            "osPackages": 24,
+            "javaPackages": 491,
+            "counts": {
+              "CRITICAL": {
+                "total": 0,
+                "fixable": 0
+              },
+              "HIGH": {
+                "total": 0,
+                "fixable": 0
+              },
+              "MEDIUM": {
+                "total": 3,
+                "fixable": 3
+              },
+              "LOW": {
+                "total": 1,
+                "fixable": 1
+              },
+              "UNKNOWN": {
+                "total": 0,
+                "fixable": 0
+              }
+            },
+            "total": 4,
+            "blocking": 0,
+            "reports": {
+              "trivy-image.json": "5a5d13b22c03414ba3b18db01d35c167f1bdd11fdb7383160b4556e0bbfc79ec",
+              "trivy-runtime.json": "14815e31ec35ea655cba2d5e5757f506f0c1262666fc9249bcdd1313e9a2677a",
+              "trivy.json": "53808c1552770c1f902eb59818b1bc5237782a629bfa9db0a7f29c1aa876b459"
+            },
+            "database": {
+              "Version": 2,
+              "NextUpdate": "2026-11-09T18:58:44.715199055Z",
+              "UpdatedAt": "2026-11-08T18:58:44.715199225Z",
+              "DownloadedAt": "2026-11-08T19:54:34.192476002Z"
+            }
+          },
+          "monitor": {
+            "scannerVersion": "0.76.1",
+            "imageConfigDigest": "sha256:8c2f4400613eda42f12920da0a25fbbd79f682f15adc0d195e0ebe14d2dd1a40",
+            "runtimeSbom": {
+              "reference": "ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:c5ab8cec00b8a1d999e5663b26a5f11646183a1b99ea82676f1fed4a02eee51f",
+              "architecture": "amd64",
+              "baseManifest": "sha256:43d29ce4c92e6b6a09e45fd668b91ffa3e042f20efaf6c3ac65a1c28d7a0a5c3",
+              "baseConfig": "sha256:dd1ee8731663f3398d63dcb39485350c8a7c0c795cae807b5c0c890b9814b473",
+              "sha256": "9abe383c35c2c12b7815223d5c5c30341da81b0437561a76b2eb89a191e564ad"
+            },
+            "osPackages": 24,
+            "javaPackages": 491,
+            "counts": {
+              "CRITICAL": {
+                "total": 0,
+                "fixable": 0
+              },
+              "HIGH": {
+                "total": 0,
+                "fixable": 0
+              },
+              "MEDIUM": {
+                "total": 3,
+                "fixable": 3
+              },
+              "LOW": {
+                "total": 1,
+                "fixable": 1
+              },
+              "UNKNOWN": {
+                "total": 0,
+                "fixable": 0
+              }
+            },
+            "total": 4,
+            "blocking": 0,
+            "reports": {
+              "trivy-image.json": "d9b9c2be8df7983dc7a69d6ea59620e62dfe5849fd930a5f6bf156e97aac2623",
+              "trivy-runtime.json": "88c8e15d0761201aa85c5d3129ad49114469cb78b3456f608d40c43b76e4921b",
+              "trivy.json": "3a10de2ecfb7035051a509b64fb018dd1da73734163e32422590e853e4cea092"
+            },
+            "database": {
+              "Version": 2,
+              "NextUpdate": "2026-11-09T18:58:44.715199055Z",
+              "UpdatedAt": "2026-11-08T18:58:44.715199225Z",
+              "DownloadedAt": "2026-11-08T20:01:52.361310812Z"
+            }
+          },
+          "remainingFindings": [
+            {
+              "id": "CVE-2026-119210",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "MEDIUM",
+              "target": "Java"
+            },
+            {
+              "id": "CVE-2026-119276",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "MEDIUM",
+              "target": "Java"
+            },
+            {
+              "id": "CVE-2026-119281",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "MEDIUM",
+              "target": "Java"
+            },
+            {
+              "id": "CVE-2026-119280",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "LOW",
+              "target": "Java"
+            }
+          ]
+        },
+        {
+          "architecture": "arm64",
+          "digest": "sha256:9191d0bc70d86b4985c0a8b45510297225bca3d5d22004c3dcceb3f8f34c2604",
+          "publication": {
+            "scannerVersion": "0.76.1",
+            "imageConfigDigest": "sha256:11c6fffd1ff67c0dbaaaed49791e9c2ae68779499d7b6fdd853cab3ead02a973",
+            "runtimeSbom": {
+              "reference": "ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:c5ab8cec00b8a1d999e5663b26a5f11646183a1b99ea82676f1fed4a02eee51f",
+              "architecture": "arm64",
+              "baseManifest": "sha256:ac9b58cef20e81857d6fb82da88779b428ea3ee24df9af536c91b7e68737529a",
+              "baseConfig": "sha256:960164b52be2b518924a3b3ea094eebe7ec8589dd2ef5057c40f13b7472f99bc",
+              "sha256": "d4789a6c0c448fef17ec86e6050ec97da20231fe361a947c236040abb2104583"
+            },
+            "osPackages": 24,
+            "javaPackages": 491,
+            "counts": {
+              "CRITICAL": {
+                "total": 0,
+                "fixable": 0
+              },
+              "HIGH": {
+                "total": 0,
+                "fixable": 0
+              },
+              "MEDIUM": {
+                "total": 3,
+                "fixable": 3
+              },
+              "LOW": {
+                "total": 1,
+                "fixable": 1
+              },
+              "UNKNOWN": {
+                "total": 0,
+                "fixable": 0
+              }
+            },
+            "total": 4,
+            "blocking": 0,
+            "reports": {
+              "trivy-image.json": "6f6b20dfe3824f768c1fea8529dbaeb3348cc87dc7cdfda14af349aa826c652a",
+              "trivy-runtime.json": "dba6db72719ae8fa2c3d4d803567438139238f46ff1aa9a613aea4bc28e0af30",
+              "trivy.json": "5e4c47221ea0a6bb4c3938b5770f94669974fd8b42890d55daa49948241623ee"
+            },
+            "database": {
+              "Version": 2,
+              "NextUpdate": "2026-11-09T18:58:44.715199055Z",
+              "UpdatedAt": "2026-11-08T18:58:44.715199225Z",
+              "DownloadedAt": "2026-11-08T19:55:05.445712541Z"
+            }
+          },
+          "monitor": {
+            "scannerVersion": "0.76.1",
+            "imageConfigDigest": "sha256:11c6fffd1ff67c0dbaaaed49791e9c2ae68779499d7b6fdd853cab3ead02a973",
+            "runtimeSbom": {
+              "reference": "ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:c5ab8cec00b8a1d999e5663b26a5f11646183a1b99ea82676f1fed4a02eee51f",
+              "architecture": "arm64",
+              "baseManifest": "sha256:ac9b58cef20e81857d6fb82da88779b428ea3ee24df9af536c91b7e68737529a",
+              "baseConfig": "sha256:960164b52be2b518924a3b3ea094eebe7ec8589dd2ef5057c40f13b7472f99bc",
+              "sha256": "d4789a6c0c448fef17ec86e6050ec97da20231fe361a947c236040abb2104583"
+            },
+            "osPackages": 24,
+            "javaPackages": 491,
+            "counts": {
+              "CRITICAL": {
+                "total": 0,
+                "fixable": 0
+              },
+              "HIGH": {
+                "total": 0,
+                "fixable": 0
+              },
+              "MEDIUM": {
+                "total": 3,
+                "fixable": 3
+              },
+              "LOW": {
+                "total": 1,
+                "fixable": 1
+              },
+              "UNKNOWN": {
+                "total": 0,
+                "fixable": 0
+              }
+            },
+            "total": 4,
+            "blocking": 0,
+            "reports": {
+              "trivy-image.json": "9e90ec3d2f820d5a868880e814bcd118ac12ffc47aafb351840efeb91b4b166f",
+              "trivy-runtime.json": "831a85d5b4897a5365dbc256a9615e2b1737e29c84b97d3729ccc70262420fef",
+              "trivy.json": "af6c4d5cf8b7612cad7f8fad0ae74363133a281f850bbd8298d0f70781d12e9e"
+            },
+            "database": {
+              "Version": 2,
+              "NextUpdate": "2026-11-09T18:58:44.715199055Z",
+              "UpdatedAt": "2026-11-08T18:58:44.715199225Z",
+              "DownloadedAt": "2026-11-08T20:01:54.99065431Z"
+            }
+          },
+          "remainingFindings": [
+            {
+              "id": "CVE-2026-119210",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "MEDIUM",
+              "target": "Java"
+            },
+            {
+              "id": "CVE-2026-119276",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "MEDIUM",
+              "target": "Java"
+            },
+            {
+              "id": "CVE-2026-119281",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "MEDIUM",
+              "target": "Java"
+            },
+            {
+              "id": "CVE-2026-119280",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "LOW",
+              "target": "Java"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "aws",
+      "tag": "26.8.2-r2-aws",
+      "digest": "sha256:0b649b9d41a0c11d8a975f47bfd6ef4c723d382c4e1117a8ec94bbeeab072114",
+      "children": [
+        {
+          "architecture": "amd64",
+          "digest": "sha256:e5a9766f784149a0fa603e6d0946c5d90da6ae7c6354b9246f8db540b60941b7",
+          "publication": {
+            "scannerVersion": "0.76.1",
+            "imageConfigDigest": "sha256:98a4e46776030a710b78c1e3576b84d85cf57f55387b343df19b79f7cf312674",
+            "runtimeSbom": {
+              "reference": "ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:c5ab8cec00b8a1d999e5663b26a5f11646183a1b99ea82676f1fed4a02eee51f",
+              "architecture": "amd64",
+              "baseManifest": "sha256:43d29ce4c92e6b6a09e45fd668b91ffa3e042f20efaf6c3ac65a1c28d7a0a5c3",
+              "baseConfig": "sha256:dd1ee8731663f3398d63dcb39485350c8a7c0c795cae807b5c0c890b9814b473",
+              "sha256": "9abe383c35c2c12b7815223d5c5c30341da81b0437561a76b2eb89a191e564ad"
+            },
+            "osPackages": 24,
+            "javaPackages": 523,
+            "counts": {
+              "CRITICAL": {
+                "total": 0,
+                "fixable": 0
+              },
+              "HIGH": {
+                "total": 0,
+                "fixable": 0
+              },
+              "MEDIUM": {
+                "total": 3,
+                "fixable": 3
+              },
+              "LOW": {
+                "total": 1,
+                "fixable": 1
+              },
+              "UNKNOWN": {
+                "total": 0,
+                "fixable": 0
+              }
+            },
+            "total": 4,
+            "blocking": 0,
+            "reports": {
+              "trivy-image.json": "e3527c1b7d1576858f080500f5f8076a651f3251c460a53fe4e82973ee0ea91d",
+              "trivy-runtime.json": "8d377fb2c9605b6bc8a91fddfb14d7765a1d4ec669d781a5ab3adde45ad73fa6",
+              "trivy.json": "2b4b6eb809ce4d5cbca61ccba0182b13470beb5a88ea7fa43f9c75335b701c2f"
+            },
+            "database": {
+              "Version": 2,
+              "NextUpdate": "2026-11-09T18:58:44.715199055Z",
+              "UpdatedAt": "2026-11-08T18:58:44.715199225Z",
+              "DownloadedAt": "2026-11-08T19:54:44.496551732Z"
+            }
+          },
+          "monitor": {
+            "scannerVersion": "0.76.1",
+            "imageConfigDigest": "sha256:98a4e46776030a710b78c1e3576b84d85cf57f55387b343df19b79f7cf312674",
+            "runtimeSbom": {
+              "reference": "ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:c5ab8cec00b8a1d999e5663b26a5f11646183a1b99ea82676f1fed4a02eee51f",
+              "architecture": "amd64",
+              "baseManifest": "sha256:43d29ce4c92e6b6a09e45fd668b91ffa3e042f20efaf6c3ac65a1c28d7a0a5c3",
+              "baseConfig": "sha256:dd1ee8731663f3398d63dcb39485350c8a7c0c795cae807b5c0c890b9814b473",
+              "sha256": "9abe383c35c2c12b7815223d5c5c30341da81b0437561a76b2eb89a191e564ad"
+            },
+            "osPackages": 24,
+            "javaPackages": 523,
+            "counts": {
+              "CRITICAL": {
+                "total": 0,
+                "fixable": 0
+              },
+              "HIGH": {
+                "total": 0,
+                "fixable": 0
+              },
+              "MEDIUM": {
+                "total": 3,
+                "fixable": 3
+              },
+              "LOW": {
+                "total": 1,
+                "fixable": 1
+              },
+              "UNKNOWN": {
+                "total": 0,
+                "fixable": 0
+              }
+            },
+            "total": 4,
+            "blocking": 0,
+            "reports": {
+              "trivy-image.json": "dbdd3c29287f32e3b9cd782d1e54871752363f1013ad1afbb0f6f466b28ff21a",
+              "trivy-runtime.json": "510acc6c3a737ddf42ff2f1e9dac5526f19aa217ad18599f359792cf1f1544e6",
+              "trivy.json": "249f34fce0295963ab1296d6e40d2780e2b415af6e227e2fd2d98546976546a7"
+            },
+            "database": {
+              "Version": 2,
+              "NextUpdate": "2026-11-09T18:58:44.715199055Z",
+              "UpdatedAt": "2026-11-08T18:58:44.715199225Z",
+              "DownloadedAt": "2026-11-08T20:02:01.386501628Z"
+            }
+          },
+          "remainingFindings": [
+            {
+              "id": "CVE-2026-119210",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "MEDIUM",
+              "target": "Java"
+            },
+            {
+              "id": "CVE-2026-119276",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "MEDIUM",
+              "target": "Java"
+            },
+            {
+              "id": "CVE-2026-119281",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "MEDIUM",
+              "target": "Java"
+            },
+            {
+              "id": "CVE-2026-119280",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "LOW",
+              "target": "Java"
+            }
+          ]
+        },
+        {
+          "architecture": "arm64",
+          "digest": "sha256:a058dc489489aa1792607cd40770aac93dd7d39a1429b6a28b14298ff30e1b3c",
+          "publication": {
+            "scannerVersion": "0.76.1",
+            "imageConfigDigest": "sha256:ea9c1155bb98cbe43b83681f5f71c0d8710d7f7e35a7ab81c98a1af5d71dc270",
+            "runtimeSbom": {
+              "reference": "ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:c5ab8cec00b8a1d999e5663b26a5f11646183a1b99ea82676f1fed4a02eee51f",
+              "architecture": "arm64",
+              "baseManifest": "sha256:ac9b58cef20e81857d6fb82da88779b428ea3ee24df9af536c91b7e68737529a",
+              "baseConfig": "sha256:960164b52be2b518924a3b3ea094eebe7ec8589dd2ef5057c40f13b7472f99bc",
+              "sha256": "d4789a6c0c448fef17ec86e6050ec97da20231fe361a947c236040abb2104583"
+            },
+            "osPackages": 24,
+            "javaPackages": 523,
+            "counts": {
+              "CRITICAL": {
+                "total": 0,
+                "fixable": 0
+              },
+              "HIGH": {
+                "total": 0,
+                "fixable": 0
+              },
+              "MEDIUM": {
+                "total": 3,
+                "fixable": 3
+              },
+              "LOW": {
+                "total": 1,
+                "fixable": 1
+              },
+              "UNKNOWN": {
+                "total": 0,
+                "fixable": 0
+              }
+            },
+            "total": 4,
+            "blocking": 0,
+            "reports": {
+              "trivy-image.json": "f8d8a85b28273f9a3247ebaf2cde47d4d9dccb4b54391db4f07869b7a16f7e37",
+              "trivy-runtime.json": "7db67dbb4723f3e24563e030957f5ca87fd270e2c788a9021380d2ed4a4e0b85",
+              "trivy.json": "90d503b553ffc33131c41cc88ed49245fdbea7e70d5afef7f012229a95e0ae78"
+            },
+            "database": {
+              "Version": 2,
+              "NextUpdate": "2026-11-09T18:58:44.715199055Z",
+              "UpdatedAt": "2026-11-08T18:58:44.715199225Z",
+              "DownloadedAt": "2026-11-08T19:55:15.044145224Z"
+            }
+          },
+          "monitor": {
+            "scannerVersion": "0.76.1",
+            "imageConfigDigest": "sha256:ea9c1155bb98cbe43b83681f5f71c0d8710d7f7e35a7ab81c98a1af5d71dc270",
+            "runtimeSbom": {
+              "reference": "ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:c5ab8cec00b8a1d999e5663b26a5f11646183a1b99ea82676f1fed4a02eee51f",
+              "architecture": "arm64",
+              "baseManifest": "sha256:ac9b58cef20e81857d6fb82da88779b428ea3ee24df9af536c91b7e68737529a",
+              "baseConfig": "sha256:960164b52be2b518924a3b3ea094eebe7ec8589dd2ef5057c40f13b7472f99bc",
+              "sha256": "d4789a6c0c448fef17ec86e6050ec97da20231fe361a947c236040abb2104583"
+            },
+            "osPackages": 24,
+            "javaPackages": 523,
+            "counts": {
+              "CRITICAL": {
+                "total": 0,
+                "fixable": 0
+              },
+              "HIGH": {
+                "total": 0,
+                "fixable": 0
+              },
+              "MEDIUM": {
+                "total": 3,
+                "fixable": 3
+              },
+              "LOW": {
+                "total": 1,
+                "fixable": 1
+              },
+              "UNKNOWN": {
+                "total": 0,
+                "fixable": 0
+              }
+            },
+            "total": 4,
+            "blocking": 0,
+            "reports": {
+              "trivy-image.json": "ab9bce8bb9390a005324333ba681c47e7d9a2420a107f3eb84b492117783724a",
+              "trivy-runtime.json": "1ca70bfc3ffbbd8a67076b506f1feefbbe33c805cbaf3d67d80a5b7fee8e9688",
+              "trivy.json": "90512a869bb2f0224e3c853ba52e638660689596f535b1158cd8bbd1dc2b5e8a"
+            },
+            "database": {
+              "Version": 2,
+              "NextUpdate": "2026-11-09T18:58:44.715199055Z",
+              "UpdatedAt": "2026-11-08T18:58:44.715199225Z",
+              "DownloadedAt": "2026-11-08T20:02:10.480594385Z"
+            }
+          },
+          "remainingFindings": [
+            {
+              "id": "CVE-2026-119210",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "MEDIUM",
+              "target": "Java"
+            },
+            {
+              "id": "CVE-2026-119276",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "MEDIUM",
+              "target": "Java"
+            },
+            {
+              "id": "CVE-2026-119281",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "MEDIUM",
+              "target": "Java"
+            },
+            {
+              "id": "CVE-2026-119280",
+              "package": "org.mariadb.jdbc:mariadb-java-client",
+              "installed": "3.5.10",
+              "fixed": "3.3.7, 3.4.5, 3.5.11",
+              "severity": "LOW",
+              "target": "Java"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "AL2023 uses the pinned upstream payload SBOM and the Amazon Linux advisory feed. Coverage for unfixed OS and JVM advisories is limited.",
+    "The old Debian zlib findings are historical evidence. Differences between advisory feeds do not establish cross-distribution CVE repairs.",
+    "Source CI exercised PostgreSQL, TLS, authentication and graceful shutdown. Live cloud databases were outside the test matrix."
+  ]
+}
