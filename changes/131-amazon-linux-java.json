@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "changes": [
+    {
+      "type": "feature",
+      "summary": "Run core and aws on the reviewed Amazon Linux 2023 distroless Corretto Java 25 base, with digest-bound RPM inventory and native Java vulnerability coverage.",
+      "issues": [
+        131
+      ],
+      "profiles": [
+        "core",
+        "aws"
+      ]
+    }
+  ]
+}

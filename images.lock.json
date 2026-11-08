@@ -7,7 +7,7 @@
   ],
   "keycloak": "quay.io/keycloak/keycloak:26.8.2@sha256:3879c623248408de29a5303178b5816c77e8dfef3890c361f8c0bbeaa979ba3b",
   "builder": "docker.io/library/eclipse-temurin:25-jdk-noble@sha256:95e350ad1eb738f943e141640f7e3d797e483359a3b33c3864255bfd1ad71f8a",
-  "runtime": "gcr.io/distroless/java25-debian13:nonroot@sha256:a90a5fadd78dc37b643da72dca2f744ef67eba625eca7227a5b375b548e6b1c2",
+  "runtime": "ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:c5ab8cec00b8a1d999e5663b26a5f11646183a1b99ea82676f1fed4a02eee51f",
   "postgres": "docker.io/library/postgres:17-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
   "awsDependencies": {
     "wrapperVersion": "4.5.0",

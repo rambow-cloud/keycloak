@@ -1,0 +1,9 @@
+# Rambow Cloud Java 25 runtime
+
+Both profiles build on the reviewed `ghcr.io/rambow-cloud/java:25.0.5-r2` index pinned in `images.lock.json`. The upstream Corretto runtime uses Amazon Linux 2023 and provides `/usr/bin/java`, UID/GID 65532 and system/JVM trust. Native Linux amd64 and arm64 CI verify the Keycloak runtime, PostgreSQL TLS and shutdown contract. See the [upstream stable release](https://github.com/rambow-cloud/amazon-linux-distroless/releases/tag/java25-25.0.5-r2).
+
+The base omits the RPM database. Its qualified build publishes an architecture-specific CycloneDX inventory of shipped RPM payloads. The vendored SBOMs retain their upstream bytes and checksums. `base.json` associates each with the pinned index, child manifest, configuration digest and base layer diff IDs. A scan checks that the final image inherits those layers and requires every pinned RPM identity in the ALAS result. See the [upstream qualified release](https://github.com/rambow-cloud/amazon-linux-distroless/releases/tag/java25-2b5e2fab76dc).
+
+Trivy scans the final OCI image for Java libraries and the upstream SBOM for Amazon Linux advisories using the same vulnerability database. CI, release scans and scheduled monitoring retain the original two reports and use their combined results for the existing gate. Missing or mismatched inventories fail the scan. Historical Debian images retain their original scan path. The SBOM stays in the scanner inputs. [Trivy Amazon Linux coverage](https://trivy.dev/docs/v0.76/guide/coverage/os/amazon/).
+
+ALAS reporting for unfixed vulnerabilities and JVM advisories has coverage limits. Comparing Debian and AL2023 finding counts does not establish a repair. For a runtime update, review the new pinned index and both upstream payload inventories and run native CI. This family uses reviewed updates and formal releases. The automated Google Distroless comparison path remains limited to its reviewed Debian family.

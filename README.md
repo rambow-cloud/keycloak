@@ -1,6 +1,6 @@
 # Rambow Cloud Keycloak
 
-Minimal Keycloak OCI images for PostgreSQL deployments, with a **distroless Java 25 LTS** runtime, **non-root execution** and build-time optimization. Images are built with Buildah, verified with Podman and published to Quay.
+Minimal Keycloak OCI images for PostgreSQL deployments, with a **distroless Java 25 LTS** runtime, **non-root execution** and build-time optimization. Images are built with Buildah, verified with Podman and published to Quay. See the [Amazon Linux runtime and scan contract](docs/amazon-linux-runtime.md).
 
 ## Current images
 

@@ -141,10 +141,15 @@ test('runtime updater writes only approved inputs, starts a compliant Issue firs
   const {runRuntimeUpdate,checkRuntimePullRequest}=await import('../scripts/runtime-update.mjs');const {updaterApp}=await import('../scripts/lib/upstream.mjs');const f=await fixture();
   const calls=[];let createdFiles,pr,commit;
   const endpoint=(name,result)=>async args=>{calls.push([name,args]);return {data:typeof result==='function'?result(args):result};};
-  const file=path=>readFileSync(join(__dirname,'..',path),'utf8');
+  const file=path=>{
+    if(path==='images.lock.json') return JSON.stringify(record.plan.imageLock);
+    if(path==='config/runtime-update.json') return JSON.stringify({schemaVersion:1,request:null});
+    if(path==='releases/events.jsonl') return '';
+    return readFileSync(join(__dirname,'..',path),'utf8');
+  };
   const github={paginate:async(method,args)=>(await method(args)).data,graphql:async(q,args)=>q.startsWith('query')?{repository:{pullRequest:{id:'PR',headRefOid:'b'.repeat(40),isDraft:false}}}:{},rest:{
     repos:{get:endpoint('metadata',{full_name:'rambow-cloud/keycloak',default_branch:'main'}),getContent:endpoint('content',a=>({encoding:'base64',content:Buffer.from(a.ref==='b'.repeat(40)?createdFiles[a.path]:file(a.path)).toString('base64')})),getCommit:async()=>({data:{sha:'b'.repeat(40),author:updaterApp.bot}})},
-    git:{getRef:endpoint('ref',{object:{sha}}),getTree:endpoint('tree',{tree:readdirSync(join(__dirname,'../releases/records')).map(n=>({path:'releases/records/'+n,type:'blob'}))}),getCommit:endpoint('base',{tree:{sha}}),createTree:endpoint('createTree',a=>{createdFiles=Object.fromEntries(a.tree.map(t=>[t.path,t.content]));return {sha};}),createCommit:endpoint('commit',{sha:'b'.repeat(40)}),createRef:endpoint('branch',{})},
+    git:{getRef:endpoint('ref',{object:{sha}}),getTree:endpoint('tree',{tree:[{path:'releases/records/v26.8.1-r4.json',type:'blob'}]}),getCommit:endpoint('base',{tree:{sha}}),createTree:endpoint('createTree',a=>{createdFiles=Object.fromEntries(a.tree.map(t=>[t.path,t.content]));return {sha};}),createCommit:endpoint('commit',{sha:'b'.repeat(40)}),createRef:endpoint('branch',{})},
     issues:{listForRepo:endpoint('issues',[]),create:endpoint('createIssue',a=>({...a,number:104,state:'open',user:updaterApp.bot}))},
     pulls:{list:endpoint('pulls',[]),create:endpoint('createPR',a=>{pr={...a,number:105,user:updaterApp.bot,head:{sha:'b'.repeat(40),ref:a.head,repo:{full_name:'rambow-cloud/keycloak'}}};return pr;}),listFiles:async()=>({data:Object.keys(createdFiles).map(filename=>({filename}))})},
   }};

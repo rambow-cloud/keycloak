@@ -2,6 +2,8 @@ import { hash, json, profiles, isDigest, isSha } from './releases.mjs';
 import { selectTargets, fullFindings, verifyReport } from './cve-monitor.mjs';
 import {gateSummary} from './trivy.mjs';
 
+export const isAutomaticRuntime = reference => /^gcr\.io\/distroless\/java\d+-debian13:nonroot@sha256:[a-f0-9]{64}$/.test(reference ?? '');
+
 export function compactReport(r) {
   return {SchemaVersion:r.SchemaVersion,ArtifactType:r.ArtifactType,CreatedAt:r.CreatedAt,
     Metadata:{OS:r.Metadata?.OS,ImageID:r.Metadata?.ImageID,ImageConfig:{architecture:r.Metadata?.ImageConfig?.architecture,os:r.Metadata?.ImageConfig?.os}},
@@ -26,9 +28,8 @@ export function runtimeIntent(records,lock) {
   return {id:hash(json(value)),...value};
 }
 export function validateRuntimeChange(runtime,selected) {
-  const pin=/^gcr\.io\/distroless\/java\d+-debian13:nonroot@sha256:[a-f0-9]{64}$/;
-  if(!runtime || !pin.test(runtime.to??'') || !runtime.from || Object.keys(runtime.from).length!==selected.length || selected.some(p=>
-    !profiles.includes(p)||!pin.test(runtime.from[p]??'')||runtime.from[p]===runtime.to||runtime.from[p].split('@')[0]!==runtime.to.split('@')[0])) throw Error('Runtime updates require changed pinned distroless digests in the same reviewed family');
+  if(!runtime || !isAutomaticRuntime(runtime.to) || !runtime.from || Object.keys(runtime.from).length!==selected.length || selected.some(p=>
+    !profiles.includes(p)||!isAutomaticRuntime(runtime.from[p])||runtime.from[p]===runtime.to||runtime.from[p].split('@')[0]!==runtime.to.split('@')[0])) throw Error('Runtime updates require changed pinned distroless digests in the same reviewed family');
   return runtime;
 }
 export function validateRequest(request) {

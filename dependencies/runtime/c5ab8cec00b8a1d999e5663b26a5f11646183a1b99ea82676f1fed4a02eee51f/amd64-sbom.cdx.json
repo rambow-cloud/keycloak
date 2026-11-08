@@ -1,0 +1,1140 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:ce506838-08ff-441a-ab0a-edf0066153cb",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-11-07T22:38:17.878Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "rambow-inventory-scan-adapter",
+          "version": "1"
+        }
+      ]
+    },
+    "component": {
+      "type": "container",
+      "bom-ref": "rambow-java-runtime",
+      "name": "AL2023 java runtime",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:ImageID",
+          "value": "sha256:dd1ee8731663f3398d63dcb39485350c8a7c0c795cae807b5c0c890b9814b473"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "operating-system",
+      "bom-ref": "amazon-linux-2023",
+      "name": "amazon",
+      "version": "2023",
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:Type",
+          "value": "amazon"
+        },
+        {
+          "name": "aquasecurity:trivy:Class",
+          "value": "os-pkgs"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/alsa-lib@1.2.7.2-1.amzn2023.0.4?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "alsa-lib",
+      "version": "1.2.7.2-1.amzn2023.0.4",
+      "purl": "pkg:rpm/amazon/alsa-lib@1.2.7.2-1.amzn2023.0.4?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPLv2+"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "alsa-lib"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "1.2.7.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "1.amzn2023.0.4"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "4430ed6a04c16e549c291e5990bb18b8d314405d00450c48bb6ef64abb668df1"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/bzip2-libs@1.0.8-6.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "bzip2-libs",
+      "version": "1.0.8-6.amzn2023.0.2",
+      "purl": "pkg:rpm/amazon/bzip2-libs@1.0.8-6.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "BSD"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "bzip2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "1.0.8"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "6.amzn2023.0.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "d79286ed2f2350109d2254fae144c0b950df418f16a87e854a1a78a320b01292"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/ca-certificates@2025.2.76-1.0.amzn2023.0.5?arch=noarch&distro=amazon-2023&epoch=0",
+      "name": "ca-certificates",
+      "version": "2025.2.76-1.0.amzn2023.0.5",
+      "purl": "pkg:rpm/amazon/ca-certificates@2025.2.76-1.0.amzn2023.0.5?arch=noarch&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "Public Domain"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "ca-certificates"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "2025.2.76"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "1.0.amzn2023.0.5"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "ae14f85e83bd0b4d099a7bfca6e8ae47fad1a265bfeb53899d77238a16a4e9fb"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "2"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/fontconfig@2.13.94-2.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "fontconfig",
+      "version": "2.13.94-2.amzn2023.0.2",
+      "purl": "pkg:rpm/amazon/fontconfig@2.13.94-2.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT and Public Domain and UCD"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "fontconfig"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "2.13.94"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "2.amzn2023.0.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "59d4183d9136b08e9789c87fcaac35ebbedfb8d51f64426372b8137587d75b01"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "41"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/freetype@2.13.2-5.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "freetype",
+      "version": "2.13.2-5.amzn2023.0.2",
+      "purl": "pkg:rpm/amazon/freetype@2.13.2-5.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "(FTL OR GPL-2.0-or-later) AND BSD-3-Clause AND MIT AND MIT-Modern-Variant AND LicenseRef-Fedora-Public-Domain AND Zlib"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "freetype"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "2.13.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "5.amzn2023.0.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "c21d2503aff6097ce35f57a940299618c683585905e12d9899a1b43cecaa1a24"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/glib2@2.82.2-771.amzn2023?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "glib2",
+      "version": "2.82.2-771.amzn2023",
+      "purl": "pkg:rpm/amazon/glib2@2.82.2-771.amzn2023?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPL-2.1-or-later"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "glib2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "2.82.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "771.amzn2023"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "2bcf1c2ffd0d0adb28db34a5734c7254b28b4511ad30f6b5cc372ba563da1de4"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/glibc@2.34-231.amzn2023.0.5?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "glibc",
+      "version": "2.34-231.amzn2023.0.5",
+      "purl": "pkg:rpm/amazon/glibc@2.34-231.amzn2023.0.5?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPLv2+ and LGPLv2+ with exceptions and GPLv2+ and GPLv2+ with exceptions and BSD and Inner-Net and ISC and Public Domain and GFDL"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "glibc"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "2.34"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "231.amzn2023.0.5"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "f5739cf953bf7cc135c8077ebf2b991af2556aea98d10ff935debbad65149e38"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "7"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/glibc-common@2.34-231.amzn2023.0.5?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "glibc-common",
+      "version": "2.34-231.amzn2023.0.5",
+      "purl": "pkg:rpm/amazon/glibc-common@2.34-231.amzn2023.0.5?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "LGPLv2+ and LGPLv2+ with exceptions and GPLv2+ and GPLv2+ with exceptions and BSD and Inner-Net and ISC and Public Domain and GFDL"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "glibc"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "2.34"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "231.amzn2023.0.5"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "d355c7943a3da7c0cff5404e2b4c5a7094bf2bda1a678bb6a3e0fb72e05a6c4b"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "12"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/google-noto-sans-vf-fonts@20240401-1.amzn2023.0.2?arch=noarch&distro=amazon-2023&epoch=0",
+      "name": "google-noto-sans-vf-fonts",
+      "version": "20240401-1.amzn2023.0.2",
+      "purl": "pkg:rpm/amazon/google-noto-sans-vf-fonts@20240401-1.amzn2023.0.2?arch=noarch&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "OFL-1.1"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "google-noto-fonts"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "20240401"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "1.amzn2023.0.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "b064998f267dbbfc6506460aceeb3db1d609c24672be383424ca99e99edaa9f5"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "3"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/graphite2@1.3.14-7.amzn2023.0.3?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "graphite2",
+      "version": "1.3.14-7.amzn2023.0.3",
+      "purl": "pkg:rpm/amazon/graphite2@1.3.14-7.amzn2023.0.3?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "(LGPLv2+ or GPLv2+ or MPLv1.1) and (Netscape or GPLv2+ or LGPLv2+)"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "graphite2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "1.3.14"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "7.amzn2023.0.3"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "f97fd8fbc2b58d66316e658db57619a39acef89b28c117412ef9af626db20580"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/harfbuzz@7.0.0-2.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "harfbuzz",
+      "version": "7.0.0-2.amzn2023.0.2",
+      "purl": "pkg:rpm/amazon/harfbuzz@7.0.0-2.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "harfbuzz"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "7.0.0"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "2.amzn2023.0.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "b3e7b73e18a4fb9e26c611975b99537439bec3ca5fbc040dc34f86ea28627fd5"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/java-25-amazon-corretto-headless@25.0.5.0.10-1.amzn2023.1?arch=x86_64&distro=amazon-2023&epoch=1",
+      "name": "java-25-amazon-corretto-headless",
+      "version": "25.0.5.0.10-1.amzn2023.1",
+      "purl": "pkg:rpm/amazon/java-25-amazon-corretto-headless@25.0.5.0.10-1.amzn2023.1?arch=x86_64&distro=amazon-2023&epoch=1",
+      "licenses": [
+        {
+          "license": {
+            "name": "ASL 1.1 and ASL 2.0 and BSD and BSD with advertising and GPL+ and GPLv2 and GPLv2 with exceptions and IJG and LGPLv2+ and MIT and MPLv2.0 and Public Domain and W3C and zlib and ISC and FTL and RSA."
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "java-25-amazon-corretto"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "25.0.5.0.10"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "1.amzn2023.1"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "1"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "7740b47f92b57452b5dc4138da6418d044ee603591bc1bfc3cc86cb0711fd4f9"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "62"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/libbrotli@1.1.0-1.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "libbrotli",
+      "version": "1.1.0-1.amzn2023.0.2",
+      "purl": "pkg:rpm/amazon/libbrotli@1.1.0-1.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "brotli"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "1.1.0"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "1.amzn2023.0.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "61dc3262ec4b6e66ef1cdf420fa512260286217d8cb9c05609bf08458bed7323"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "2"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/libgcc@14.2.1-7.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "libgcc",
+      "version": "14.2.1-7.amzn2023.0.2",
+      "purl": "pkg:rpm/amazon/libgcc@14.2.1-7.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "GPL-3.0-or-later AND LGPL-3.0-or-later AND (GPL-3.0-or-later WITH GCC-exception-3.1) AND (GPL-3.0-or-later WITH Texinfo-exception) AND (LGPL-2.1-or-later WITH GCC-exception-2.0) AND (GPL-2.0-or-later WITH GCC-exception-2.0) AND (GPL-2.0-or-later WITH GNU-compiler-exception) AND BSL-1.0 AND GFDL-1.3-or-later AND Linux-man-pages-copyleft-2-para AND SunPro AND BSD-1-Clause AND BSD-2-Clause AND BSD-2-Clause-Views AND BSD-3-Clause AND BSD-4-Clause AND BSD-Source-Code AND Zlib AND MIT AND Apache-2.0 AND (Apache-2.0 WITH LLVM-Exception) AND ZPL-2.1 AND ISC AND LicenseRef-Fedora-Public-Domain AND HP-1986 AND curl AND Martin-Birgmeier AND HPND-Markus-Kuhn AND dtoa AND SMLNJ AND AMD-newlib AND OAR AND HPND-merchantability-variant AND HPND-Intel"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "gcc14"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "14.2.1"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "7.amzn2023.0.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "215e8ef317dfccce12d7412316e5db6c050a3a54a7a5ea6eb918c9830173cc7e"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/libjpeg-turbo@2.1.4-2.amzn2023.0.5?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "libjpeg-turbo",
+      "version": "2.1.4-2.amzn2023.0.5",
+      "purl": "pkg:rpm/amazon/libjpeg-turbo@2.1.4-2.amzn2023.0.5?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "IJG"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "libjpeg-turbo"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "2.1.4"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "2.amzn2023.0.5"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "5acd36980c25d610ed9fe4a7bea2f5d5d843727a7cf5858f5f5b2998b89d60f3"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/libpng@1.6.37-10.amzn2023.0.13?arch=x86_64&distro=amazon-2023&epoch=2",
+      "name": "libpng",
+      "version": "1.6.37-10.amzn2023.0.13",
+      "purl": "pkg:rpm/amazon/libpng@1.6.37-10.amzn2023.0.13?arch=x86_64&distro=amazon-2023&epoch=2",
+      "licenses": [
+        {
+          "license": {
+            "name": "zlib"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "libpng"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "1.6.37"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "10.amzn2023.0.13"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "2"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "a34dbecffbcd7f3774491ef38b2f31294774a703f679e8bb4fdea3d88f1a1922"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/libstdc%2B%2B@14.2.1-7.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "libstdc++",
+      "version": "14.2.1-7.amzn2023.0.2",
+      "purl": "pkg:rpm/amazon/libstdc%2B%2B@14.2.1-7.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "GPL-3.0-or-later AND LGPL-3.0-or-later AND (GPL-3.0-or-later WITH GCC-exception-3.1) AND (GPL-3.0-or-later WITH Texinfo-exception) AND (LGPL-2.1-or-later WITH GCC-exception-2.0) AND (GPL-2.0-or-later WITH GCC-exception-2.0) AND (GPL-2.0-or-later WITH GNU-compiler-exception) AND BSL-1.0 AND GFDL-1.3-or-later AND Linux-man-pages-copyleft-2-para AND SunPro AND BSD-1-Clause AND BSD-2-Clause AND BSD-2-Clause-Views AND BSD-3-Clause AND BSD-4-Clause AND BSD-Source-Code AND Zlib AND MIT AND Apache-2.0 AND (Apache-2.0 WITH LLVM-Exception) AND ZPL-2.1 AND ISC AND LicenseRef-Fedora-Public-Domain AND HP-1986 AND curl AND Martin-Birgmeier AND HPND-Markus-Kuhn AND dtoa AND SMLNJ AND AMD-newlib AND OAR AND HPND-merchantability-variant AND HPND-Intel"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "gcc14"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "14.2.1"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "7.amzn2023.0.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "0c2d7755e5ec3d67524a105e3f387c070013e6217101ead9b1f2d5d8a6f8b4a2"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/libxml2@2.10.4-1.amzn2023.0.22?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "libxml2",
+      "version": "2.10.4-1.amzn2023.0.22",
+      "purl": "pkg:rpm/amazon/libxml2@2.10.4-1.amzn2023.0.22?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "libxml2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "2.10.4"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "1.amzn2023.0.22"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "4dc30bae6df5bfb477757950136804a2867d92cc54b207a53312f7aa967ef872"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/pcre2@10.40-1.amzn2023.0.5?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "pcre2",
+      "version": "10.40-1.amzn2023.0.5",
+      "purl": "pkg:rpm/amazon/pcre2@10.40-1.amzn2023.0.5?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "BSD"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "pcre2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "10.40"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "1.amzn2023.0.5"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "6f7bd597a3442a16653945a730bed08f78c5eed4eccefc3f0462ec14dffee247"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/setup@2.13.7-3.amzn2023.0.2?arch=noarch&distro=amazon-2023&epoch=0",
+      "name": "setup",
+      "version": "2.13.7-3.amzn2023.0.2",
+      "purl": "pkg:rpm/amazon/setup@2.13.7-3.amzn2023.0.2?arch=noarch&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "Public Domain"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "setup"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "2.13.7"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "3.amzn2023.0.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "32505f07050b1e1f76a5ed0eec0af03f773d27ccf6f6c01e8a7d32c583b5593f"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "2"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/system-release@2023.12.20261102-0.amzn2023?arch=noarch&distro=amazon-2023&epoch=0",
+      "name": "system-release",
+      "version": "2023.12.20261102-0.amzn2023",
+      "purl": "pkg:rpm/amazon/system-release@2023.12.20261102-0.amzn2023?arch=noarch&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "system-release"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "2023.12.20261102"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "0.amzn2023"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "c615836a1ac1e46a777f60415026b6c6e3e0d63bd07ebc86ef3928eeebae321a"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "2"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/tzdata@2026e-1.amzn2023.0.1?arch=noarch&distro=amazon-2023&epoch=0",
+      "name": "tzdata",
+      "version": "2026e-1.amzn2023.0.1",
+      "purl": "pkg:rpm/amazon/tzdata@2026e-1.amzn2023.0.1?arch=noarch&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "LicenseRef-Fedora-Public-Domain AND (GPL-2.0-only WITH ClassPath-exception-2.0)"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "tzdata"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "2026e"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "1.amzn2023.0.1"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "6528d0b8f45861c669b13d97e03a31f8916f01b6f5d81aa530bccd682cada8b3"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/xz-libs@5.2.5-9.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "xz-libs",
+      "version": "5.2.5-9.amzn2023.0.2",
+      "purl": "pkg:rpm/amazon/xz-libs@5.2.5-9.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "Public Domain"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "xz"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "5.2.5"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "9.amzn2023.0.2"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "5732aac952d1f5d52110cad1250df4eedf3e65d8e7b27368ec98aeb9a2061771"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:rpm/amazon/zlib@1.2.11-33.amzn2023.0.6?arch=x86_64&distro=amazon-2023&epoch=0",
+      "name": "zlib",
+      "version": "1.2.11-33.amzn2023.0.6",
+      "purl": "pkg:rpm/amazon/zlib@1.2.11-33.amzn2023.0.6?arch=x86_64&distro=amazon-2023&epoch=0",
+      "licenses": [
+        {
+          "license": {
+            "name": "zlib and Boost"
+          }
+        }
+      ],
+      "properties": [
+        {
+          "name": "aquasecurity:trivy:SrcName",
+          "value": "zlib"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcVersion",
+          "value": "1.2.11"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcRelease",
+          "value": "33.amzn2023.0.6"
+        },
+        {
+          "name": "aquasecurity:trivy:SrcEpoch",
+          "value": "0"
+        },
+        {
+          "name": "rambow:partial-package",
+          "value": "true"
+        },
+        {
+          "name": "rambow:input-rpm-sha256",
+          "value": "083bfd30bba9d65ad37d774a23b7c0ab7a22d15c893f1550fcd42d777214251f"
+        },
+        {
+          "name": "rambow:runtime-file-count",
+          "value": "1"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "rambow-java-runtime",
+      "dependsOn": [
+        "amazon-linux-2023"
+      ]
+    },
+    {
+      "ref": "amazon-linux-2023",
+      "dependsOn": [
+        "pkg:rpm/amazon/alsa-lib@1.2.7.2-1.amzn2023.0.4?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/bzip2-libs@1.0.8-6.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/ca-certificates@2025.2.76-1.0.amzn2023.0.5?arch=noarch&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/fontconfig@2.13.94-2.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/freetype@2.13.2-5.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/glib2@2.82.2-771.amzn2023?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/glibc@2.34-231.amzn2023.0.5?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/glibc-common@2.34-231.amzn2023.0.5?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/google-noto-sans-vf-fonts@20240401-1.amzn2023.0.2?arch=noarch&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/graphite2@1.3.14-7.amzn2023.0.3?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/harfbuzz@7.0.0-2.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/java-25-amazon-corretto-headless@25.0.5.0.10-1.amzn2023.1?arch=x86_64&distro=amazon-2023&epoch=1",
+        "pkg:rpm/amazon/libbrotli@1.1.0-1.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/libgcc@14.2.1-7.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/libjpeg-turbo@2.1.4-2.amzn2023.0.5?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/libpng@1.6.37-10.amzn2023.0.13?arch=x86_64&distro=amazon-2023&epoch=2",
+        "pkg:rpm/amazon/libstdc%2B%2B@14.2.1-7.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/libxml2@2.10.4-1.amzn2023.0.22?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/pcre2@10.40-1.amzn2023.0.5?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/setup@2.13.7-3.amzn2023.0.2?arch=noarch&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/system-release@2023.12.20261102-0.amzn2023?arch=noarch&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/tzdata@2026e-1.amzn2023.0.1?arch=noarch&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/xz-libs@5.2.5-9.amzn2023.0.2?arch=x86_64&distro=amazon-2023&epoch=0",
+        "pkg:rpm/amazon/zlib@1.2.11-33.amzn2023.0.6?arch=x86_64&distro=amazon-2023&epoch=0"
+      ]
+    }
+  ]
+}
