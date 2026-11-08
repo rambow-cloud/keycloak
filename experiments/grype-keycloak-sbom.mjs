@@ -22,6 +22,8 @@ const { plan } = await readJson('releases/records/v26.8.2-r2.json');
 const guava = await readJson('dependencies/keycloak/overrides.lock.json');
 const otel = await readJson('dependencies/keycloak/opentelemetry.lock.json');
 const telemetryArtifacts = validateTelemetryOverride(otel, plan.keycloakVersion);
+const awsLock = await readJson(plan.imageLock.awsDependencies.lockFile);
+const awsArtifacts = awsLock.artifacts.map(artifact => ({ ...artifact, path: 'providers/' + artifact.file }));
 const inventory = await readRuntimeSbom(plan.imageLock.runtime, architecture);
 const originalPath = join(output, 'runtime.cdx.json');
 await copyFile(inventory.path, originalPath);
@@ -63,33 +65,37 @@ async function readBlob(layout, digest) {
   return JSON.parse(bytes);
 }
 
-function verifiedJavaInventory(java) {
+function verifiedJavaInventory(java, profile) {
   assert.equal(java.bomFormat, 'CycloneDX');
   const packages = java.components.filter(component => component.properties?.some(property =>
     property.name === 'syft:package:type' && property.value === 'java-archive'));
   assert.ok(packages.length, 'Syft found no Java archives');
   const corrections = [];
-  for (const artifact of telemetryArtifacts) {
-    // The optimized distribution keeps the original filenames after replacing the JAR bytes.
+  const locked = profile === 'aws' ? [...telemetryArtifacts, ...awsArtifacts] : telemetryArtifacts;
+  for (const artifact of locked) {
+    // Use Maven coordinates from the lock only when the image contains the same JAR bytes.
+    const parts = new URL(artifact.url).pathname.split('/').slice(2);
+    const group = parts.slice(0, -3).join('.');
+    const [name, version] = parts.slice(-3, -1);
     const path = '/opt/keycloak/' + artifact.path;
     const file = java.components.find(component => component.type === 'file' && component.name === path);
     assert.ok(file?.hashes.some(entry => entry.alg === 'SHA-256' && entry.content === artifact.sha256),
-      'Syft file hash does not confirm the reviewed OpenTelemetry JAR at ' + path);
-    const index = packages.findIndex(component => component.name === artifact.artifactId &&
+      'Syft file hash does not confirm the locked JAR at ' + path);
+    const index = packages.findIndex(component => component.name === name &&
       component.properties.some(property => property.name === 'syft:location:0:path' && property.value === path));
     assert.ok(index >= 0, 'Missing Syft package for ' + path);
     const component = packages[index];
-    const version = artifact.url.split('/').at(-2);
-    const purl = 'pkg:maven/io.opentelemetry/' + artifact.artifactId + '@' + version;
+    const purl = 'pkg:maven/' + group + '/' + name + '@' + version;
+    if (component.purl === purl && component.version === version) continue;
     const originalRef = component['bom-ref'];
     assert.ok(originalRef.startsWith(component.purl));
     const ref = purl + originalRef.slice(component.purl.length);
     const { cpe, properties, ...data } = component;
-    packages[index] = { ...data, 'bom-ref': ref, group: 'io.opentelemetry', version, purl,
+    packages[index] = { ...data, 'bom-ref': ref, group, version, purl,
       properties: properties.filter(property => property.name !== 'syft:cpe23') };
     corrections.push({ path, sha256: artifact.sha256, originalPurl: component.purl, purl, originalRef, ref });
   }
-  return { packages, corrections };
+  return { packages, corrections, verifiedJars: locked.length };
 }
 
 function mergeSboms(java, packages, corrections, reference, digest) {
@@ -149,7 +155,7 @@ for (const profile of ['core', 'aws']) {
     '-o', 'cyclonedx-json=' + javaPath, '-o', 'syft-json=' + join(directory, 'java.syft.json')]);
   await rm(layout, { recursive: true });
   const java = await readJson(javaPath);
-  const { packages, corrections } = verifiedJavaInventory(java);
+  const { packages, corrections, verifiedJars } = verifiedJavaInventory(java, profile);
   await writeJson(join(directory, 'java-corrections.json'), corrections);
   const maven = packages.filter(component => component.purl?.startsWith('pkg:maven/'));
   const hasMaven = (name, version) => maven.some(component => component.purl.split('?')[0] ===
@@ -164,6 +170,7 @@ for (const profile of ['core', 'aws']) {
   }
   assert.equal(hasMaven('software.amazon.jdbc/aws-advanced-jdbc-wrapper', plan.imageLock.awsDependencies.wrapperVersion),
     profile === 'aws', 'Unexpected AWS JDBC wrapper coverage');
+  assert.equal(packages.some(component => component.name === 'aws-advanced-jdbc-wrapper'), profile === 'aws');
 
   const mergedPath = join(directory, 'combined.cdx.json');
   await writeJson(mergedPath, mergeSboms(java, packages, corrections, reference, digest));
@@ -182,7 +189,7 @@ for (const profile of ['core', 'aws']) {
   assert.equal(gatheredPackages, rpms.length + packages.length, 'Grype package count differs from the combined inventory');
   const summary = {
     architecture, profile, digest, rpmCount: rpms.length, javaComponents: packages.length,
-    verifiedTelemetryJars: corrections.length,
+    verifiedJars, correctedMavenCoordinates: corrections.length,
     mavenIdentities: new Set(maven.map(component => component.purl)).size,
     gatheredPackages,
     matches: report.matches.length,
