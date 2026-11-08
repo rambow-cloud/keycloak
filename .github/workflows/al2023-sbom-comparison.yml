@@ -1,0 +1,46 @@
+name: AL2023 CycloneDX comparison
+
+on:
+  push:
+    branches: [chore/139-grype-cyclonedx]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    if: github.ref == 'refs/heads/chore/139-grype-cyclonedx'
+    name: Compare AL2023 SBOM (${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-26.04
+            grype-sha256: 9c8965ced9df657e5e851c14021bae838802f711edd7a48f9bc3c923a8d28f12
+          - arch: arm64
+            runner: ubuntu-26.04-arm
+            grype-sha256: d7d2e160255b0f087280feabf6f213cf4c45d475690f3f1fe5dc336eb1037bf0
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    env:
+      PROBE_ARCH: ${{ matrix.arch }}
+      GRYPE_SHA256: ${{ matrix.grype-sha256 }}
+      GRYPE_CHECK_FOR_APP_UPDATE: 'false'
+      NO_COLOR: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Compare Grype and Trivy against the original SBOM and the ALAS control
+        run: node experiments/al2023-sbom-comparison.mjs
+      - name: Retain original SBOM, raw results and comparison
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: al2023-sbom-${{ matrix.arch }}-${{ github.run_attempt }}
+          path: .cache/al2023-sbom-comparison/
+          include-hidden-files: true
+          retention-days: 30
+          if-no-files-found: error
