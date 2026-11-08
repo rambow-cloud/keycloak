@@ -4,21 +4,21 @@ Minimal Keycloak OCI images for PostgreSQL deployments, with a **distroless Java
 
 ## Current images
 
-Current release: [v26.8.2-r1](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r1). Keycloak **26.8.2**, Java **25 LTS**, Linux **amd64 and arm64**. Each profile has one OCI index tag that selects the host architecture.
+Current release: [v26.8.2-r2](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r2). Keycloak **26.8.2**, Corretto **25 LTS** on Amazon Linux 2023, Linux **amd64 and arm64**. Each profile has one OCI index tag that selects the host architecture.
 
 | Profile | Latest published tag | Image reference | Purpose |
 | --- | --- | --- | --- |
-| core | `26.8.2-r1-core` | `quay.io/rambow-cloud/keycloak:26.8.2-r1-core` | PostgreSQL with the native JDBC driver. |
-| aws | `26.8.2-r1-aws` | `quay.io/rambow-cloud/keycloak:26.8.2-r1-aws` | RDS PostgreSQL integration with the AWS JDBC Wrapper and pinned CA bundle. |
+| core | `26.8.2-r2-core` | `quay.io/rambow-cloud/keycloak:26.8.2-r2-core` | PostgreSQL with the native JDBC driver. |
+| aws | `26.8.2-r2-aws` | `quay.io/rambow-cloud/keycloak:26.8.2-r2-aws` | RDS PostgreSQL integration with the AWS JDBC Wrapper and pinned CA bundle. |
 
 Pull a profile with Podman:
 
 ```sh
-podman pull quay.io/rambow-cloud/keycloak:26.8.2-r1-core
-podman pull quay.io/rambow-cloud/keycloak:26.8.2-r1-aws
+podman pull quay.io/rambow-cloud/keycloak:26.8.2-r2-core
+podman pull quay.io/rambow-cloud/keycloak:26.8.2-r2-aws
 ```
 
-Use [digest-pinned references and validation records](releases/README.md) for deployments. See the [security release notes](docs/security/README.md) for newly included fixes and [detailed evidence](releases/evidence/v26.8.2-r1-security.json) for remaining findings and limits. No `latest` tag is published.
+Use [digest-pinned references and validation records](releases/README.md) for deployments. See the [security release notes](docs/security/README.md) for newly included fixes and [runtime migration evidence](releases/evidence/v26.8.2-r2-runtime.json) for remaining findings and limits. No `latest` tag is published.
 
 ## Features
 
