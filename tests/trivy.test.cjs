@@ -38,6 +38,29 @@ test('scanner checksum rejects modified archives before execution', async () => 
   assert.throws(() => verifyScannerArchive(Buffer.from('modified archive'), digest), /checksum mismatch/);
 });
 
+test('the pinned download recovers transient errors and rejects permanent or corrupt responses', async () => {
+  const { downloadScannerArchive } = await lib;
+  const bytes = Buffer.from('pinned archive');
+  const locked = { ...policy, linuxArm64Sha256: createHash('sha256').update(bytes).digest('hex') };
+  let attempts = 0;
+  const pauses = [];
+  const archive = await downloadScannerArchive(locked, 'arm64', {
+    fetcher: async url => {
+      assert.match(url, /trivy_0\.76\.1_Linux-ARM64\.tar\.gz$/);
+      return ++attempts === 3 ? new Response(bytes) : new Response(null, { status: 503 });
+    },
+    pause: async milliseconds => { pauses.push(milliseconds); },
+  });
+  assert.deepEqual(archive, bytes);
+  assert.deepEqual(pauses, [2000, 4000]);
+  for (const [response, expected] of [[new Response(null, { status: 404 }), /HTTP 404/], [new Response('corrupt'), /checksum mismatch/]]) {
+    await assert.rejects(downloadScannerArchive(locked, 'arm64', {
+      fetcher: async () => response,
+      pause: async () => { assert.fail('Permanent failures must not retry'); },
+    }), expected);
+  }
+});
+
 test('gate blocks fixable HIGH/CRITICAL while retaining all severities and unfixed findings', async () => {
   const { summarize, validateSummary, gateSummary } = await lib;
   const data = report([vuln('CVE-2026-10001', 'HIGH', '1.1'), vuln('CVE-2026-10002', 'CRITICAL'), vuln('CVE-2026-10003', 'LOW', '1.2')]);

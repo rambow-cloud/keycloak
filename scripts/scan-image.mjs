@@ -2,7 +2,7 @@ import { readFile, writeFile, mkdir, mkdtemp } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
-import { summarize, validatePolicy, renderReport, verifyScannerArchive } from './lib/trivy.mjs';
+import { summarize, renderReport, downloadScannerArchive } from './lib/trivy.mjs';
 import { nativeArchitecture } from './lib/platforms.mjs';
 
 const profile = process.env.BUILD_PROFILE ?? 'core';
@@ -19,13 +19,8 @@ try {
   if (process.platform !== 'linux') throw new Error('The pinned Trivy binary requires Linux.');
   const hostArchitecture = nativeArchitecture();
   const policy = JSON.parse(await readFile(new URL('../config/trivy.json', import.meta.url), 'utf8'));
-  validatePolicy(policy);
   const work = await mkdtemp(join(tmpdir(), 'rambow-trivy-'));
-  const url = 'https://github.com/aquasecurity/trivy/releases/download/v' + policy.version + '/trivy_' + policy.version + '_Linux-' + (hostArchitecture === 'arm64' ? 'ARM64' : '64bit') + '.tar.gz';
-  const response = await fetch(url, { signal: AbortSignal.timeout(120000) });
-  if (!response.ok) throw new Error('Cannot download pinned Trivy: HTTP ' + response.status);
-  const archive = Buffer.from(await response.arrayBuffer());
-  verifyScannerArchive(archive, hostArchitecture === 'arm64' ? policy.linuxArm64Sha256 : policy.linuxAmd64Sha256);
+  const archive = await downloadScannerArchive(policy, hostArchitecture);
   await writeFile(join(work, 'trivy.tar.gz'), archive);
   const extract = spawnSync('tar', ['-xzf', join(work, 'trivy.tar.gz'), '-C', work, '--no-same-owner', 'trivy'], { stdio: 'inherit' });
   if (extract.status !== 0) throw new Error('Cannot extract Trivy binary.');

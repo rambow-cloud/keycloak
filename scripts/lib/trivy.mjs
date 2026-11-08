@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { setTimeout as delay } from 'node:timers/promises';
 
 export const profiles = ['core', 'aws'];
 export const severities = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'UNKNOWN'];
@@ -93,6 +94,42 @@ export function gateTargetSummaries(summary, context) {
 
 export function verifyScannerArchive(bytes, expected) {
   if (!/^[a-f0-9]{64}$/.test(expected) || createHash('sha256').update(bytes).digest('hex') !== expected) throw new Error('Pinned Trivy archive checksum mismatch.');
+}
+
+export async function downloadScannerArchive(policy, architecture, { fetcher = fetch, pause = delay } = {}) {
+  validatePolicy(policy);
+  const assets = {
+    amd64: { suffix: '64bit', checksum: policy.linuxAmd64Sha256 },
+    arm64: { suffix: 'ARM64', checksum: policy.linuxArm64Sha256 },
+  };
+  const asset = Object.hasOwn(assets, architecture) ? assets[architecture] : undefined;
+  if (!asset?.checksum) throw new Error('Missing pinned Trivy archive for ' + architecture);
+  const url = `https://github.com/aquasecurity/trivy/releases/download/v${policy.version}/trivy_${policy.version}_Linux-${asset.suffix}.tar.gz`;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    let archive;
+    let failure;
+    let retryable = true;
+    try {
+      const response = await fetcher(url, { signal: AbortSignal.timeout(120000) });
+      if (response.ok) {
+        archive = Buffer.from(await response.arrayBuffer());
+      } else {
+        failure = 'HTTP ' + response.status;
+        retryable = response.status === 408 || response.status === 429 || response.status >= 500;
+        await response.body?.cancel();
+      }
+    } catch (error) {
+      failure ??= error.message;
+    }
+    if (archive) {
+      verifyScannerArchive(archive, asset.checksum);
+      return archive;
+    }
+    if (!retryable || attempt === 3) throw new Error('Cannot download pinned Trivy: ' + failure);
+    console.warn(`Pinned Trivy download attempt ${attempt} failed (${failure}). Retrying.`);
+    await pause(attempt * 2000);
+  }
 }
 
 // Render only bounded scalar data, never artifact-supplied Markdown, HTML, links or mentions.

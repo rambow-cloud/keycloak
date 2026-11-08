@@ -7,7 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { validateRequest,runtimeIntent,compareReports,compactReport } from './lib/runtime-update.mjs';
 import { parseReleaseEvents,validateReleaseEvents } from './lib/release-events.mjs';
-import { verifyScannerArchive,summarize,renderReport } from './lib/trivy.mjs';
+import { downloadScannerArchive,summarize,renderReport } from './lib/trivy.mjs';
 import { nativeArchitecture } from './lib/platforms.mjs';
 import { json,hash } from './lib/releases.mjs';
 
@@ -41,11 +41,7 @@ if(!config.request||!active||config.request.to!==lock.runtime||!Object.hasOwn(co
       return {digest:d,config:JSON.parse(bytes).config.digest};
     };
     const previous=await manifest(before,target.digest),candidate=await manifest(image);
-    const url='https://github.com/aquasecurity/trivy/releases/download/v'+policy.version+'/trivy_'+policy.version+'_Linux-'+(architecture==='arm64'?'ARM64':'64bit')+'.tar.gz';
-    const response=await fetch(url,{signal:AbortSignal.timeout(120000)});
-    if(!response.ok) throw Error('Pinned Trivy download failed');
-    const archive=Buffer.from(await response.arrayBuffer());
-    verifyScannerArchive(archive,architecture==='arm64'?policy.linuxArm64Sha256:policy.linuxAmd64Sha256);
+    const archive=await downloadScannerArchive(policy,architecture);
     await writeFile(join(work,'scanner.tar.gz'),archive);
     run('tar',['-xzf',join(work,'scanner.tar.gz'),'-C',work,'--no-same-owner','trivy']);
     const scan=async(layout,path,frozen)=>{
