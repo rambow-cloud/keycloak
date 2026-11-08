@@ -81,21 +81,26 @@ function verifiedJavaInventory(java) {
     const component = packages[index];
     const version = artifact.url.split('/').at(-2);
     const purl = 'pkg:maven/io.opentelemetry/' + artifact.artifactId + '@' + version;
+    const originalRef = component['bom-ref'];
+    assert.ok(originalRef.startsWith(component.purl));
+    const ref = purl + originalRef.slice(component.purl.length);
     const { cpe, properties, ...data } = component;
-    packages[index] = { ...data, group: 'io.opentelemetry', version, purl,
+    packages[index] = { ...data, 'bom-ref': ref, group: 'io.opentelemetry', version, purl,
       properties: properties.filter(property => property.name !== 'syft:cpe23') };
-    corrections.push({ path, sha256: artifact.sha256, originalPurl: component.purl, purl });
+    corrections.push({ path, sha256: artifact.sha256, originalPurl: component.purl, purl, originalRef, ref });
   }
   return { packages, corrections };
 }
 
-function mergeSboms(java, packages, reference, digest) {
+function mergeSboms(java, packages, corrections, reference, digest) {
   const root = { type: 'container', name: reference, version: digest, 'bom-ref': reference };
   const components = [os, ...rpms, ...packages];
   const refs = new Set(components.map(component => component['bom-ref']));
   assert.ok(!refs.has(undefined) && !refs.has(reference) && refs.size === components.length,
     'Combined inventory has missing or duplicate component references');
   const javaRoot = java.metadata.component['bom-ref'];
+  const replacements = new Map(corrections.map(({ originalRef, ref }) => [originalRef, ref]));
+  const translate = ref => replacements.get(ref) ?? ref;
   return {
     ...java,
     metadata: { ...java.metadata, component: root },
@@ -103,8 +108,8 @@ function mergeSboms(java, packages, reference, digest) {
     dependencies: [
       { ref: reference, dependsOn: [os['bom-ref'], ...packages.map(component => component['bom-ref'])] },
       { ref: os['bom-ref'], dependsOn: rpms.map(component => component['bom-ref']) },
-      ...(java.dependencies ?? []).filter(edge => edge.ref !== javaRoot && refs.has(edge.ref))
-        .map(edge => ({ ref: edge.ref, dependsOn: (edge.dependsOn ?? []).filter(ref => refs.has(ref)) })),
+      ...(java.dependencies ?? []).filter(edge => edge.ref !== javaRoot && refs.has(translate(edge.ref)))
+        .map(edge => ({ ref: translate(edge.ref), dependsOn: (edge.dependsOn ?? []).map(translate).filter(ref => refs.has(ref)) })),
     ],
   };
 }
@@ -161,7 +166,7 @@ for (const profile of ['core', 'aws']) {
     profile === 'aws', 'Unexpected AWS JDBC wrapper coverage');
 
   const mergedPath = join(directory, 'combined.cdx.json');
-  await writeJson(mergedPath, mergeSboms(java, packages, reference, digest));
+  await writeJson(mergedPath, mergeSboms(java, packages, corrections, reference, digest));
   const result = run(grype, ['sbom:' + mergedPath, '--distro', 'amzn:2023', '-vv', '-o', 'json'], grypeEnv);
   await writeFile(join(directory, 'grype.log'), result.stderr);
   await writeFile(join(directory, 'grype.json'), result.stdout);
@@ -172,16 +177,14 @@ for (const profile of ['core', 'aws']) {
   const imported = new Set([...result.stderr.matchAll(/id="(pkg:[^"\s]+)"/g)].map(match => match[1]));
   assert.deepEqual([...imported].filter(purl => purl.startsWith('pkg:rpm/')).sort(), [...inventory.purls].sort(),
     'Grype did not read the original RPM identities');
-  const mavenIdentities = new Set(maven.map(component => component.purl));
-  for (const [name, version] of expected) {
-    assert.ok([...imported].some(purl => purl.split('?')[0] === 'pkg:maven/' + name + '@' + version),
-      'Grype did not read ' + name + '@' + version);
-  }
+  // Grype does not log every package identity at debug level. Use its catalog count.
+  const gatheredPackages = Number(/gathered packages packages=(\d+)\b/.exec(result.stderr)?.[1]);
+  assert.equal(gatheredPackages, rpms.length + packages.length, 'Grype package count differs from the combined inventory');
   const summary = {
     architecture, profile, digest, rpmCount: rpms.length, javaComponents: packages.length,
     verifiedTelemetryJars: corrections.length,
-    syftMavenIdentities: mavenIdentities.size,
-    grypeMavenIdentities: [...imported].filter(purl => purl.startsWith('pkg:maven/')).length,
+    mavenIdentities: new Set(maven.map(component => component.purl)).size,
+    gatheredPackages,
     matches: report.matches.length,
     rpmMatches: report.matches.filter(match => match.artifact.type === 'rpm').length,
     ignoredMatches: report.ignoredMatches?.length ?? 0,
@@ -194,7 +197,7 @@ for (const profile of ['core', 'aws']) {
 
 assert.deepEqual(results[0].database, results[1].database, 'Grype database changed between profiles');
 await appendFile(process.env.GITHUB_STEP_SUMMARY, '## Keycloak Grype SBOM experiment (' + architecture + ')\n\n' +
-  '| Profile | RPMs | Syft Java components | Grype Maven identities | RPM matches | All matches |\n' +
+  '| Profile | RPMs | Syft Java components | Packages loaded by Grype | RPM matches | All matches |\n' +
   '| --- | ---: | ---: | ---: | ---: | ---: |\n' +
-  results.map(result => '| ' + [result.profile, result.rpmCount, result.javaComponents, result.grypeMavenIdentities,
+  results.map(result => '| ' + [result.profile, result.rpmCount, result.javaComponents, result.gatheredPackages,
     result.rpmMatches, result.matches].join(' | ') + ' |\n').join(''));
