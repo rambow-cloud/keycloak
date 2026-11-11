@@ -103,6 +103,11 @@ test('same-family revision automation permits forward updates and rejects immuta
   assert.equal(sameRuntimeFamily(current.runtime, ref('25.1.0-r1')), false);
   const intent = runtimeIntent([currentRecord], next);
   assert.equal(validateRequest({ schemaVersion: 1, ...intent, issue: 146, fragment: 'changes/146-distroless.json' }).to, next.runtime);
+  const { validateChanges } = await import('../scripts/lib/image-changes.mjs');
+  const fix = { type: 'fix', summary: 'Consume the reviewed runtime repair for the affected glibc packages.',
+    issues: [146], profiles: ['core', 'aws'], cves: ['CVE-2026-86805'], runtime: { from: intent.from, to: intent.to } };
+  validateChanges([fix]);
+  assert.throws(() => validateChanges([{ ...fix, runtime: { ...fix.runtime, to: current.runtime } }]), /changed pinned/);
 });
 
 test('supported OS fixes are selected independently while Java CVEs remain tracked', async () => {

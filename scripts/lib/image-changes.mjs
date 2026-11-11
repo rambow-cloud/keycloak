@@ -43,7 +43,7 @@ export function validateChanges(changes, {allowMaintenance=false} = {}) {
         /^(?:no (?:image )?(?:changes?|updates?)\b|nothing\b)|^(?:n\/?a|none|todo|tbd|placeholder|updates?|fix(?:es)?)\b[.! ]*$/i.test(c.summary) ||
         !Array.isArray(c.issues) || !c.issues.length || c.issues.length > 20 || c.issues.some(n => !Number.isSafeInteger(n) || n < 1) ||
         new Set(c.issues).size !== c.issues.length || c.release !== undefined && typeof c.release!=='boolean' || c.cves !== undefined && (!Array.isArray(c.cves) || !c.cves.length || new Set(c.cves).size!==c.cves.length || c.cves.some(id=>!/^CVE-\d{4}-\d{4,}$/.test(id)))) throw new Error('Changes require a substantive summary, valid CVEs and local Issue numbers.');
-    if(c.type==='runtime-update') validateRuntimeChange(c.runtime,c.profiles??Object.keys(c.runtime?.from??{}));
+    if(c.type==='runtime-update'||c.type==='fix'&&c.runtime) validateRuntimeChange(c.runtime,c.profiles??Object.keys(c.runtime?.from??{}));
   }
   return changes;
 }

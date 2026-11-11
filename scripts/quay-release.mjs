@@ -140,7 +140,7 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
   const intent = frozen ? { images: frozen.images, profiles: frozen.images.map(i => i.profile) }
     : await assessRelease({ github, repo, sourceCommit, records });
   let runtimeProof;
-  if(!preview&&intent.images.some(i=>i.changes?.some(c=>c.type==='runtime-update'))) {
+  if(!preview&&intent.images.some(i=>i.changes?.some(c=>c.type==='runtime-update'||c.type==='fix'&&c.runtime))) {
     runtimeProof=await readAsset(github,repo,release,'runtime-comparison.json');
     if(!runtimeProof||runtimeProof.sourceCommit!==sourceCommit||hash(json(runtimeProof.imageLock))!==hash(json(imageLock))) throw Error('Runtime update requires immutable exact-source comparison evidence');
     const request=validateRequest(JSON.parse(await readText(github,repo,'config/runtime-update.json',sourceCommit)).request);

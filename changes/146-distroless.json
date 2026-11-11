@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "changes": [
     {
-      "type": "runtime-update",
+      "type": "fix",
       "summary": "Upgrade the reviewed AL2023 Java 25 runtime to revision r3 with fixed glibc packages and complete native same-database CVE comparisons.",
       "issues": [
         146

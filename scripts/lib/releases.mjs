@@ -35,7 +35,7 @@ export function validateAliases(config) {
 }
 export function validatePlan(plan) {
   const version = parseRelease(plan.tag);
-  if(plan.images?.some(i=>i.changes?.some(c=>c.type==='runtime-update'))&&!/^[a-f0-9]{64}$/.test(plan.runtimeComparisonSha256??'')) throw Error('Frozen runtime publication needs its comparison hash');
+  if(plan.images?.some(i=>i.changes?.some(c=>c.type==='runtime-update'||c.type==='fix'&&c.runtime))&&!/^[a-f0-9]{64}$/.test(plan.runtimeComparisonSha256??'')) throw Error('Frozen runtime publication needs its comparison hash');
   if (![1, 2, 3].includes(plan.schemaVersion) || plan.registry !== registry || plan.releaseId < 1 || !Number.isSafeInteger(plan.releaseId) ||
       !isSha(plan.sourceCommit) || !isSha(plan.toolsCommit) || !Number.isSafeInteger(plan.sourceRun?.id) || plan.sourceRun.id < 1 ||
       !Number.isSafeInteger(plan.sourceRun?.attempt) || plan.sourceRun.attempt < 1 ||
