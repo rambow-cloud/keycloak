@@ -138,11 +138,18 @@ test('runtime configuration validates selected profiles without changing final-i
   assert.deepEqual(validationProfiles('scripts/compare-runtime.mjs'),['core','aws']);
 });
 test('runtime updater writes only approved inputs, starts a compliant Issue first and preserves an existing candidate',async()=>{
+  for(const rambow of [false,true]) {
   const {runRuntimeUpdate,checkRuntimePullRequest}=await import('../scripts/runtime-update.mjs');const {updaterApp}=await import('../scripts/lib/upstream.mjs');const f=await fixture();
+  const snapshot=structuredClone(record);
+  if(rambow) snapshot.plan.imageLock.runtime='ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:'+'a'.repeat(64);
+  const nextRuntime=rambow?'ghcr.io/rambow-cloud/java:25.0.5-r3@sha256:'+'f'.repeat(64):f.lock.runtime;
+  const inventories=rambow?Object.fromEntries(['amd64-sbom.cdx.json','arm64-sbom.cdx.json','base.json'].map(name=>
+    ['dependencies/runtime/'+'f'.repeat(64)+'/'+name,JSON.stringify({fixture:name})])):{};
   const calls=[];let createdFiles,pr,commit;
   const endpoint=(name,result)=>async args=>{calls.push([name,args]);return {data:typeof result==='function'?result(args):result};};
   const file=path=>{
-    if(path==='images.lock.json') return JSON.stringify(record.plan.imageLock);
+    if(path==='images.lock.json') return JSON.stringify(snapshot.plan.imageLock);
+    if(path==='releases/records/'+record.plan.tag+'.json') return JSON.stringify(snapshot);
     if(path==='config/runtime-update.json') return JSON.stringify({schemaVersion:1,request:null});
     if(path==='releases/events.jsonl') return '';
     return readFileSync(join(__dirname,'..',path),'utf8');
@@ -153,13 +160,15 @@ test('runtime updater writes only approved inputs, starts a compliant Issue firs
     issues:{listForRepo:endpoint('issues',[]),create:endpoint('createIssue',a=>({...a,number:104,state:'open',user:updaterApp.bot}))},
     pulls:{list:endpoint('pulls',[]),create:endpoint('createPR',a=>{pr={...a,number:105,user:updaterApp.bot,head:{sha:'b'.repeat(40),ref:a.head,repo:{full_name:'rambow-cloud/keycloak'}}};return pr;}),listFiles:async()=>({data:Object.keys(createdFiles).map(filename=>({filename}))})},
   }};
-  const options={github,context:{repo:{owner:'rambow-cloud',repo:'keycloak'},ref:'refs/heads/main'},core:{info(){}},identity:updaterApp.bot,resolve:async()=>f.lock.runtime,inspect:async()=>({warnings:[]})};
+  const options={github,context:{repo:{owner:'rambow-cloud',repo:'keycloak'},ref:'refs/heads/main'},core:{info(){}},identity:updaterApp.bot,
+    resolve:async()=>nextRuntime,discover:async()=>({runtime:nextRuntime,files:inventories}),inspect:async()=>({warnings:[]})};
   const result=await runRuntimeUpdate(options);assert.equal(result.issue,104);assert.ok(calls.findIndex(([n])=>n==='createIssue')<calls.findIndex(([n])=>n==='createTree'));
   require('../scripts/issue-policy.cjs').validateIssue(calls.find(([n])=>n==='createIssue')[1]&&{...calls.find(([n])=>n==='createIssue')[1],number:104,state:'open'});
-  assert.ok(Object.keys(createdFiles).every(p=>['images.lock.json','config/runtime-update.json','changes/104-distroless.json'].includes(p)));
+  assert.ok(Object.keys(createdFiles).every(p=>['images.lock.json','config/runtime-update.json','changes/104-distroless.json',...Object.keys(inventories)].includes(p)));
   await checkRuntimePullRequest({github,context:options.context,pr});
   await assert.rejects(checkRuntimePullRequest({github,context:options.context,pr:{...pr,body:pr.body+'human edit'}}),/edited/);
   const count=calls.length;github.rest.pulls.list=async()=>({data:[pr]});assert.equal((await runRuntimeUpdate(options)).status,'existing-candidate-preserved');assert.equal(calls.slice(count).some(([n])=>n==='createTree'),false);
+  }
 });
 test('automatic Release creation freezes evidence before publishing and fails on tag, source or evidence conflicts',async()=>{
   const {buildRuntimeReport,createRuntimeRelease}=await import('../scripts/runtime-release.mjs');const {updaterApp}=await import('../scripts/lib/upstream.mjs');
