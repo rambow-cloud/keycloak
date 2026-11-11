@@ -239,7 +239,7 @@ export async function recordRelease({ github, context, core, record, dispatchGit
       if (pr.state !== 'open') throw new Error('Catalog PR was closed without merging; preserve its work before recovery.');
       await assertCatalogOwned({ github, context, pr });
       if (!pr.auto_merge) throw new Error('Catalog auto-merge was disabled; inspect the PR before recovery.');
-      const runs = await github.paginate(github.rest.actions.listWorkflowRuns, { ...repo, workflow_id: 'ci.yml', head_sha: pr.head.sha, per_page: 100 });
+      const runs = await dispatchGithub.paginate(dispatchGithub.rest.actions.listWorkflowRuns, { ...repo, workflow_id: 'ci.yml', head_sha: pr.head.sha, per_page: 100 });
       const latest = selectCatalogCI(runs, pr);
       if (latest?.status === 'completed' && latest.conclusion !== 'success') throw new Error('Catalog CI failed; published images remain intact. Inspect the PR before recovery.');
       const { data: head } = await github.rest.git.getRef({ ...repo, ref: 'heads/' + pr.base.ref });
