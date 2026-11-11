@@ -42,6 +42,7 @@ The default command is `start --optimized`. Build-time option or provider change
 | [Security release notes](docs/security/README.md) | Newly shipped security fixes, newest version first. |
 | [Security history](docs/security/history.md) | Detailed CVE records, corrections and retained verification evidence. |
 | [Vulnerability scanning](docs/vulnerability-scanning.md) | Scan coverage, merge gates and PR reports. |
+| [Signatures and SBOMs](docs/supply-chain.md) | Cosign trust policy, per-architecture CycloneDX inventories and verification commands for new release contracts. |
 | [Upstream updates](docs/upstream-updates.md) | Automated dependency updates and review policy. |
 | [Release workflow](docs/quay-releases.md) | Quay publication, immutable tags and recovery. |
 

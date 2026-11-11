@@ -1,14 +1,15 @@
 import { createHash } from 'node:crypto';
 import { assertBasePlatforms } from './platforms.mjs';
 
-export async function resolveImageDigest(reference, fetcher = fetch, requiredArchitectures = []) {
+export async function readImageObject(reference, fetcher = fetch, kind = 'manifests') {
   const approved = /^(?:(?:quay\.io|gcr\.io|docker\.io)\/[\w./-]+|ghcr\.io\/rambow-cloud\/java):[\w.-]+(?:@sha256:[a-f0-9]{64})?$/;
   if (!approved.test(reference)) throw new Error('Invalid or unapproved OCI reference: ' + reference);
   const [tagged, pinned] = reference.split('@');
   const [host, ...parts] = tagged.split('/');
   const [repository, tag] = parts.join('/').split(':');
   const registry = host === 'docker.io' ? 'registry-1.docker.io' : host;
-  const url = `https://${registry}/v2/${repository}/manifests/${pinned ?? tag}`;
+  if (!['manifests', 'blobs'].includes(kind) || kind === 'blobs' && !pinned) throw Error('Expected a pinned OCI config blob');
+  const url = 'https://' + registry + '/v2/' + repository + '/' + kind + '/' + (pinned ?? tag);
   const headers = { Accept: 'application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v2+json' };
   let response = await fetcher(url, { headers, signal: AbortSignal.timeout(30000) });
   if (response.status === 401) {
@@ -30,7 +31,12 @@ export async function resolveImageDigest(reference, fetcher = fetch, requiredArc
   if (declared && declared !== digest) throw new Error('Registry digest mismatch: ' + reference);
   if (pinned && pinned !== digest) throw new Error('Pinned registry digest mismatch');
   const manifest = JSON.parse(bytes.toString('utf8'));
-  if (manifest.schemaVersion !== 2 || (!manifest.manifests && !manifest.layers)) throw new Error('Invalid OCI manifest: ' + reference);
-  if (requiredArchitectures.length) assertBasePlatforms(manifest, requiredArchitectures);
-  return `${tagged}@${digest}`;
+  if (kind === 'manifests' && (manifest.schemaVersion !== 2 || (!manifest.manifests && !manifest.layers))) throw new Error('Invalid OCI manifest: ' + reference);
+  return { reference: tagged + '@' + digest, digest, value: manifest };
+}
+
+export async function resolveImageDigest(reference, fetcher = fetch, requiredArchitectures = []) {
+  const result = await readImageObject(reference, fetcher);
+  if (requiredArchitectures.length) assertBasePlatforms(result.value, requiredArchitectures);
+  return result.reference;
 }

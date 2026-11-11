@@ -226,6 +226,9 @@ export async function recordRelease({ github, context, core, record,
   const { data: release } = await github.rest.repos.getReleaseByTag({ ...repo, tag: record.plan.tag });
   const frozen = await readAsset(github, repo, release, 'publication-plan.json');
   if (!equal(frozen, record.plan)) throw new Error('Publication record does not match the frozen Release plan.');
+  if (record.supplyChain && !equal(await readAsset(github, repo, release, 'supply-chain-verification.json'), record.supplyChain)) {
+    throw Error('Publication is missing its protected signature verification attachment');
+  }
   await putImmutableAsset(github, repo, release, 'publication-record.json', record);
   const pending = await ensureCatalogPR({ github, context, core, record });
   if (!pending.merged) {

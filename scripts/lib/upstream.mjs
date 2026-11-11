@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { sameRuntimeFamily } from './runtime-family.mjs';
 
 export const marker = '<!-- rambow-upstream-updates:v1 -->';
 export const managedPaths = ['images.lock.json', 'README.md', 'AGENTS.md', 'config/java.options', 'changes/upstream.json'];
@@ -87,7 +88,7 @@ export function autoMergeEligible(previous, next, warnings) {
   if (warnings.length || previous.keycloakVersion.split('.').slice(0, 2).join('.') !== next.keycloakVersion.split('.').slice(0, 2).join('.')) return false;
   const rest = lock => Object.fromEntries(Object.entries(lock).filter(([key]) => !['keycloakVersion', 'keycloak', 'builder', 'runtime'].includes(key)));
   return JSON.stringify(rest(previous)) === JSON.stringify(rest(next)) &&
-    ['builder', 'runtime'].every(key => previous[key].split('@')[0] === next[key].split('@')[0]);
+    previous.builder.split('@')[0] === next.builder.split('@')[0] && sameRuntimeFamily(previous.runtime, next.runtime);
 }
 
 export function issueBody() {

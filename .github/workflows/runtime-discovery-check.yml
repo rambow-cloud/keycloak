@@ -1,0 +1,36 @@
+name: Runtime discovery check
+on:
+  pull_request:
+    paths:
+      - scripts/lib/rambow-runtime.mjs
+      - scripts/lib/runtime-family.mjs
+      - scripts/lib/oci.mjs
+      - scripts/runtime-update.mjs
+      - images.lock.json
+      - .github/workflows/runtime-discovery-check.yml
+permissions:
+  contents: read
+jobs:
+  discover:
+    name: Reviewed runtime discovery
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Exercise public upstream discovery with a repository-scoped read-only token
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const fs = require('node:fs/promises');
+            const {discoverRambowRuntime} = await import(process.cwd()+'/scripts/lib/rambow-runtime.mjs');
+            const baseline = JSON.parse(await fs.readFile('releases/records/v26.8.2-r2.json','utf8'));
+            const result = await discoverRambowRuntime({github,current:baseline.plan.imageLock.runtime});
+            if(result.runtime===baseline.plan.imageLock.runtime || Object.keys(result.files).length!==3) {
+              throw Error('The published newer Java runtime was not discovered with both inventories');
+            }
+            await core.summary.addHeading('Reviewed runtime discovery').addCodeBlock(JSON.stringify({
+              baseline:baseline.plan.imageLock.runtime,candidate:result.runtime,release:result.release,
+              importedFiles:Object.keys(result.files)
+            },null,2),'json').write();

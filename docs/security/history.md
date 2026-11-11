@@ -17,6 +17,7 @@ Git-backed JSONL records; no database service. This page documents reviewed repa
 | [SEC-2026-005](#sec-2026-005) | CVE-2026-118259, GHSA-ccrj-gw8r-854m | Fix pending publication; listed images are affected | `26.8.1-r2-core`, `26.8.1-r2-aws` | [#79](https://github.com/rambow-cloud/keycloak/issues/79) |
 | [SEC-2026-006](#sec-2026-006) | CVE-2026-118259, GHSA-ccrj-gw8r-854m | Fixed before first publication | `26.8.1-r4-core`, `26.8.1-r4-aws` | [#79](https://github.com/rambow-cloud/keycloak/issues/79), [#81](https://github.com/rambow-cloud/keycloak/issues/81), [#84](https://github.com/rambow-cloud/keycloak/issues/84) |
 | [SEC-2026-007](#sec-2026-007) | CVE-2026-92358, CVE-2026-105305, CVE-2026-107623, CVE-2026-107889, CVE-2026-111497, CVE-2026-112208, CVE-2026-107123, CVE-2026-107124, CVE-2026-107602, CVE-2026-110931, CVE-2026-97367, CVE-2026-97174, CVE-2026-114232, CVE-2026-97847, CVE-2026-96547, CVE-2026-96457, CVE-2026-96460, CVE-2026-97848, CVE-2026-109081, CVE-2026-92857, CVE-2026-103112, CVE-2026-97175, CVE-2026-96447, CVE-2026-82965, CVE-2026-96448, CVE-2026-92855, CVE-2026-92856, CVE-2026-19688, CVE-2026-117691 | Fixed before first publication | `26.8.2-r1-core`, `26.8.2-r1-aws` | [#123](https://github.com/rambow-cloud/keycloak/issues/123), [#125](https://github.com/rambow-cloud/keycloak/issues/125) |
+| [SEC-2026-008](#sec-2026-008) | CVE-2026-86805 | Fix pending publication; listed images are affected | `26.8.2-r2-core`, `26.8.2-r2-aws` | [#146](https://github.com/rambow-cloud/keycloak/issues/146) |
 
 ## CVE and security event index
 
@@ -40,6 +41,7 @@ Git-backed JSONL records; no database service. This page documents reviewed repa
 - **CVE-2026-54428**: [SEC-2026-001](#sec-2026-001)
 - **CVE-2026-64607**: [SEC-2026-001](#sec-2026-001)
 - **CVE-2026-82965**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-86805**: [SEC-2026-008](#sec-2026-008)
 - **CVE-2026-92358**: [SEC-2026-007](#sec-2026-007)
 - **CVE-2026-92855**: [SEC-2026-007](#sec-2026-007)
 - **CVE-2026-92856**: [SEC-2026-007](#sec-2026-007)
@@ -278,6 +280,32 @@ Evidence and sources:
 - [Formal publication and immutable record](<https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r1>)
 - [Exact native source CI](<https://github.com/rambow-cloud/keycloak/actions/runs/42208382303>)
 - [Persistent source audit, native scan hashes and remaining findings](<https://github.com/rambow-cloud/keycloak/blob/main/releases/evidence/v26.8.2-r1-security.json>)
+
+## SEC-2026-008
+
+Prepare the AL2023 glibc repair using the reviewed Java 25.0.5-r3 runtime and native paired verification.
+
+Recorded (UTC): `2026-11-11T22:51:58.667Z`. Result: **Fix pending publication; listed images are affected**.
+
+- The listed r2 index digests are affected published baselines. The source candidate advances both profiles to Java 25.0.5-r3 with glibc/glibc-common 2.34-231.amzn2023.0.6.
+- The automatic runtime discovery verifies the upstream stable release, GHCR index and architecture children, config identities and exact CycloneDX RPM inventories before proposing an update.
+- Native core/aws amd64/arm64 CI must compare the existing published children and candidate using identical Trivy/database bytes and prove CVE-2026-86805 absent. The existing HIGH/CRITICAL gate remains required.
+- Formal publication and its signature/catalog checks follow review and successful main CI. Source-only changes do not repair existing published digests. MariaDB CVEs remain tracked separately in Issue 143.
+
+| Profile | Published tag | Digest |
+| --- | --- | --- |
+| core | `26.8.2-r2-core` | `sha256:32ee7e8ac0414da4f79dac38402b2226519b2600074c6bd72221f908fce1a2b4` |
+| aws | `26.8.2-r2-aws` | `sha256:0b649b9d41a0c11d8a975f47bfd6ef4c723d382c4e1117a8ec94bbeeab072114` |
+
+Issues: [#146](https://github.com/rambow-cloud/keycloak/issues/146).
+
+Reference PRs: [#145](https://github.com/rambow-cloud/keycloak/pull/145).
+
+Evidence and sources:
+
+- [Upstream stable runtime repair](<https://github.com/rambow-cloud/amazon-linux-distroless/releases/tag/java25-25.0.5-r3>)
+- [Automatic runtime updater correction](<https://github.com/rambow-cloud/keycloak/issues/146>)
+- [Source repair and supply-chain integration](<https://github.com/rambow-cloud/keycloak/pull/145>)
 
 ## Maintain and query
 

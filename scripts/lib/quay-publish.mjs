@@ -1,4 +1,5 @@
 import { registry, profiles, validatePlan, validateRecord, destinationAction } from './releases.mjs';
+import { validateSupplyChainRecord } from './supply-chain.mjs';
 
 // Registry adapter never receives a tag from an unvalidated release or implicit profile selection.
 export async function publishImages(plan, adapter, { runId, validationToolsCommit = plan.toolsCommit, now = () => new Date().toISOString(), progress = () => {} }) {
@@ -18,6 +19,12 @@ export async function publishImages(plan, adapter, { runId, validationToolsCommi
       state.completedTags.push(image.tag);
       progress({ ...state });
     }
+    let supplyChain;
+    if (plan.supplyChain) {
+      if (typeof adapter.secure !== 'function') throw Error('Frozen release requires Cosign verification before aliases and recording');
+      supplyChain = await adapter.secure();
+      validateSupplyChainRecord({ plan, supplyChain });
+    }
     const aliasChanges = [];
     // Mutable aliases are not touched until both canonical image tags are present.
     for (const alias of plan.aliases) {
@@ -33,7 +40,8 @@ export async function publishImages(plan, adapter, { runId, validationToolsCommi
       state.completedTags.push(alias.tag);
       progress({ ...state });
     }
-    const record = validateRecord({ schemaVersion: 1, status: 'published', publishedAt: now(), publishRunId: runId, validationToolsCommit, plan, aliasChanges });
+    const record = validateRecord({ schemaVersion: 1, status: 'published', publishedAt: now(), publishRunId: runId, validationToolsCommit, plan, aliasChanges,
+      ...(supplyChain ? { supplyChain } : {}) });
     progress({ ...state, status: 'published' });
     return record;
   } catch (error) {

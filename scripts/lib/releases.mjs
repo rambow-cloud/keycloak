@@ -3,6 +3,7 @@ import { validateChanges } from './image-changes.mjs';
 import { lockArchitectures } from './platforms.mjs';
 import { validateChildren } from './multiarch.mjs';
 import { activeReleaseRecords, liveImage } from './release-events.mjs';
+import { validateSupplyChain, validateSupplyChainRecord } from './supply-chain.mjs';
 export const registry = 'quay.io/rambow-cloud/keycloak';
 export const repository = 'rambow-cloud/keycloak';
 export const profiles = ['core', 'aws'];
@@ -34,7 +35,7 @@ export function validateAliases(config) {
 }
 export function validatePlan(plan) {
   const version = parseRelease(plan.tag);
-  if(plan.images?.some(i=>i.changes?.some(c=>c.type==='runtime-update'))&&!/^[a-f0-9]{64}$/.test(plan.runtimeComparisonSha256??'')) throw Error('Frozen runtime publication needs its comparison hash');
+  if(plan.images?.some(i=>i.changes?.some(c=>c.type==='runtime-update'||c.type==='fix'&&c.runtime))&&!/^[a-f0-9]{64}$/.test(plan.runtimeComparisonSha256??'')) throw Error('Frozen runtime publication needs its comparison hash');
   if (![1, 2, 3].includes(plan.schemaVersion) || plan.registry !== registry || plan.releaseId < 1 || !Number.isSafeInteger(plan.releaseId) ||
       !isSha(plan.sourceCommit) || !isSha(plan.toolsCommit) || !Number.isSafeInteger(plan.sourceRun?.id) || plan.sourceRun.id < 1 ||
       !Number.isSafeInteger(plan.sourceRun?.attempt) || plan.sourceRun.attempt < 1 ||
@@ -64,10 +65,12 @@ export function validatePlan(plan) {
     }
   }
   if (plan.aliases.some(a => !plan.images.some(i => i.profile === a.profile))) throw new Error('Alias must bind a published profile.');
+  validateSupplyChain(plan);
   return plan;
 }
 export function validateRecord(record) {
   validatePlan(record.plan);
+  validateSupplyChainRecord(record);
   if (record.schemaVersion !== 1 || record.status !== 'published' || !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(record.publishedAt ?? '') ||
       !Number.isFinite(Date.parse(record.publishedAt)) || !isSha(record.validationToolsCommit) ||
       !Number.isSafeInteger(record.publishRunId) || record.publishRunId < 1 || !Array.isArray(record.aliasChanges) ||

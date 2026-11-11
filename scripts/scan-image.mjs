@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { summarize, renderReport, downloadScannerArchive } from './lib/trivy.mjs';
 import { nativeArchitecture } from './lib/platforms.mjs';
 import { isRambowRuntime, readRuntimeSbom, combineRuntimeScans } from './lib/runtime-sbom.mjs';
+import { createSbom, sbomBytes } from './lib/sbom.mjs';
+import { createHash } from 'node:crypto';
 
 const profile = process.env.BUILD_PROFILE ?? 'core';
 const architecture = process.env.BUILD_ARCH;
@@ -44,6 +46,20 @@ try {
     await writeFile(join(output, 'trivy.json'), JSON.stringify(report, null, 2) + '\n');
   }
   summary = summarize(report, { profile, architecture, headSha, runId, runAttempt, policy, runtime });
+  if (architecture) {
+    const index = JSON.parse(await readFile(join(image, 'index.json'), 'utf8'));
+    if (index.manifests?.length !== 1) throw Error('SBOM requires one exact image manifest');
+    const digest = index.manifests[0].digest;
+    if (!/^sha256:[a-f0-9]{64}$/.test(digest ?? '')) throw Error('Invalid SBOM image digest');
+    const manifestBytes = await readFile(join(image, 'blobs', 'sha256', digest.slice(7)));
+    if ('sha256:' + createHash('sha256').update(manifestBytes).digest('hex') !== digest) throw Error('SBOM manifest checksum mismatch');
+    const manifest = JSON.parse(manifestBytes);
+    if (manifest.config.digest !== report.Metadata.ImageID) throw Error('SBOM scan does not match the selected image config');
+    const runtimeSbom = inventory ? JSON.parse(await readFile(inventory.path, 'utf8')) : undefined;
+    await writeFile(join(output, 'sbom.cdx.json'), sbomBytes(createSbom(report, {
+      digest, profile, architecture, scannerVersion: policy.version, runtimeSbom,
+    })));
+  }
   for (const name of ['db', 'java-db']) {
     try { await writeFile(join(output, name + '-metadata.json'), await readFile(join(work, 'cache', name, 'metadata.json'))); }
     catch (error) { if (error.code !== 'ENOENT') throw error; }

@@ -10,6 +10,8 @@ import { parseReleaseEvents,validateReleaseEvents } from './lib/release-events.m
 import { downloadScannerArchive,summarize,renderReport } from './lib/trivy.mjs';
 import { nativeArchitecture } from './lib/platforms.mjs';
 import { json,hash } from './lib/releases.mjs';
+import { isRambowRuntime,readRuntimeSbom,combineRuntimeScans } from './lib/runtime-sbom.mjs';
+import { createSbom,sbomBytes } from './lib/sbom.mjs';
 
 const [imageArg,outputArg]=process.argv.slice(2),image=resolve(imageArg??'.cache/trivy-image'),output=resolve(outputArg??'.cache/trivy-report');
 const profile=process.env.BUILD_PROFILE,architecture=process.env.BUILD_ARCH;
@@ -44,11 +46,20 @@ if(!config.request||!active||config.request.to!==lock.runtime||!Object.hasOwn(co
     const archive=await downloadScannerArchive(policy,architecture);
     await writeFile(join(work,'scanner.tar.gz'),archive);
     run('tar',['-xzf',join(work,'scanner.tar.gz'),'-C',work,'--no-same-owner','trivy']);
-    const scan=async(layout,path,frozen)=>{
+    const scan=async(layout,path,frozen,runtime)=>{
       run(join(work,'trivy'),['image','--config','','--ignorefile','','--scanners','vuln','--pkg-types','os,library','--severity','UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL',
         '--ignore-unfixed=false','--list-all-pkgs','--format','json','--output',path,'--exit-code','0','--cache-dir',cache,'--timeout','10m','--no-progress','--skip-version-check',
         ...(frozen?['--skip-db-update','--skip-java-db-update']:[]),'--input',layout]);
-      return JSON.parse(await readFile(path,'utf8'));
+      let report=JSON.parse(await readFile(path,'utf8'));
+      if(isRambowRuntime(runtime)) {
+        const inventory=await readRuntimeSbom(runtime,architecture),runtimePath=path+'.runtime.json';
+        run(join(work,'trivy'),['sbom','--config','','--ignorefile','','--scanners','vuln','--list-all-pkgs',
+          '--ignore-unfixed=false','--format','json','--output',runtimePath,'--cache-dir',cache,
+          '--skip-db-update','--skip-java-db-update','--no-progress','--skip-version-check',fileURLToPath(inventory.path)]);
+        report=combineRuntimeScans(report,JSON.parse(await readFile(runtimePath,'utf8')),inventory);
+        await writeFile(path,json(report));
+      }
+      return report;
     };
     const database=async()=>{
       const result={};
@@ -59,17 +70,19 @@ if(!config.request||!active||config.request.to!==lock.runtime||!Object.hasOwn(co
       }
       return result;
     };
-    const old=await scan(before,join(output,'before.json'),false),db=await database();
-    const next=await scan(image,join(output,'trivy.json'),true),dbAfter=await database();
+    const old=await scan(before,join(output,'before.json'),false,request.from[profile]),db=await database();
+    const next=await scan(image,join(output,'trivy.json'),true,request.to),dbAfter=await database();
     if(json(db)!==json(dbAfter)||old.Metadata?.ImageID!==previous.config||next.Metadata?.ImageID!==candidate.config) throw Error('Comparison database or scanned config changed');
     const context={monitorCommit:headSha,runId,runAttempt};
-    const delta=compareReports(old,next,target,context,policy);
+    const delta=compareReports(old,next,target,context,policy,request.to);
     const pair={schemaVersion:1,requestId:request.id,profile,architecture,sourceCommit:headSha,runId,runAttempt,target,
       candidateDigest:candidate.digest,candidateConfig:candidate.config,baselineConfig:previous.config,scannerVersion:policy.version,
       scannerSha256:architecture==='arm64'?policy.linuxArm64Sha256:policy.linuxAmd64Sha256,database:db,databaseAfter:dbAfter,
       before:compactReport(old),after:compactReport(next),fullReportSha256:{before:hash(await readFile(join(output,'before.json'))),after:hash(await readFile(join(output,'trivy.json')))},delta};
     await writeFile(join(output,'runtime-pair.json'),json(pair));
-    const summary=summarize(next,{profile,architecture,headSha,runId,runAttempt,policy});
+    const summary=summarize(next,{profile,architecture,headSha,runId,runAttempt,policy,runtime:request.to});
+    const runtimeSbom=isRambowRuntime(request.to) ? JSON.parse(await readFile((await readRuntimeSbom(request.to,architecture)).path,'utf8')) : undefined;
+    await writeFile(join(output,'sbom.cdx.json'),sbomBytes(createSbom(next,{profile,architecture,digest:candidate.digest,scannerVersion:policy.version,runtimeSbom})));
     await writeFile(join(output,'summary.json'),json(summary));
     if(process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY,
       renderReport({[profile+'/'+architecture]:summary},{runUrl:'https://github.com/'+process.env.GITHUB_REPOSITORY+'/actions/runs/'+runId,headSha,runId,runAttempt,
