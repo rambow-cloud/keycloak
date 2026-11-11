@@ -345,7 +345,7 @@ test('ordinary PRs cannot rewrite published records or add records without publi
 test('catalog creation is Issue-first and scopes native auto-merge to generated files with explicit checks', async t => {
   const {updaterApp}=await import('../scripts/lib/upstream.mjs');
   for (const identity of [bot,updaterApp.bot]) for (const lifecycle of [false, true]) await t.test(identity.login+' '+(lifecycle ? 'retains expansion and withdrawal events' : 'initial publication'), async () => {
-  const { ensureCatalogPR } = await catalog;
+  const { ensureCatalogPR,recordRelease } = await catalog;
   const { readFileSync, readdirSync } = require('node:fs');
   const { validateIssue } = require('../scripts/issue-policy.cjs');
   const previous = lifecycle ? readdirSync('releases/records').filter(n => /^v26\.8\.1-r[123]\.json$/.test(n))
@@ -353,7 +353,7 @@ test('catalog creation is Issue-first and scopes native auto-merge to generated 
   const record = await recordFixture(lifecycle ? await planFixture({ tag: 'v26.8.1-r4', revision: 4, releaseId: 44,
     images: profileImages().map(i => ({ ...i, tag: '26.8.1-r4-' + i.profile })) }) : undefined);
   if (lifecycle) { record.publishedAt = '2026-10-30T01:00:00.000Z'; record.publishRunId = 2004; }
-  const f = await apiFixture({ records: previous, assets: { 'publication-record.json': record } });
+  const f = await apiFixture({ records: previous, assets: { 'publication-record.json': record,'publication-plan.json':record.plan } });
   const head = 'f'.repeat(40);
   let files = {};
   let pr;
@@ -410,6 +410,30 @@ test('catalog creation is Issue-first and scopes native auto-merge to generated 
   }
   assert.equal(f.calls.filter(c => c.name === 'dispatch').length, identity===bot?2:0);
   assert.equal(f.calls.at(-1).name, 'enable-auto-merge');
+  if(identity===updaterApp.bot) {
+    let merged=false,ciReads=0;
+    f.github.rest.issues.get=async()=>({data:{...f.calls.find(c=>c.name==='issue').args,number:77,state:'open'}});
+    f.github.rest.repos.getCommit=async ({ref})=>({data:{sha:ref.startsWith('refs/tags/')?record.plan.sourceCommit:head,
+      author:identity,parents:[{sha:tools}]}});
+    const previousContent=f.github.rest.repos.getContent;
+    f.github.rest.repos.getContent=async args=>args.path==='releases/records/'+record.plan.tag+'.json'&&args.ref==='main'
+      ? {data:{encoding:'base64',size:1000,content:Buffer.from(JSON.stringify(record)).toString('base64')}}:previousContent(args);
+    f.github.rest.pulls.get=async()=>({data:{...pr,base:{ref:'main'},auto_merge:{},merged_at:merged?'2026-11-12T00:00:00Z':null,state:'open'}});
+    const previousPaginate=f.github.paginate;
+    f.github.paginate=async(method,args)=>{
+      if(method===f.github.rest.actions.listWorkflowRuns) throw Error('The App has no Actions permission');
+      return method===f.github.rest.pulls.list?[pr]:previousPaginate(method,args);
+    };
+    const dispatchGithub={rest:{actions:{listWorkflowRuns(){}}},paginate:async()=>{
+      ciReads++;merged=true;
+      return [{id:1,event:'pull_request',path:'.github/workflows/ci.yml',head_sha:head,head_branch:pr.head.ref,
+        repository:{full_name:'rambow-cloud/keycloak'},head_repository:{full_name:'rambow-cloud/keycloak'},status:'completed',conclusion:'success'}];
+    }};
+    await recordRelease({...f,record,dispatchGithub,maxPolls:3});
+    assert.equal(ciReads,1);
+    assert.equal(f.calls.filter(c=>c.name==='issue').length,1,'Recovery must reuse the existing App PR');
+    assert.equal(f.calls.at(-1).args.name,'publication-complete.json');
+  }
   });
 });
 
