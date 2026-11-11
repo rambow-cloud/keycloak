@@ -251,9 +251,7 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 40
     permissions:
-      contents: write
-      issues: write
-      pull-requests: write
+      contents: read
       actions: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -270,8 +268,8 @@ jobs:
           PREPARED: ${{ needs.prepare.outputs.prepared }}
         with:
           script: |
-            const { recordRelease } = await import(process.cwd() + '/scripts/release-catalog.mjs');
+            const { requestCatalog } = await import(process.cwd() + '/scripts/catalog-broker.mjs');
             const p = JSON.parse(process.env.PREPARED);
             const record = p.recordOnly ? p.record : JSON.parse(await require('node:fs/promises').readFile('.cache/publication/record.json','utf8'));
-            const result = await recordRelease({ github, context, core, record });
+            const result = await requestCatalog({ github, context, core, record });
             await core.summary.addHeading('Quay publication complete').addCodeBlock(JSON.stringify({tag:record.plan.tag,images:record.plan.images,catalog:result},null,2),'json').write();

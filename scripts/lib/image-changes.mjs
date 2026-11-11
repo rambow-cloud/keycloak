@@ -10,7 +10,7 @@ const ordered = value => Array.isArray(value) ? value.map(ordered) : value && ty
   ? Object.fromEntries(Object.entries(value).sort(([a],[b]) => a.localeCompare(b)).map(([k,v]) => [k,ordered(v)])) : value;
 const stringify = value => JSON.stringify(ordered(value));
 const metadata = /^(?:docs\/|releases\/|changes\/|\.github\/(?:ISSUE_TEMPLATE\/|pull_request_template\.md|issue-policy\.json)|.*\.md$|LICENSE(?:\..*)?$|\.gitignore$)/;
-const bookkeeping = /^scripts\/(?:r2-architecture-migration|quay-release|release-catalog|releases|upstream-update|lock-images|issue-policy|trivy-comment)\.(?:mjs|cjs)$|^scripts\/lib\/(?:release-policy|release-events|image-changes|releases|quay-publish|quay-auth|upstream)\.mjs$|^config\/r2-architecture-migration\.json$|^\.github\/workflows\/(?!ci\.yml$)[^/]+\.yml$|^tests\/[^/]+\.test\.cjs$/;
+const bookkeeping = /^scripts\/(?:r2-architecture-migration|quay-release|release-catalog|catalog-broker|releases|upstream-update|lock-images|issue-policy|trivy-comment)\.(?:mjs|cjs)$|^scripts\/lib\/(?:release-policy|release-events|image-changes|releases|quay-publish|quay-auth|upstream)\.mjs$|^config\/r2-architecture-migration\.json$|^\.github\/workflows\/(?!ci\.yml$)[^/]+\.yml$|^tests\/[^/]+\.test\.cjs$/;
 const validation = /^scripts\/(?:verify-|scan-image|scan-release|package-images|platform|trivy-gate|release-image|check-upstream-compatibility)|^scripts\/lib\/(?:trivy|oci|image-changes|multiarch|platforms|runtime-sbom)\.mjs$|^config\/(?:trivy|upstream-compatibility)\.json$|^dependencies\/runtime\/|^\.github\/workflows\/ci\.yml$|^tests\//;
 export function sourceProfiles(path) {
   if (/^scripts\/lib\/(?:rambow-runtime|runtime-family)\.mjs$/.test(path)) return [];

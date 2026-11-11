@@ -343,7 +343,8 @@ test('ordinary PRs cannot rewrite published records or add records without publi
 });
 
 test('catalog creation is Issue-first and scopes native auto-merge to generated files with explicit checks', async t => {
-  for (const lifecycle of [false, true]) await t.test(lifecycle ? 'retains expansion and withdrawal events' : 'initial publication', async () => {
+  const {updaterApp}=await import('../scripts/lib/upstream.mjs');
+  for (const identity of [bot,updaterApp.bot]) for (const lifecycle of [false, true]) await t.test(identity.login+' '+(lifecycle ? 'retains expansion and withdrawal events' : 'initial publication'), async () => {
   const { ensureCatalogPR } = await catalog;
   const { readFileSync, readdirSync } = require('node:fs');
   const { validateIssue } = require('../scripts/issue-policy.cjs');
@@ -363,11 +364,11 @@ test('catalog creation is Issue-first and scopes native auto-merge to generated 
   f.github.rest.git.createTree = write('tree', args => { files = Object.fromEntries(args.tree.map(e => [e.path, e.content])); return { sha: 'new-tree' }; });
   f.github.rest.git.createCommit = write('commit', { sha: head });
   f.github.rest.git.createRef = write('branch', args => { branch = args; return {}; });
-  f.github.rest.repos.getCommit = async () => ({ data: { sha: head, author: bot, parents: [{ sha: tools }] } });
+  f.github.rest.repos.getCommit = async () => ({ data: { sha: head, author: identity, parents: [{ sha: tools }] } });
   f.github.rest.pulls = { list() {}, listFiles() {}, create: write('pr', args => {
     assert.equal(branch?.ref, 'refs/heads/' + args.head, 'PR head must already exist');
     assert.equal(branch?.sha, head, 'PR branch must point to the generated commit');
-    pr = { number: 78, user: bot, body: args.body, head: { sha: head, ref: args.head, repo: { full_name: 'rambow-cloud/keycloak' } }, html_url: 'https://github.com/rambow-cloud/keycloak/pull/78' };
+    pr = { number: 78, user: identity, body: args.body, head: { sha: head, ref: args.head, repo: { full_name: 'rambow-cloud/keycloak' } }, html_url: 'https://github.com/rambow-cloud/keycloak/pull/78' };
     return pr;
   }) };
   const getContent = f.github.rest.repos.getContent;
@@ -407,7 +408,7 @@ test('catalog creation is Issue-first and scopes native auto-merge to generated 
       assert.ok(files['releases/README.md'].includes(image.digest));
     }
   }
-  assert.equal(f.calls.filter(c => c.name === 'dispatch').length, 2);
+  assert.equal(f.calls.filter(c => c.name === 'dispatch').length, identity===bot?2:0);
   assert.equal(f.calls.at(-1).name, 'enable-auto-merge');
   });
 });

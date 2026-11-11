@@ -1,0 +1,82 @@
+name: Release catalog
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Formal Release with protected immutable publication evidence
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: catalog-${{ inputs.release_tag }}
+  cancel-in-progress: false
+jobs:
+  prepare:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    outputs:
+      prepared: ${{ steps.validate.outputs.prepared }}
+      active: ${{ steps.validate.outputs.active }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - id: validate
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        with:
+          script: |
+            const {prepareCatalog}=await import(process.cwd()+'/scripts/catalog-broker.mjs');
+            const prepared=await prepareCatalog({github,context,tag:process.env.RELEASE_TAG});
+            core.setOutput('prepared',JSON.stringify(prepared));
+            core.setOutput('active',!prepared.complete);
+            await core.summary.addHeading('Catalog decision').addCodeBlock(JSON.stringify({
+              tag:process.env.RELEASE_TAG,complete:prepared.complete
+            },null,2),'json').write();
+  record:
+    needs: prepare
+    if: needs.prepare.outputs.active == 'true'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 40
+    environment: upstream-update
+    permissions:
+      contents: read
+      # Only historical GITHUB_TOKEN catalog recovery uses dispatched checks.
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: Iv23li88vLKtqCEQifBK
+          private-key: ${{ secrets.UPSTREAM_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-issues: write
+          permission-pull-requests: write
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PREPARED: ${{ needs.prepare.outputs.prepared }}
+          MINTED_APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          READ_TOKEN: ${{ github.token }}
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const {updaterApp,validateUpdaterApp,sameUpdater}=await import(process.cwd()+'/scripts/lib/upstream.mjs');
+            const app=validateUpdaterApp(updaterApp,process.env.MINTED_APP_SLUG);
+            const {data:identity}=await github.rest.users.getByUsername({username:app.bot.login});
+            if(!sameUpdater(identity,app.bot)) throw Error('Pinned catalog App identity changed');
+            const {recordRelease}=await import(process.cwd()+'/scripts/release-catalog.mjs');
+            const record=JSON.parse(process.env.PREPARED).record;
+            const dispatchGithub=new github.constructor({auth:process.env.READ_TOKEN});
+            const result=await recordRelease({github,dispatchGithub,context,core,record});
+            await core.summary.addHeading('App catalog complete').addCodeBlock(JSON.stringify(result,null,2),'json').write();
