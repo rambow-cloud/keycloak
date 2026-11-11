@@ -160,6 +160,26 @@
           "summary": "Fix the HTTP Client vulnerability by upgrading httpclient5 from 5.6.1 to 5.6.4."
         }
       ]
+    },
+    {
+      "release": "v26.8.2-r3",
+      "record": "SEC-2026-009",
+      "fixes": [
+        {
+          "advisory": "CVE-2026-86805",
+          "summary": "Remove the detected vulnerability from the published core image through the verified runtime-input refresh; see paired package evidence."
+        }
+      ]
+    },
+    {
+      "release": "v26.8.2-r3",
+      "record": "SEC-2026-010",
+      "fixes": [
+        {
+          "advisory": "CVE-2026-86805",
+          "summary": "Remove the detected vulnerability from the published aws image through the verified runtime-input refresh; see paired package evidence."
+        }
+      ]
     }
   ]
 }
