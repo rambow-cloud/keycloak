@@ -4,6 +4,7 @@ import { dispatchMissingChecks, configureAutoMerge } from './upstream-update.mjs
 import policy from './issue-policy.cjs';
 import { validateChanges, validateFragment } from './lib/image-changes.mjs';
 import {parseReleaseEvents,validateReleaseEvents} from './lib/release-events.mjs';
+import {updaterApp,sameUpdater} from './lib/upstream.mjs';
 
 const marker = '<!-- quay-catalog:v1 -->';
 const actionsBot = 'MDM6Qm90NDE4OTgyODI=';
@@ -97,7 +98,7 @@ export async function canonicalCatalogBody({ github, context, pr }) {
   if (current?.body !== body || current?.headRefOid !== pr.head.sha || current?.editor?.__typename !== 'Bot' ||
       current.editor.id !== codesmithBot || !edits?.totalCount || edits.totalCount !== edits.nodes?.length ||
       edits.pageInfo?.hasNextPage !== false || edits.nodes.some(e => e?.editor?.__typename !== 'Bot' ||
-        ![actionsBot, codesmithBot].includes(e.editor.id))) {
+        ![actionsBot, codesmithBot, updaterApp.bot.node_id].includes(e.editor.id))) {
     throw new Error('Catalog footer edit history is not exclusively attributable to the pinned automation bots.');
   }
   return parts[1];
@@ -105,7 +106,7 @@ export async function canonicalCatalogBody({ github, context, pr }) {
 
 export async function assertCatalogOwned({ github, context, pr }) {
   const repo = context.repo;
-  if (pr.user?.login !== 'github-actions[bot]' || pr.head.repo?.full_name !== repository ||
+  if (!(pr.user?.login === 'github-actions[bot]' || sameUpdater(pr.user,updaterApp.bot)) || pr.head.repo?.full_name !== repository ||
       !/^chore\/[1-9]\d*-record-release-v\d+\.\d+\.\d+-r\d+$/.test(pr.head.ref) || !pr.body?.startsWith(marker)) throw new Error('Catalog PR is not bot-owned.');
   const body = await canonicalCatalogBody({ github, context, pr });
   const expectedHead = body.match(/<!-- catalog-head:([a-f0-9]{40}) -->/)?.[1];
@@ -113,7 +114,7 @@ export async function assertCatalogOwned({ github, context, pr }) {
   const clean = body.replace(/<!-- catalog-body:[a-f0-9]{64} -->\n?$/, '');
   if (expectedHead !== pr.head.sha || !expectedBody || hash(clean) !== expectedBody) throw new Error('Catalog PR was edited; refusing automatic maintenance/merge.');
   const { data: commit } = await github.rest.repos.getCommit({ ...repo, ref: pr.head.sha });
-  if (commit.author?.login !== 'github-actions[bot]') throw new Error('Catalog branch has human/unknown commits.');
+  if (!(commit.author?.login === 'github-actions[bot]' || sameUpdater(commit.author,updaterApp.bot))) throw new Error('Catalog branch has human/unknown commits.');
   const changes = await github.paginate(github.rest.pulls.listFiles, { ...repo, pull_number: pr.number, per_page: 100 });
   const recordPaths = changes.filter(f => /^releases\/records\/v\d+\.\d+\.\d+-r\d+\.json$/.test(f.filename));
   if (changes.length !== 2 || recordPaths.length !== 1 || recordPaths[0].status !== 'added' ||
@@ -146,7 +147,7 @@ export async function checkCatalogPullRequest({ github, context, pr }) {
   }
 }
 
-export async function ensureCatalogPR({ github, context, core, record }) {
+export async function ensureCatalogPR({ github, context, core, record, dispatchGithub=github }) {
   validateRecord(record);
   const repo = context.repo;
   const { data: metadata } = await github.rest.repos.get(repo);
@@ -176,7 +177,7 @@ export async function ensureCatalogPR({ github, context, core, record }) {
     policy.validateIssue(linked);
     if (policy.issueNumbers(pr.body).length !== 1 || pr.head.ref !== 'chore/' + issue + '-record-release-' + record.plan.tag) throw new Error('Unexpected catalog Issue/branch.');
     if (equal(owned.files, files) && owned.commit.parents.some(p => p.sha === baseSha)) {
-      await dispatchMissingChecks(github, repo, pr, core.info);
+      if(!sameUpdater(pr.user,updaterApp.bot)) await dispatchMissingChecks(dispatchGithub, repo, pr, core.info);
       await configureAutoMerge(github, repo, pr, true, core.info);
       return { number: pr.number, url: pr.html_url, baseSha };
     }
@@ -206,19 +207,19 @@ export async function ensureCatalogPR({ github, context, core, record }) {
   }
   // Validate the real diff and Release attachment before enabling any merge.
   await assertCatalogOwned({ github, context, pr });
-  await dispatchMissingChecks(github, repo, pr, core.info);
+  if(!sameUpdater(pr.user,updaterApp.bot)) await dispatchMissingChecks(dispatchGithub, repo, pr, core.info);
   await configureAutoMerge(github, repo, pr, true, core.info);
   core.info('Catalog PR: ' + pr.html_url);
   return { number: pr.number, url: pr.html_url, baseSha };
 }
 
 export function selectCatalogCI(runs, pr) {
-  return runs.filter(r => r.event === 'workflow_dispatch' && r.path === '.github/workflows/ci.yml' &&
+  return runs.filter(r => (r.event === 'workflow_dispatch' || sameUpdater(pr.user,updaterApp.bot)&&r.event==='pull_request') && r.path === '.github/workflows/ci.yml' &&
     r.head_sha === pr.head.sha && r.head_branch === pr.head.ref && r.repository?.full_name === repository &&
     r.head_repository?.full_name === repository).sort((a, b) => b.id - a.id)[0];
 }
 
-export async function recordRelease({ github, context, core, record,
+export async function recordRelease({ github, context, core, record, dispatchGithub=github,
   pause = ms => new Promise(resolve => setTimeout(resolve, ms)), maxPolls = 100 }) {
   validateRecord(record);
   const repo = context.repo;
@@ -230,7 +231,7 @@ export async function recordRelease({ github, context, core, record,
     throw Error('Publication is missing its protected signature verification attachment');
   }
   await putImmutableAsset(github, repo, release, 'publication-record.json', record);
-  const pending = await ensureCatalogPR({ github, context, core, record });
+  const pending = await ensureCatalogPR({ github, context, core, record, dispatchGithub });
   if (!pending.merged) {
     for (let n = 0; n < maxPolls; n++) {
       const { data: pr } = await github.rest.pulls.get({ ...repo, pull_number: pending.number });

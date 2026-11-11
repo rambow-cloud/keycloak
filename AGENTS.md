@@ -14,6 +14,7 @@ Build Keycloak OCI images for Rambow Cloud. Prefer distroless Java, a non-root u
 6. After changing an issue's scope or body, rerun the PR's `Issue policy` check. Follow SECURITY.md for sensitive vulnerabilities; fixes may reference a sanitized maintenance issue without public exploit details.
 7. The upstream updater may enable native auto-merge for patch/digest changes within reviewed image families after required checks, as authorized by the project owner. Larger upgrades and compatibility warnings require maintainer review. Do not broaden auto-merge eligibility or weaken checks. See `docs/upstream-updates.md`.
 8. The project owner also authorizes native auto-merge for bot-owned Quay publication-record PRs limited to a new `releases/records/<release>.json` and generated `releases/README.md`. They must match the immutable Release attachment, pass the required guarded Issue policy and CI, and preserve human edits. Alias configuration, code, workflows and existing records are excluded. Never push catalog updates directly to main.
+   Create new catalog PRs with the pinned updater App through the main-only catalog broker and existing `upstream-update` Environment. Keep its private key out of formal-tag publisher jobs. Retain historical GitHub Actions bot recovery without auto-approving workflows or weakening required checks.
 
 ## Image requirements
 
