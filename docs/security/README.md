@@ -4,6 +4,15 @@
 
 [Detailed history and evidence](history.md) · [Image tags and digests](../../releases/README.md)
 
+## v26.8.2-r3
+
+<a id="sec-2026-009"></a>
+
+- **[CVE-2026-86805](history.md#sec-2026-009)** (`core`): Remove the detected vulnerability from the published core image through the verified runtime-input refresh; see paired package evidence.
+<a id="sec-2026-010"></a>
+
+- **[CVE-2026-86805](history.md#sec-2026-010)** (`aws`): Remove the detected vulnerability from the published aws image through the verified runtime-input refresh; see paired package evidence.
+
 ## v26.8.2-r1
 
 <a id="sec-2026-007"></a>

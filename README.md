@@ -4,21 +4,21 @@ Minimal Keycloak OCI images for PostgreSQL deployments, with a **distroless Java
 
 ## Current images
 
-Current release: [v26.8.2-r2](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r2). Keycloak **26.8.2**, Corretto **25 LTS** on Amazon Linux 2023, Linux **amd64 and arm64**. Each profile has one OCI index tag that selects the host architecture.
+Published profiles are OCI indexes selecting native Linux amd64 or arm64. See [recorded digests and validation](releases/README.md).
 
-| Profile | Latest published tag | Image reference | Purpose |
-| --- | --- | --- | --- |
-| core | `26.8.2-r2-core` | `quay.io/rambow-cloud/keycloak:26.8.2-r2-core` | PostgreSQL with the native JDBC driver. |
-| aws | `26.8.2-r2-aws` | `quay.io/rambow-cloud/keycloak:26.8.2-r2-aws` | RDS PostgreSQL integration with the AWS JDBC Wrapper and pinned CA bundle. |
+| Profile | Latest published tag | Image reference |
+| --- | --- | --- |
+| aws | `26.8.2-r3-aws` | `quay.io/rambow-cloud/keycloak:26.8.2-r3-aws` |
+| core | `26.8.2-r3-core` | `quay.io/rambow-cloud/keycloak:26.8.2-r3-core` |
 
 Pull a profile with Podman:
 
 ```sh
-podman pull quay.io/rambow-cloud/keycloak:26.8.2-r2-core
-podman pull quay.io/rambow-cloud/keycloak:26.8.2-r2-aws
+podman pull quay.io/rambow-cloud/keycloak:26.8.2-r3-aws
+podman pull quay.io/rambow-cloud/keycloak:26.8.2-r3-core
 ```
 
-Use [digest-pinned references and validation records](releases/README.md) for deployments. See the [security release notes](docs/security/README.md) for newly included fixes and [runtime migration evidence](releases/evidence/v26.8.2-r2-runtime.json) for remaining findings and limits. No `latest` tag is published.
+Runtime digest updates publish with a [paired CVE comparison](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r3). No `latest` tag is published.
 
 ## Features
 
