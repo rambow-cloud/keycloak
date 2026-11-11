@@ -52,7 +52,9 @@ function importFixture() {
     [{ name: 'stable.json', id: 'stable', size: 1000 }, ...Object.keys(assets).filter(key => key.startsWith(args.release_id + '/'))
       .map(key => ({ name: key.split('/')[1], id: key, size: assets[key].length }))] };
   const readObject = async (reference, _fetcher, kind) => {
-    if (!reference.includes('@')) return { reference: currentRecord.plan.imageLock.runtime };
+    if (!reference.includes('@')) return reference.endsWith(':25.0.5-r2')
+      ? { reference: currentRecord.plan.imageLock.runtime }
+      : { reference: reference + '@' + digest('b'), digest: digest('b'), value: index };
     const sha = reference.split('@')[1];
     if (kind === 'blobs') {
       const architecture = readObject.lastArchitecture;

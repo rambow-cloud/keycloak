@@ -51,7 +51,8 @@ export async function discoverRambowRuntime({ github, current, fetcher = fetch, 
     throw Error('Invalid qualified stable Java runtime release');
   }
   const runtime = 'ghcr.io/rambow-cloud/java:' + version + '@' + stable.reference.split('@')[1];
-  const index = await readObject(runtime, fetcher);
+  const index = await readObject(runtime.split('@')[0], fetcher);
+  if (index.reference !== runtime) throw Error('Selected immutable runtime tag differs from the stable release digest');
   assertBasePlatforms(index.value, ['amd64', 'arm64']);
   const { data: preview } = await github.rest.repos.getReleaseByTag({ ...upstream, tag: stable.previewRelease.slice(prefix.length) });
   if (preview.draft || preview.html_url !== stable.previewRelease) throw Error('Invalid runtime inventory release');
