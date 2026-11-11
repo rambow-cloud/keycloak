@@ -52,7 +52,8 @@ jobs:
           script: |
             const { prepareRelease } = await import(process.cwd() + '/scripts/quay-release.mjs');
             const p = await prepareRelease({ github, context, core, tag: process.env.RELEASE_TAG,
-              preview: process.env.PREVIEW === 'true', trustedToolsCommit: process.env.TOOLS_COMMIT });
+              preview: process.env.PREVIEW === 'true', trustedToolsCommit: process.env.TOOLS_COMMIT,
+              signingPolicy: JSON.parse(require('node:fs').readFileSync('config/cosign.json','utf8')) });
             core.setOutput('prepared', JSON.stringify(p));
             core.setOutput('active', !p.skipped && !p.complete);
             core.setOutput('record_only', !!p.recordOnly);
@@ -149,7 +150,7 @@ jobs:
             const { freezeRelease } = await import(process.cwd() + '/scripts/quay-release.mjs');
             const prepared = JSON.parse(process.env.PREPARED);
             const scans = await Promise.all(prepared.images.map(async ({profile}) => JSON.parse(await fs.readFile('.cache/release-scans/release-scan-'+profile+'-'+process.env.GITHUB_RUN_ATTEMPT+'/evidence.json','utf8'))));
-            const plan = await freezeRelease({ github, context, prepared, scans });
+            const plan = await freezeRelease({ github, context, prepared, scans, sbomDirectory: '.cache/release-scans' });
             core.setOutput('plan', JSON.stringify(plan));
   publish:
     needs: [prepare, freeze]
@@ -191,7 +192,7 @@ jobs:
             await fs.mkdir('.cache/publication', { recursive: true });
             await fs.writeFile('.cache/publication/plan.json', JSON.stringify(plan));
             await publishReleaseImages(plan, '.cache/release-input', '.cache/publication', {
-              context, getIDToken: audience => core.getIDToken(audience), mask: value => core.setSecret(value)
+              github, context, getIDToken: audience => core.getIDToken(audience), mask: value => core.setSecret(value)
             });
       - name: Retain successful or partial publication state
         if: ${{ !cancelled() }}
@@ -237,6 +238,9 @@ jobs:
             await putImmutableAsset(github,context.repo,release,'publication-attempt-'+context.runId+'-'+process.env.GITHUB_RUN_ATTEMPT+'.json',attempt);
             if(process.env.PUBLISH_RESULT==='success') {
               const record=validateRecord(JSON.parse(await fs.readFile('.cache/publication/record.json','utf8')));
+              if(record.supplyChain) {
+                await putImmutableAsset(github,context.repo,release,'supply-chain-verification.json',record.supplyChain);
+              }
               await putImmutableAsset(github,context.repo,release,'publication-record.json',record);
             }
   record:

@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { lockArchitectures } from './lib/platforms.mjs';
 import { validateSummary, gateSummary } from './lib/trivy.mjs';
 import {verifyTelemetryScan,requiresTelemetryRepair} from './opentelemetry-dependencies.mjs';
+import { sbomHash, validateSbom } from './lib/sbom.mjs';
 const [preparedPath, layout, output] = process.argv.slice(2);
 const prepared = JSON.parse(await readFile(preparedPath,'utf8'));
 const profile = process.env.BUILD_PROFILE;
@@ -39,3 +40,15 @@ for (const architecture of targets) {
 }
 await writeFile(resolve(output,'summary.json'),JSON.stringify(prepared.imageLock.platforms ? {schemaVersion:3,profile,summaries} : summaries[0],null,2)+'\n');
 if (failed) throw Error('One or more architecture scans failed the release gate');
+if (prepared.supplyChain && !prepared.frozen) {
+  const evidencePath = resolve(output, 'evidence.json');
+  const evidence = JSON.parse(await readFile(evidencePath, 'utf8'));
+  evidence.sboms = [];
+  for (const architecture of targets) {
+    const digest = evidence.children?.find(child => child.architecture === architecture)?.digest;
+    const sbom = JSON.parse(await readFile(resolve(output, architecture, 'sbom.cdx.json'), 'utf8'));
+    validateSbom(sbom, { digest, profile, architecture });
+    evidence.sboms.push({ profile, architecture, digest, asset: 'sbom-' + profile + '-' + architecture + '.cdx.json', sha256: sbomHash(sbom) });
+  }
+  await writeFile(evidencePath, JSON.stringify(evidence, null, 2) + '\n');
+}

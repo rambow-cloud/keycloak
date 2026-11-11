@@ -10,6 +10,7 @@ import { publishImages } from './lib/quay-publish.mjs';
 import { federatedQuayCredentials } from './lib/quay-auth.mjs';
 import { lockArchitectures } from './lib/platforms.mjs';
 import { inspectLayout } from './lib/multiarch.mjs';
+import { prepareSigning } from './sign-release.mjs';
 
 function run(args, options = {}) {
   const r = spawnSync('skopeo', args, { encoding: 'utf8', maxBuffer: 5000000, timeout: 600000, ...options });
@@ -44,17 +45,19 @@ async function inspectSource(directory, prepared, image) {
   return { path, digest: info.Digest, archiveSha256: actual };
 }
 
-export async function publishReleaseImages(plan, directory, output, { context, getIDToken, mask }) {
+export async function publishReleaseImages(plan, directory, output, { github, context, getIDToken, mask }) {
   validatePlan(plan);
   // Verify all downloaded inputs before requesting either transient token.
   const sources = {};
   for (const image of plan.images) sources[image.profile] = await inspectSource(directory, plan, image);
-  const credentials = await federatedQuayCredentials({ username: process.env.QUAY_USERNAME, context, getIDToken, mask });
   const work = await mkdtemp(join(tmpdir(), 'rambow-quay-'));
-  const auth = join(work, 'auth.json');
+  const secure = await prepareSigning(plan, { github, context, work, output, getIDToken, mask });
+  const credentials = await federatedQuayCredentials({ username: process.env.QUAY_USERNAME, context, getIDToken, mask });
+  const auth = join(work, 'config.json');
   try {
     run(['login', '--authfile', auth, '--username', credentials.username, '--password-stdin', 'quay.io'], { input: credentials.token });
     const adapter = {
+      ...(secure ? { secure: () => secure(work) } : {}),
       inspect: async reference => {
         const result = spawnSync('skopeo', ['inspect', '--authfile', auth, '--raw', 'docker://' + reference], { encoding: 'utf8', timeout: 120000, maxBuffer:10000000 });
         if (!result.error && result.status === 0) return 'sha256:' + hash(result.stdout);

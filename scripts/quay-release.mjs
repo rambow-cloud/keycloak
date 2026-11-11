@@ -4,6 +4,9 @@ import { assessRelease as assessImageRelease, readJSON } from './lib/image-chang
 import { lockArchitectures } from './lib/platforms.mjs';
 import { parseReleaseEvents, validateReleaseEvents } from './lib/release-events.mjs';
 import {aggregatePairs,validateRequest,runtimeIntent} from './lib/runtime-update.mjs';
+import { readFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { validateSbom, sbomHash } from './lib/sbom.mjs';
 
 export async function readText(github, repo, path, ref) {
   const { data } = await github.rest.repos.getContent({ ...repo, path, ref });
@@ -32,19 +35,19 @@ export async function readHistory(github, repo, ref, records) {
   const tags = [...new Set(records.flatMap(r => r.plan.images.filter(i => !i.changes).map(i => i.tag)))];
   return Object.fromEntries(await Promise.all(tags.map(async tag => [tag, await readJSON(github, repo, 'releases/history/' + tag + '.json', ref)])));
 }
-export async function readAsset(github, repo, release, name) {
+export async function readAsset(github, repo, release, name, maxBytes = 2000000) {
   const assets = await github.paginate(github.rest.repos.listReleaseAssets, { ...repo, release_id: release.id, per_page: 100 });
   const matching = assets.filter(a => a.name === name);
   if (matching.length > 1) throw new Error('Ambiguous release asset: ' + name);
   if (!matching.length) return null;
   const asset = matching[0];
-  if (asset.size > 2000000) throw new Error('Release metadata asset exceeds limit.');
+  if (asset.size > maxBytes) throw new Error('Release metadata asset exceeds limit.');
   const { data } = await github.rest.repos.getReleaseAsset({ ...repo, asset_id: asset.id, headers: { accept: 'application/octet-stream' } });
   const text = typeof data === 'string' ? data : Buffer.from(data).toString('utf8');
   return JSON.parse(text);
 }
 export async function putImmutableAsset(github, repo, release, name, value) {
-  const existing = await readAsset(github, repo, release, name);
+  const existing = await readAsset(github, repo, release, name, name.startsWith('sbom-') ? 10000000 : 2000000);
   if (existing) {
     if (!equal(existing, value)) throw new Error('Release metadata is already frozen with different contents: ' + name);
     return;
@@ -63,6 +66,7 @@ export function completionAsset(record) {
 }
 
 export async function prepareRelease({ github, context, core, tag, preview = false,
+  signingPolicy,
   trustedToolsCommit,
   assessRelease = assessImageRelease,
   pause = ms => new Promise(resolve => setTimeout(resolve, ms)), maxPolls = 100 }) {
@@ -182,6 +186,9 @@ export async function prepareRelease({ github, context, core, tag, preview = fal
             imageLock, lockSha256: hash(lockText), aliases: activeAliases,
             previousAliases: Object.fromEntries(activeAliases.map(a => [a.tag, (frozen?.previousAliases ?? previousAliases)[a.tag]])),
             sourceRun: { id: run.id, attempt: run.run_attempt }, images: selected.map(i => ({ ...intent.images.find(n => n.profile === i.profile), ...i })), frozen,
+            ...((frozen?.supplyChain || !frozen && signingPolicy) ? {
+              supplyChain: frozen?.supplyChain ?? { schemaVersion: 1, cosign: signingPolicy },
+            } : {}),
             ...(runtimeProof?{runtimeProof:runtimeProofReference(runtimeProof)}: {}) };
         }
         dispatchedAfterId = run.id;
@@ -213,17 +220,28 @@ export function makeFrozenPlan(prepared, scans) {
     keycloakVersion: prepared.keycloakVersion, revision: prepared.revision, sourceCommit: prepared.sourceCommit,
     toolsCommit: prepared.frozen?.toolsCommit ?? prepared.toolsCommit, sourceRun: prepared.sourceRun,
     lockSha256: prepared.lockSha256, imageLock: prepared.imageLock, aliases: prepared.aliases,
-    previousAliases: prepared.previousAliases, images,...(prepared.runtimeProof?{runtimeComparisonSha256:prepared.runtimeProof.sha256}: {}) };
+    previousAliases: prepared.previousAliases, images,...(prepared.runtimeProof?{runtimeComparisonSha256:prepared.runtimeProof.sha256}: {}),
+    ...(prepared.frozen?.supplyChain ? { supplyChain: prepared.frozen.supplyChain } :
+      prepared.supplyChain && !prepared.frozen ? { supplyChain: { ...prepared.supplyChain, sboms: scans.flatMap(scan => scan.sboms ?? []) } } : {}) };
   validatePlan(plan);
   if (prepared.frozen && !equal(prepared.frozen, plan)) throw new Error('Freshly inspected artifacts differ from the frozen publication plan.');
   return plan;
 }
-export async function freezeRelease({ github, context, prepared, scans }) {
+export async function freezeRelease({ github, context, prepared, scans, sbomDirectory }) {
   const plan = makeFrozenPlan(prepared, scans);
   const repo = context.repo;
   await assertTagSource(github, repo, plan.tag, plan.sourceCommit);
   const { data: release } = await github.rest.repos.getReleaseByTag({ ...repo, tag: plan.tag });
   if (release.id !== plan.releaseId || release.draft || release.prerelease) throw new Error('Release state changed before freeze.');
+  for (const descriptor of plan.supplyChain?.sboms ?? []) {
+    const sbom = prepared.frozen
+      ? await readAsset(github, repo, release, descriptor.asset, 10000000)
+      : JSON.parse(await readFile(resolve(sbomDirectory, 'release-scan-' + descriptor.profile + '-' + process.env.GITHUB_RUN_ATTEMPT,
+        descriptor.architecture, 'sbom.cdx.json'), 'utf8'));
+    if (!sbom || sbomHash(sbom) !== descriptor.sha256) throw Error('Frozen SBOM asset checksum mismatch');
+    validateSbom(sbom, descriptor);
+    await putImmutableAsset(github, repo, release, descriptor.asset, sbom);
+  }
   await putImmutableAsset(github, repo, release, 'publication-plan.json', plan);
   return plan;
 }

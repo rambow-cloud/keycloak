@@ -3,6 +3,7 @@ import { validateChanges } from './image-changes.mjs';
 import { lockArchitectures } from './platforms.mjs';
 import { validateChildren } from './multiarch.mjs';
 import { activeReleaseRecords, liveImage } from './release-events.mjs';
+import { validateSupplyChain, validateSupplyChainRecord } from './supply-chain.mjs';
 export const registry = 'quay.io/rambow-cloud/keycloak';
 export const repository = 'rambow-cloud/keycloak';
 export const profiles = ['core', 'aws'];
@@ -64,10 +65,12 @@ export function validatePlan(plan) {
     }
   }
   if (plan.aliases.some(a => !plan.images.some(i => i.profile === a.profile))) throw new Error('Alias must bind a published profile.');
+  validateSupplyChain(plan);
   return plan;
 }
 export function validateRecord(record) {
   validatePlan(record.plan);
+  validateSupplyChainRecord(record);
   if (record.schemaVersion !== 1 || record.status !== 'published' || !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(record.publishedAt ?? '') ||
       !Number.isFinite(Date.parse(record.publishedAt)) || !isSha(record.validationToolsCommit) ||
       !Number.isSafeInteger(record.publishRunId) || record.publishRunId < 1 || !Array.isArray(record.aliasChanges) ||
