@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "changes": [
+    {
+      "type": "runtime-update",
+      "summary": "Upgrade the reviewed AL2023 Java 25 runtime to revision r3 with fixed glibc packages and complete native same-database CVE comparisons.",
+      "issues": [
+        146
+      ],
+      "profiles": [
+        "core",
+        "aws"
+      ],
+      "cves": [
+        "CVE-2026-86805"
+      ],
+      "runtime": {
+        "from": {
+          "core": "ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:c5ab8cec00b8a1d999e5663b26a5f11646183a1b99ea82676f1fed4a02eee51f",
+          "aws": "ghcr.io/rambow-cloud/java:25.0.5-r2@sha256:c5ab8cec00b8a1d999e5663b26a5f11646183a1b99ea82676f1fed4a02eee51f"
+        },
+        "to": "ghcr.io/rambow-cloud/java:25.0.5-r3@sha256:b71ac597d7174fcf14d8449af30f17dc4516651cbf3ed3ca0b7a98d1557e5b4a"
+      }
+    }
+  ]
+}

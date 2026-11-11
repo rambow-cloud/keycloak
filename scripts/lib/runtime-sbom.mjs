@@ -6,14 +6,10 @@ const referencePattern = /^ghcr\.io\/rambow-cloud\/java:25\.\d+\.\d+-r[1-9]\d*@s
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 export const isRambowRuntime = reference => referencePattern.test(reference ?? '');
 
-export async function readRuntimeSbom(reference, architecture) {
+export function validateRuntimeInventory(reference, architecture, metadata, bytes) {
   const match = referencePattern.exec(reference);
   if (!match || !['amd64', 'arm64'].includes(architecture)) throw Error('Expected a reviewed Rambow Java 25 runtime and architecture');
-  const directory = new URL('../../dependencies/runtime/' + match[1] + '/', import.meta.url);
-  const metadata = JSON.parse(await readFile(new URL('base.json', directory), 'utf8'));
   const base = metadata.architectures?.[architecture];
-  const path = new URL(architecture + '-sbom.cdx.json', directory);
-  const bytes = await readFile(path);
   if (metadata.schemaVersion !== 1 || metadata.reference !== reference || !digestPattern.test(base?.manifest) ||
       !digestPattern.test(base.config) || !Array.isArray(base.diffIds) || !base.diffIds.length ||
       !base.diffIds.every(value => digestPattern.test(value)) || hash(bytes) !== base.sbomSha256) {
@@ -26,7 +22,16 @@ export async function readRuntimeSbom(reference, architecture) {
       !sbom.components.some(component => component.type === 'operating-system' && component.name === 'amazon' && component.version === '2023')) {
     throw Error('Invalid AL2023 base SBOM inventory');
   }
-  return { reference, architecture, path, base, purls };
+  return { reference, architecture, base, purls };
+}
+
+export async function readRuntimeSbom(reference, architecture) {
+  const match = referencePattern.exec(reference);
+  if (!match || !['amd64', 'arm64'].includes(architecture)) throw Error('Expected a reviewed Rambow Java 25 runtime and architecture');
+  const directory = new URL('../../dependencies/runtime/' + match[1] + '/', import.meta.url);
+  const metadata = JSON.parse(await readFile(new URL('base.json', directory), 'utf8'));
+  const path = new URL(architecture + '-sbom.cdx.json', directory);
+  return { ...validateRuntimeInventory(reference, architecture, metadata, await readFile(path)), path };
 }
 
 export function combineRuntimeScans(imageReport, runtimeReport, inventory) {

@@ -5,8 +5,14 @@ import { json,hash } from './lib/releases.mjs';
 import { updaterApp,sameUpdater,inspectCompatibility,autoMergeEligible } from './lib/upstream.mjs';
 import { configureAutoMerge } from './upstream-update.mjs';
 import policy from './issue-policy.cjs';
+import { discoverRambowRuntime } from './lib/rambow-runtime.mjs';
+import { isRambowRuntime } from './lib/runtime-sbom.mjs';
 
-export async function runRuntimeUpdate({github,context,core,identity,dryRun=false,resolve=resolveImageDigest,inspect=inspectCompatibility}) {
+const inventoryPaths = reference => isRambowRuntime(reference)
+  ? ['amd64-sbom.cdx.json','arm64-sbom.cdx.json','base.json'].map(name => 'dependencies/runtime/'+reference.split('@sha256:')[1]+'/'+name)
+  : [];
+
+export async function runRuntimeUpdate({github,context,core,identity,dryRun=false,resolve=resolveImageDigest,inspect=inspectCompatibility,discover=discoverRambowRuntime}) {
   const repo=context.repo;
   const {data:metadata}=await github.rest.repos.get(repo);
   if(metadata.full_name!=='rambow-cloud/keycloak'||context.ref!=='refs/heads/'+metadata.default_branch||!dryRun&&!sameUpdater(identity,updaterApp.bot)) throw Error('Runtime updater requires trusted main and the pinned App');
@@ -14,7 +20,9 @@ export async function runRuntimeUpdate({github,context,core,identity,dryRun=fals
   const sha=ref.object.sha;
   const text=await readText(github,repo,'images.lock.json',sha),lock=JSON.parse(text);
   if(!isAutomaticRuntime(lock.runtime)) return {changed:false,status:'runtime-requires-manual-review'};
-  const next={...lock,runtime:await resolve(lock.runtime.split('@')[0],fetch,['amd64','arm64'])};
+  const update=isRambowRuntime(lock.runtime) ? await discover({github,current:lock.runtime}) :
+    {runtime:await resolve(lock.runtime.split('@')[0],fetch,['amd64','arm64']),files:{}};
+  const next={...lock,runtime:update.runtime};
   const records=await readCatalog(github,repo,sha),intent=runtimeIntent(records,next);
   if(!intent) return {changed:false};
   const config=JSON.parse(await readText(github,repo,'config/runtime-update.json',sha));
@@ -38,9 +46,11 @@ export async function runRuntimeUpdate({github,context,core,identity,dryRun=fals
   policy.validateIssue(issue);
   const request=validateRequest({schemaVersion:1,...intent,issue:issue.number,fragment:'changes/'+issue.number+'-distroless.json'});
   const {warnings}=await inspect(lock.keycloakVersion,lock.javaVersion,JSON.parse(await readText(github,repo,'config/upstream-compatibility.json',sha)));
+  const inventoryFiles=Object.fromEntries(await Promise.all(inventoryPaths(next.runtime).map(async path =>
+    [path,update.files[path]??await readText(github,repo,path,sha)])));
   const files={'images.lock.json':json(next),'config/runtime-update.json':json({schemaVersion:1,request}),
     [request.fragment]:json({schemaVersion:1,changes:[{type:'runtime-update',summary:'Refresh the reviewed distroless runtime digest and compare published versus candidate CVEs with identical scanner databases; no repair is assumed before comparison.',
-      issues:[issue.number],profiles:Object.keys(intent.from),runtime:{from:intent.from,to:intent.to}}]})};
+      issues:[issue.number],profiles:Object.keys(intent.from),runtime:{from:intent.from,to:intent.to}}]}),...inventoryFiles};
   const {data:base}=await github.rest.git.getCommit({...repo,commit_sha:sha});
   const {data:tree}=await github.rest.git.createTree({...repo,base_tree:base.tree.sha,tree:Object.entries(files).filter(([path,value])=>path!=='images.lock.json'||value!==text).map(([path,content])=>({path,content,type:'blob',mode:'100644'}))});
   const {data:commit}=await github.rest.git.createCommit({...repo,message:'chore: update distroless runtime (#'+issue.number+')',tree:tree.sha,parents:[sha]});
@@ -66,7 +76,7 @@ export async function checkRuntimePullRequest({github,context,pr}) {
     if(!sameUpdater(commit.author,updaterApp.bot)) throw Error('Runtime candidate was edited');
     const config=JSON.parse(await readText(github,context.repo,'config/runtime-update.json',head));
     const request=validateRequest(config.request);
-    const paths=['images.lock.json','config/runtime-update.json',request.fragment];
+    const paths=['images.lock.json','config/runtime-update.json',request.fragment,...inventoryPaths(request.to)];
     const files=Object.fromEntries(await Promise.all(paths.map(async path=>[path,await readText(github,context.repo,path,head)])));
     if(pr.body.match(/<!-- runtime-files:([a-f0-9]{64}) -->/)?.[1]!==hash(json(files))) throw Error('Runtime files changed after generation');
     const changed=await github.paginate(github.rest.pulls.listFiles,{...context.repo,pull_number:pr.number,per_page:100});

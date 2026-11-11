@@ -34,6 +34,8 @@ Build Keycloak OCI images for Rambow Cloud. Prefer distroless Java, a non-root u
 
 - New formal release plans freeze per-child CycloneDX SBOM assets from the complete validated package inventory. Use checksum-pinned Cosign with GitHub OIDC audience `sigstore` inside the protected publisher to sign index and child digests and attest each child's frozen SBOM. Anonymous verification must constrain the issuer, exact release workflow identities, digest and predicate before aliases or publication recording. Preserve partial signing state and reuse valid signatures on recovery. Historical frozen contracts and records retain their original meaning. See `docs/supply-chain.md`.
 
+- Automatic Rambow Java runtime updates discover stable releases in the reviewed upstream repository, permit forward Java 25 patch/revision updates within the current minor line, and import digest/config/layer-bound native SBOM evidence. Preserve immutable tags and bot ownership guards. Evaluate supported CVE subsets independently while retaining unresolved findings in their original monitor Issue. All native comparison, merge and formal publication gates still apply.
+
 ## Validation and delivery
 
 - Keep this file limited to durable working agreements. Record concrete Issues, temporary tasks, experiment branches, run identifiers and execution status in their Issues, PRs or evidence reports.

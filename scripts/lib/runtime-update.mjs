@@ -1,13 +1,16 @@
 import { hash, json, profiles, isDigest, isSha } from './releases.mjs';
 import { selectTargets, fullFindings, verifyReport } from './cve-monitor.mjs';
 import {gateSummary} from './trivy.mjs';
+import { isRambowRuntime } from './runtime-sbom.mjs';
+import { sameRuntimeFamily } from './runtime-family.mjs';
 
-export const isAutomaticRuntime = reference => /^gcr\.io\/distroless\/java\d+-debian13:nonroot@sha256:[a-f0-9]{64}$/.test(reference ?? '');
+export const isAutomaticRuntime = reference => isRambowRuntime(reference) || /^gcr\.io\/distroless\/java\d+-debian13:nonroot@sha256:[a-f0-9]{64}$/.test(reference ?? '');
 
 export function compactReport(r) {
   return {SchemaVersion:r.SchemaVersion,ArtifactType:r.ArtifactType,CreatedAt:r.CreatedAt,
-    Metadata:{OS:r.Metadata?.OS,ImageID:r.Metadata?.ImageID,ImageConfig:{architecture:r.Metadata?.ImageConfig?.architecture,os:r.Metadata?.ImageConfig?.os}},
-    Results:r.Results.map(t=>({Class:t.Class,Type:t.Type,Target:t.Target,Packages:t.Packages?.map(p=>({Name:p.Name,Version:p.Version})),
+    Metadata:{OS:r.Metadata?.OS,ImageID:r.Metadata?.ImageID,ImageConfig:{architecture:r.Metadata?.ImageConfig?.architecture,os:r.Metadata?.ImageConfig?.os,rootfs:r.Metadata?.ImageConfig?.rootfs}},
+    ...(r.RuntimeSbom ? {RuntimeSbom:r.RuntimeSbom} : {}),
+    Results:r.Results.map(t=>({Class:t.Class,Type:t.Type,Target:t.Target,Packages:t.Packages?.map(p=>({Name:p.Name,Version:p.Version,...(p.Identifier?{Identifier:p.Identifier}:{})})),
       Vulnerabilities:t.Vulnerabilities?.map(v=>({VulnerabilityID:v.VulnerabilityID,PkgName:v.PkgName,InstalledVersion:v.InstalledVersion,FixedVersion:v.FixedVersion,Severity:v.Severity}))}))};
 }
 
@@ -19,7 +22,7 @@ export function runtimeIntent(records,lock) {
     const record=records.find(r=>r.plan.tag===target.release);
     const previous=record.plan.imageLock.runtime;
     if(previous===lock.runtime) continue;
-    if(previous.split('@')[0]!==lock.runtime.split('@')[0]) throw Error('Runtime family change requires explicit review');
+    if(!sameRuntimeFamily(previous,lock.runtime)) throw Error('Runtime family change requires explicit review');
     from[profile]=previous;
   }
   const baselines=targets.filter(t=>Object.hasOwn(from,t.profile));
@@ -29,7 +32,7 @@ export function runtimeIntent(records,lock) {
 }
 export function validateRuntimeChange(runtime,selected) {
   if(!runtime || !isAutomaticRuntime(runtime.to) || !runtime.from || Object.keys(runtime.from).length!==selected.length || selected.some(p=>
-    !profiles.includes(p)||!isAutomaticRuntime(runtime.from[p])||runtime.from[p]===runtime.to||runtime.from[p].split('@')[0]!==runtime.to.split('@')[0])) throw Error('Runtime updates require changed pinned distroless digests in the same reviewed family');
+    !profiles.includes(p)||!isAutomaticRuntime(runtime.from[p])||runtime.from[p]===runtime.to||!sameRuntimeFamily(runtime.from[p],runtime.to))) throw Error('Runtime updates require changed pinned distroless digests in the same reviewed family');
   return runtime;
 }
 export function validateRequest(request) {
@@ -47,8 +50,8 @@ export function validateRequest(request) {
   for(const profile of Object.keys(request.from)) for(const arch of ['amd64','arm64']) if(!keys.has(profile+'/'+arch)) throw Error('Native amd64/arm64 baselines required');
   return request;
 }
-export function compareReports(before,after,target,context,policy) {
-  const a=verifyReport(before,target,context,policy),b=verifyReport(after,target,context,policy);
+export function compareReports(before,after,target,context,policy,candidateRuntime=target.runtime) {
+  const a=verifyReport(before,target,context,policy),b=verifyReport(after,{...target,runtime:candidateRuntime},context,policy);
   const ids=rows=>[...new Set(rows.map(r=>r.id).filter(id=>/^CVE-\d{4}-\d{4,}$/.test(id)))].sort();
   const old=ids(a.findings),next=ids(b.findings);
   return {resolved:old.filter(id=>!next.includes(id)),introduced:next.filter(id=>!old.includes(id)),remaining:next.filter(id=>old.includes(id)),
@@ -68,8 +71,8 @@ export function aggregatePairs(request,pairs,context,policy) {
          !isDigest(p.baselineConfig)||p.before.Metadata?.ImageID!==p.baselineConfig||p.scannerVersion!==policy.version||
          p.scannerSha256!==(target.architecture==='arm64'?policy.linuxArm64Sha256:policy.linuxAmd64Sha256)||
          !/^[a-f0-9]{64}$/.test(p.database?.vulnerability??'')||!/^[a-f0-9]{64}$/.test(p.database?.java??'')||json(p.database)!==json(p.databaseAfter)) throw Error('Runtime comparison provenance/database mismatch');
-      gateSummary(verifyReport(p.after,target,context,policy).summary);
-      selected.push({...p,delta:compareReports(p.before,p.after,target,context,policy)});
+      gateSummary(verifyReport(p.after,{...target,runtime:request.to},context,policy).summary);
+      selected.push({...p,delta:compareReports(p.before,p.after,target,context,policy,request.to)});
     }
     const afterIds=new Set(selected.flatMap(p=>fullFindings(p.after).map(f=>f.id)));
     const resolved=[...new Set(selected.flatMap(p=>p.delta.resolved))].filter(id=>!afterIds.has(id)).sort();

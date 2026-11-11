@@ -13,6 +13,7 @@ const metadata = /^(?:docs\/|releases\/|changes\/|\.github\/(?:ISSUE_TEMPLATE\/|
 const bookkeeping = /^scripts\/(?:r2-architecture-migration|quay-release|release-catalog|releases|upstream-update|lock-images|issue-policy|trivy-comment)\.(?:mjs|cjs)$|^scripts\/lib\/(?:release-policy|release-events|image-changes|releases|quay-publish|quay-auth|upstream)\.mjs$|^config\/r2-architecture-migration\.json$|^\.github\/workflows\/(?!ci\.yml$)[^/]+\.yml$|^tests\/[^/]+\.test\.cjs$/;
 const validation = /^scripts\/(?:verify-|scan-image|scan-release|package-images|platform|trivy-gate|release-image|check-upstream-compatibility)|^scripts\/lib\/(?:trivy|oci|image-changes|multiarch|platforms|runtime-sbom)\.mjs$|^config\/(?:trivy|upstream-compatibility)\.json$|^dependencies\/runtime\/|^\.github\/workflows\/ci\.yml$|^tests\//;
 export function sourceProfiles(path) {
+  if (/^scripts\/lib\/(?:rambow-runtime|runtime-family)\.mjs$/.test(path)) return [];
   if (/^scripts\/(?:sign-release|lib\/(?:sbom|supply-chain))\.mjs$/.test(path) || path === 'config/cosign.json') return [];
   if (/^scripts\/(?:runtime-update|runtime-release|compare-runtime)\.mjs$/.test(path)||path==='config/runtime-update.json'||path==='scripts/lib/runtime-update.mjs') return [];
   if (/^scripts\/(?:cve-monitor|cve-update)\.mjs$|^scripts\/lib\/cve-monitor\.mjs$/.test(path)) return [];
@@ -21,6 +22,7 @@ export function sourceProfiles(path) {
   return imageProfiles;
 }
 export function validationProfiles(path) {
+  if (/^scripts\/lib\/(?:rambow-runtime|runtime-family)\.mjs$/.test(path)) return imageProfiles;
   if (path === 'scripts/lib/sbom.mjs') return imageProfiles;
   if (path === 'scripts/sign-release.mjs' || path === 'scripts/lib/supply-chain.mjs' || path === 'config/cosign.json') return [];
   if(path==='scripts/compare-runtime.mjs'||path==='scripts/lib/runtime-update.mjs') return imageProfiles;
