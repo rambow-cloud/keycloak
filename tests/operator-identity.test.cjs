@@ -29,3 +29,10 @@ test('OCI proof rejects another config, foreign architecture, corrupt content an
   const f=fixture();mutate(f);assert.throws(()=>verifyRunningImage(f));
  }
 });
+test('cross-version destination is bound to its own layer chain rather than the historical source',async()=>{
+ const {verifyRunningImage}=await implementation,f=fixture();
+ Object.assign(f.target,{nextDigest:f.target.digest,nextConfigDigest:f.target.configDigest,nextReference:f.target.reference,nextRootfsDiffIds:f.target.rootfsDiffIds});
+ f.target.rootfsDiffIds=['sha256:'+'4'.repeat(64)];
+ assert.equal(verifyRunningImage({...f,next:true}).config,f.target.nextConfigDigest);
+ assert.throws(()=>verifyRunningImage(f));
+});

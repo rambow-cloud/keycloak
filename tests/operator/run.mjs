@@ -5,6 +5,7 @@ import {createHash,randomBytes} from 'node:crypto';
 import https from 'node:https';
 import {keycloakResource,podOutcome,redact,markdown} from './model.mjs';
 import {loadCandidateImages,verifyRunningImage} from './images.mjs';
+import {historicalUpgradeTargets} from './upgrade/images.mjs';
 
 const root=resolve('.cache/operator-kind'),evidence=join(root,'evidence'),privateDir=join(root,'private'),tools=join(root,'tools');
 const architecture=process.env.BUILD_ARCH,native=process.arch==='x64'?'amd64':process.arch;
@@ -12,16 +13,17 @@ if(process.platform!=='linux'||architecture!==native||!['amd64','arm64'].include
 const inputs=JSON.parse(await readFile('config/operator-tests.json','utf8'));
 const lock=JSON.parse(await readFile('images.lock.json','utf8'));
 const targets=[],secrets=new Set(),profiles=JSON.parse(process.env.OPERATOR_PROFILES??'["core","aws"]');
+const crossVersion=process.env.OPERATOR_UPGRADE==='true';
 if(!profiles.length||profiles.some(profile=>!['core','aws'].includes(profile))) throw Error('Invalid selected Operator profiles');
 await mkdir(evidence,{recursive:true});await mkdir(privateDir,{recursive:true,mode:0o700});await mkdir(tools,{recursive:true});
 await chmod(privateDir,0o700);
 process.env.PATH=tools+':'+process.env.PATH;process.env.KUBECONFIG=join(privateDir,'kubeconfig');
 const report={schemaVersion:1,architecture,branch:process.env.SOURCE_BRANCH,commit:process.env.SOURCE_HEAD,ciCommit:process.env.GITHUB_SHA,
-  runId:Number(process.env.GITHUB_RUN_ID),runAttempt:Number(process.env.GITHUB_RUN_ATTEMPT??1),inputs,database:lock.postgres,targets,results:[]};
+  runId:Number(process.env.GITHUB_RUN_ID),runAttempt:Number(process.env.GITHUB_RUN_ATTEMPT??1),inputs,database:lock.postgres,targets,results:[],experiment:crossVersion?'26.8.1-to-26.8.2':'same-version-image-replacement'};
 const clean=value=>redact(value,secrets);
 const save=async(name,value)=>writeFile(join(evidence,name),clean(typeof value==='string'?value:JSON.stringify(value,null,2)+'\n'));
-const call=(command,args,{input,allowFailure=false,timeout=120000}={})=>{
-  const result=spawnSync(command,args,{input,encoding:'utf8',timeout,maxBuffer:20000000});
+const call=(command,args,{input,allowFailure=false,timeout=120000,env=process.env}={})=>{
+  const result=spawnSync(command,args,{input,encoding:'utf8',timeout,maxBuffer:20000000,env});
   if((result.error||result.status!==0)&&!allowFailure) throw Error(clean(command+' '+args.join(' ')+': '+(result.error?.message??result.status)+'\n'+result.stdout+'\n'+result.stderr));
   return result;
 };
@@ -150,10 +152,11 @@ async function apiCheck(target) {
     if(token.status!==200||!token.json.access_token) throw Error('Admin token request failed, HTTP '+token.status);
     secrets.add(token.json.access_token);if(token.json.refresh_token) secrets.add(token.json.refresh_token);
     const info=await request('/admin/serverinfo','GET',undefined,token.json.access_token);
-    if(info.status!==200||info.json.systemInfo?.version!==inputs.keycloakVersion) throw Error('Admin API version verification failed');
+    const expectedVersion=target.currentVersion??inputs.keycloakVersion;
+    if(info.status!==200||info.json.systemInfo?.version!==expectedVersion) throw Error('Admin API version verification failed; expected '+expectedVersion);
     const tls=kubectl(['exec','deployment/postgres','--','psql','-U','keycloak','-d','postgres','-Atc',"select bool_and(ssl)::text from pg_stat_ssl s join pg_stat_activity a using(pid) where a.datname='keycloak_"+target.profile+"';"]).stdout.trim();
     if(tls!=='true') throw Error('Database connections are missing or not all TLS');
-    report.results.push({profile:target.profile,phase:'verified-https-admin-and-db-tls',status:'passed',issuer:discovery.json.issuer,databaseTls:true});
+    report.results.push({profile:target.profile,phase:'verified-https-admin-and-db-tls',status:'passed',issuer:discovery.json.issuer,databaseTls:true,keycloakVersion:info.json.systemInfo.version});
     return {request,token:token.json.access_token};
 }
 async function restart(target) {
@@ -194,6 +197,22 @@ async function rollingUpdate(resource,target) {
   if(client.status!==201) throw Error('Cannot create rolling-traffic client, HTTP '+client.status);
   const user=await request('/admin/realms/'+realm+'/users','POST',{username,enabled:true,firstName:'Operator',lastName:'Test',email:username+'@example.test',emailVerified:true,requiredActions:[],credentials:[{type:'password',value:password,temporary:false}]},token);
   if(user.status!==201) throw Error('Cannot create rolling-traffic user, HTTP '+user.status);
+  const identity=async(request,token)=>{
+    const realmResult=await request('/admin/realms/'+realm,'GET',undefined,token);
+    const users=await request('/admin/realms/'+realm+'/users?username='+encodeURIComponent(username)+'&exact=true','GET',undefined,token);
+    const clients=await request('/admin/realms/'+realm+'/clients?clientId='+clientId,'GET',undefined,token);
+    if(realmResult.status!==200||users.status!==200||users.json.length!==1||clients.status!==200||clients.json.length!==1) throw Error('Upgrade data identity query failed');
+    return {realmId:realmResult.json.id,realm:realmResult.json.realm,displayName:realmResult.json.displayName,userId:users.json[0].id,username:users.json[0].username,email:users.json[0].email,clientId:clients.json[0].id,clientIdentifier:clients.json[0].clientId};
+  };
+  const beforeData=await identity(request,token);
+  let databaseBackup;
+  if(crossVersion) {
+    const path='/tmp/keycloak_'+target.profile+'.dump';
+    kubectl(['exec','deployment/postgres','--','pg_dump','-U','keycloak','-d','keycloak_'+target.profile,'--format=custom','--file='+path]);
+    const listing=kubectl(['exec','deployment/postgres','--','pg_restore','--list',path]).stdout;
+    if(!listing.includes('TABLE DATA')) throw Error('Pre-upgrade backup lacks table data');
+    databaseBackup={format:'custom',archiveListVerified:true,restored:false,storedOnlyInEphemeralDatabasePod:true};
+  }
   const connection=await apiClient(target),worker=fork(resolve('tests/operator/traffic.mjs'),[],{stdio:['ignore','ignore','ignore','ipc']});
   let readyResolve,readyReject,finishedResolve,finishedReject,stats;
   const ready=new Promise((resolve,reject)=>{readyResolve=resolve;readyReject=reject;});
@@ -243,8 +262,18 @@ async function rollingUpdate(resource,target) {
   const codes=observed.jobPods.flatMap(pod=>[...pod.status.initContainerStatuses??[],...pod.status.containerStatuses??[]].map(status=>status.state.terminated?.exitCode));
   if(codes.length<2||codes.some(code=>code!==0)) throw Error('Compatibility metadata/check did not both exit zero');
   const identities=observed.pods.map(pod=>verifyRunningImage({pod,target,next:true,architecture,call}));
-  await snapshot(target.profile+'-rolling-complete');await apiCheck(target);
-  report.results.push({profile:target.profile,phase:'auto-image-rolling-update',status:'passed',fromDigest:target.digest,toDigest:target.nextDigest,
+  const fromVersion=target.currentVersion??inputs.keycloakVersion,toVersion=target.nextVersion??inputs.keycloakVersion;
+  target.currentVersion=toVersion;
+  await snapshot(target.profile+'-rolling-complete');const after=await apiCheck(target);
+  const afterData=await identity(after.request,after.token);
+  if(JSON.stringify(beforeData)!==JSON.stringify(afterData)) throw Error('Realm/user/client identity or data changed across upgrade');
+  const versionLogs=observed.pods.map(pod=>{
+    const logs=kubectl(['logs',pod.metadata.name,'--tail=1500']).stdout;
+    if(!logs.includes('Keycloak '+toVersion)||!/started in/.test(logs)) throw Error('Destination Pod runtime version not proven');
+    return {pod:pod.metadata.name,keycloakVersion:toVersion};
+  });
+  report.results.push({profile:target.profile,phase:crossVersion?'auto-patch-version-upgrade':'auto-image-rolling-update',status:'passed',fromVersion,toVersion,fromDigest:target.digest,toDigest:target.nextDigest,
+    beforeData,afterData,databaseBackup,versionLogs,
     oldPods:old.map(pod=>({name:pod.metadata.name,uid:pod.metadata.uid})),newPods:observed.pods.map(pod=>({name:pod.metadata.name,uid:pod.metadata.uid,imageID:pod.status.containerStatuses[0].imageID})),
     identities,compatibilityExitCodes:codes,recreateUpdateUsed:false,minReadyReplicas:Math.min(...timeline.map(sample=>sample.readyPods)),gracefulShutdownPods:watches.map(watch=>watch.name),traffic:stats});
 }
@@ -260,7 +289,9 @@ try {
   call('kind',['create','cluster','--name','operator-test','--image',inputs.node,'--config',join(root,'kind.json'),'--kubeconfig',process.env.KUBECONFIG,'--wait','180s'],{timeout:480000});clusterCreated=true;
   await save('nodes.json',JSON.parse(call('kubectl',['get','nodes','-o','json']).stdout));
   if(!JSON.parse(call('kubectl',['get','nodes','-o','json']).stdout).items.every(node=>node.status.nodeInfo.architecture===architecture)) throw Error('Nonnative Kubernetes node');
-  targets.push(...await loadCandidateImages({profiles,architecture,ciCommit:process.env.GITHUB_SHA,sourceHead:process.env.SOURCE_HEAD,runId:report.runId,root,call}));
+  const candidates=await loadCandidateImages({profiles,architecture,ciCommit:process.env.GITHUB_SHA,sourceHead:process.env.SOURCE_HEAD,runId:report.runId,root,call,derive:!crossVersion});
+  if(crossVersion&&lock.keycloakVersion!=='26.8.2') throw Error('Patch experiment destination lock changed; review the version pair');
+  targets.push(...(crossVersion?await historicalUpgradeTargets({targets:candidates,architecture,root,evidence,call,ciCommit:process.env.GITHUB_SHA}):candidates));
   const upstream=join(root,'upstream');
   call('git',['init',upstream]);call('git',['-C',upstream,'remote','add','origin','https://github.com/keycloak/keycloak-k8s-resources.git']);
   call('git',['-C',upstream,'fetch','--depth=1','origin',inputs.operatorResourcesCommit]);call('git',['-C',upstream,'checkout','--detach','FETCH_HEAD']);

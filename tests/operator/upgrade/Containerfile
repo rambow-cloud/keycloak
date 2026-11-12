@@ -1,0 +1,6 @@
+# Historical fixture only: retain all published layers and add the native launcher.
+ARG SOURCE_IMAGE
+FROM ${SOURCE_IMAGE}
+COPY --chown=0:0 --chmod=0755 .cache/launcher/keycloak-launcher /opt/keycloak/bin/kc.sh
+ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
+CMD ["start", "--optimized"]

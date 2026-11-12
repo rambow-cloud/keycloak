@@ -41,5 +41,5 @@ export function markdown(report) {
     'Source: `'+report.commit+'`; branch: `'+report.branch+'`; run: '+report.runId+', attempt '+report.runAttempt+'.\n\n'+
     '| Profile | Phase | Result |\n| --- | --- | --- |\n'+report.results.map(result=>'| '+result.profile+' | '+result.phase+' | '+result.status+' |').join('\n')+
     '\n\n'+(report.error?'Experiment error: '+report.error.replaceAll('|','\\|')+'\n\n':'')+
-    'Exact native CI artifacts were loaded into disposable kind without registry publication. Stock Operator commands were used; podTemplate changes only supplied test image-pull policy, volumes and security context. Two replicas on one node do not certify production HA or cloud database behavior.\n';
+    'Experiment: '+(report.experiment??'same-version-image-replacement')+'. Exact native CI destination artifacts were loaded into disposable kind without registry publication. Historical upgrade sources retain published layers plus the same native launcher only; their reported CVEs do not make them publishable. Stock Operator commands were used; podTemplate changes only supplied test image-pull policy, volumes and security context. Two replicas on one node do not certify production HA or cloud database behavior.\n';
 }

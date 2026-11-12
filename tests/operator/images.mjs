@@ -20,7 +20,7 @@ export function verifyRunningImage({pod,target,next=false,architecture,call}) {
     if('sha256:'+hash(bytes)!==sha) throw Error('Node OCI content checksum mismatch');return JSON.parse(bytes);
   };
   const manifest=content(expectedManifest),config=content(expectedConfig);
-  if(manifest.config.digest!==expectedConfig||config.os!=='linux'||config.architecture!==architecture||JSON.stringify(config.rootfs.diff_ids)!==JSON.stringify(target.rootfsDiffIds)) throw Error('Running child/config/architecture binding mismatch');
+  if(manifest.config.digest!==expectedConfig||config.os!=='linux'||config.architecture!==architecture||JSON.stringify(config.rootfs.diff_ids)!==JSON.stringify(next?(target.nextRootfsDiffIds??target.rootfsDiffIds):target.rootfsDiffIds)) throw Error('Running child/config/architecture binding mismatch');
   const containerID=pod.status.containerStatuses[0].containerID?.match(/^containerd:\/\/([a-f0-9]{64})$/)?.[1];
   if(!containerID) throw Error('Missing running container identity');
   const container=JSON.parse(call('podman',['exec','operator-test-control-plane','ctr','-n','k8s.io','containers','info',containerID]).stdout);
@@ -32,7 +32,7 @@ export function verifyRunningImage({pod,target,next=false,architecture,call}) {
   return {pod:pod.metadata.name,uid:pod.metadata.uid,imageID,reportedDigest:digest,manifest:expectedManifest,config:expectedConfig,architecture,containerImage,snapshotParent:chain};
 }
 
-export async function loadCandidateImages({profiles,architecture,ciCommit,sourceHead,runId,root,call}) {
+export async function loadCandidateImages({profiles,architecture,ciCommit,sourceHead,runId,root,call,derive=true}) {
   const targets=[];
   for(const profile of profiles) {
     const directory=resolve('.cache/operator-input/keycloak-oci-'+profile+'-'+architecture+'-'+ciCommit);
@@ -65,7 +65,7 @@ export async function loadCandidateImages({profiles,architecture,ciCommit,source
     await writeFile(join(derived,'index.json'),JSON.stringify(nextIndex));
     if(JSON.stringify(nextConfig.rootfs)!==JSON.stringify(config.rootfs)||JSON.stringify(nextManifest.layers)!==JSON.stringify(manifest.layers)) throw Error('Rolling fixture changed executable/package layers');
     const reference='localhost/keycloak-operator-'+profile+':candidate',nextReference='localhost/keycloak-operator-'+profile+':next';
-    for(const [source,name,digest] of [[layout,reference,index.manifests[0].digest],[derived,nextReference,nextDigest]]) {
+    for(const [source,name,digest] of (derive?[[layout,reference,index.manifests[0].digest],[derived,nextReference,nextDigest]]:[[layout,reference,index.manifests[0].digest]])) {
       const output=join(root,profile+(name===reference?'-candidate':'-next')+'.tar');
       call('skopeo',['copy','--preserve-digests','oci:'+source+':candidate','oci-archive:'+output+':'+name],{timeout:300000});
       call('kind',['load','image-archive',output,'--name','operator-test'],{timeout:300000});
