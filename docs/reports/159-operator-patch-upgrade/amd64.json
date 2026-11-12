@@ -1,0 +1,1108 @@
+{
+  "schemaVersion": 1,
+  "architecture": "amd64",
+  "branch": "feat/159-go-launcher",
+  "commit": "98492c22cbc8c699f38b1ee2b5262063e2bf9da3",
+  "ciCommit": "5a2732afbb6a40491e4170362a99357da591cc73",
+  "runId": 43281045723,
+  "runAttempt": 1,
+  "inputs": {
+    "keycloakVersion": "26.8.2",
+    "namespace": "keycloak",
+    "operatorResourcesCommit": "79ba77fd65bb05a8300cd1396d6be9806a0f290f",
+    "operator": {
+      "index": "quay.io/keycloak/keycloak-operator@sha256:92cca02f2fcf549cb86c8e3c0d95de0e7016e4e3ffe2d781f174aa730417e80f",
+      "amd64": "sha256:12b68acdf885fcdb5534c6ec2462918ef7f0dc48dc53d4df4d8bb430046138d9",
+      "arm64": "sha256:1169fc8ac43932acdf01f7617955ee3118a1564015b77c121639deac8ba3247b"
+    },
+    "kind": {
+      "version": "0.33.0",
+      "amd64": "aee6151561422756b764a4ae28e7f44cda5af5a9eead3cc9985112b1de8d8e0d",
+      "arm64": "20022bee6cfcd5086cb7234d218e3454e6090022f2a8f55d1fa7fcf42c3867a2"
+    },
+    "node": "docker.io/kindest/node:v1.35.8@sha256:07b2536e30b803ed61d1677a79df6115f798ce64c80f9e22f6ed45afd09323c0",
+    "kubectl": {
+      "version": "1.35.8",
+      "amd64": "874d5e72dbb819f43cff16bcd1e4f8bac5b7f2361fe1e55049b0a6c676fb0cbf",
+      "arm64": "cc749967b62f4422260bc9c0aa7a7c55f45175ae38cb8d95767b5d2b7e04c1fd"
+    }
+  },
+  "database": "docker.io/library/postgres:17-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+  "targets": [
+    {
+      "profile": "core",
+      "reference": "localhost/keycloak-operator-core:previous",
+      "nextReference": "localhost/keycloak-operator-core:candidate",
+      "digest": "sha256:200de5b7f935019bd3d4758d3b58620a33b0e7b2a3f79abae2b1feeed6eb1fb8",
+      "nextDigest": "sha256:b61be5eb279a4dd4e7a4029b496b4ff042d9791c09b19770f82866cd66b16f37",
+      "configDigest": "sha256:9cea97e2266b5d6d39b8dd22b6f7c27763810020b32c8ef8a283b1d00aba669d",
+      "nextConfigDigest": "sha256:76f38beb81a783a61da4c409ce24d7f536dd8b86346d451c17ec6d53f0105aa3",
+      "launcher": {
+        "schemaVersion": 1,
+        "architecture": "amd64",
+        "goVersion": "1.27.4",
+        "cgoEnabled": false,
+        "staticElf": true,
+        "sourceHash": "3cc9c467486cb8a26e4d852de893fad05987be6556caa308f16330ae5465d9c1",
+        "binarySha256": "fd84cbec39d1c0c9bccd2f83c43760d55ef12e35ced2d6fa4696262ae910ddb2",
+        "sourceCommit": "5a2732afbb6a40491e4170362a99357da591cc73"
+      },
+      "rootfsDiffIds": [
+        "sha256:9486261b5a13f63ca6904b36721527ac8f19df53d300560138d69ae9b4c203de",
+        "sha256:621c35e751a51a9a9dc3e80aa0b7fe8be2a93402ea6ccd307d30852cd7776cda",
+        "sha256:b64fe4bb89ff075efc03878811052cbaf4f9dd891aed968e9ed6993fedf1f4a7",
+        "sha256:b5764396d8d3f88c6c91b8e97022f147ec721afcf85710d96775922e0df881af",
+        "sha256:275a30dd8ce958b21daa9ad962c6fbc09f98306ee2f486b65c9075dc257b1412",
+        "sha256:4d049f83d9cf21d1f5cc0e11deaf36df02790d0e60c1a3829538fb4b61685368",
+        "sha256:af5aa97ebe6ce1604747ec1e21af7136ded391bcabe4acef882e718a87c86bcc",
+        "sha256:6f1cdceb6a3146f0ccb986521156bef8a422cdbb0863396f7f751f575ba308f4",
+        "sha256:bd3cdfae1d3fdd83a2231d608969b38b82349777c2fff9a7c12d54f8ac5c9b38",
+        "sha256:4cde6b0bb6f50a5f255eef7b2a42162c661cf776b803225dcac9a659e396bb6b",
+        "sha256:ad51d0769d16ba578106a177987dfe3d2e02c1668c852b795b2f6b024068242a",
+        "sha256:187cfc6d1e3e8a40a5e64653bcd3239c140807dcf1c09e48021178705a5a6139",
+        "sha256:0762a1f6557d1e88a761ab05aa7f65a10dc0e559913ea13befb873d907e1a396",
+        "sha256:8a3b315d45080ecb38e39d42d28e951303c67c2ce7482bcdbbc3b5424be19013",
+        "sha256:e4ba966d7f0527dfe0fcb559e4e18d4da42c4e6beae924719255e0dedb554ed0",
+        "sha256:ed866e58bebf5b90b1db471f4eff229d62dd0682a8b3abb727776c425e93f0b6",
+        "sha256:29d492a034557b4b338ab6ef33e3f1ecfaaa340ff721aae0776149b59cc7052d",
+        "sha256:6c4a78b210237270efb567d7d2542b190c77c20d44adefbc3496d2d085d271e4",
+        "sha256:0cd351bd16de499bf614cf9e35cd1b64e61272119b38dbc95e5eae87163c1f7e",
+        "sha256:a2195e8a560e78570f0ab99b60ee87df454da67fd8d44b49769d007b2a294d92",
+        "sha256:d7e3714f0a7e51c406d3677891a1a0964ea84cd9d2a5d9083db23f55ca974d63",
+        "sha256:d729025149d33e1372a0056f6a791f963d4508abe5fa430109194e31052f291f",
+        "sha256:b6a57a357229275f8cba973b46db4d91dff2c73e8152adabe6d38a17e837e270",
+        "sha256:9c6a905dd4aedbf2544d7f2e1e2d13bd0377d3077e54b94346676dd0ed2b063f",
+        "sha256:6db791322bfcbc72dc54aa46d012ef46a2314819ec9cc28904e9091b4b94e63e",
+        "sha256:6e18ad80f3d64a8cbbcd1ff2e8a0d5ce7282cf664e816b86183a59d30a618e8a",
+        "sha256:c16b2ec4b1493bad1b1de23d659c899e60abb166bda756d02792f0a03ba54a43",
+        "sha256:7db505d90756626f425c6c5468eca565c82f589b144ecaa4f411ad9bbf79e614",
+        "sha256:382ca0f951d4ef69fd736380747f9e1f02161c6dc94af74dafcf96de4466c9d9",
+        "sha256:953871f68b73a0c29f9268de527a33d56fb21e904f9b3b9a52281ead677a015a",
+        "sha256:98227d7e6e3f34aa1cc40516e87587b4107366befc5c74a88b1f7aa5a78dacbd",
+        "sha256:f998043f43bd1599209638d60163e7f5f36a1ce7acdca0f4ea5f83926dafd4ed",
+        "sha256:be4946483c6f4c9c5f5163cb8a1827089c3c20041b293826897bb86bf4e50e3b",
+        "sha256:5fd9b486a88397b3b78535f3d12ed8c79c4ed00cabecf9a5a113a41398ae3cd4",
+        "sha256:71299c933567c6f5f5dfc3b8976bf7f7dd6beda4180a2fadcbaa3ba94ef84379",
+        "sha256:83c0532ffcf76e4514a428fa8df8b25acd6750d5e7b0402e6c3c5f8e9f4628c1",
+        "sha256:737c6402aaced2faa48251ec46559a757cf2ecd96b0ea9a8aa4cc94ff6f81a6d"
+      ],
+      "archiveSha256": "f23dd8bb0b2068db6ddbe54a3f9fb7b34003bef682a2e103bbfb81c76599a208",
+      "scan": {
+        "headSha": "98492c22cbc8c699f38b1ee2b5262063e2bf9da3",
+        "runId": 43281045723,
+        "runAttempt": 1,
+        "blocking": 0
+      },
+      "derivedChange": "Historical 26.8.1-r5 child plus the same static Go launcher only; destination is the exact current-run gated 26.8.2 artifact.",
+      "currentVersion": "26.8.2",
+      "nextVersion": "26.8.2",
+      "nextRootfsDiffIds": [
+        "sha256:bbc872d66e0e5be46bb28cf3927a06197e0b2c8f22531cf2f79eba9c8d31529f",
+        "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+        "sha256:18cfa218aba074698513624fe01de1d0358ff07819dcdb350bfbf72cf828cca7",
+        "sha256:341aa3718d26cb84650929266ccf9fdd268bd22275f167eacb9cd457dbe28488"
+      ],
+      "destination": {
+        "version": "26.8.2",
+        "digest": "sha256:b61be5eb279a4dd4e7a4029b496b4ff042d9791c09b19770f82866cd66b16f37",
+        "configDigest": "sha256:76f38beb81a783a61da4c409ce24d7f536dd8b86346d451c17ec6d53f0105aa3",
+        "archiveSha256": "f1ec563bac42acb19834842e0a19a96e83f763dd776e14ffbc35759a2d0fab18",
+        "scan": {
+          "headSha": "98492c22cbc8c699f38b1ee2b5262063e2bf9da3",
+          "runId": 43281045723,
+          "runAttempt": 1,
+          "blocking": 0
+        }
+      },
+      "historicalSource": {
+        "release": "v26.8.1-r5",
+        "publishedTag": "26.8.1-r5-core",
+        "parentDigest": "sha256:c0125fa1b8c4023f0af289bc32e53f65eece9d6c314da19e9dc92fb98eb13ca9",
+        "parentConfigDigest": "sha256:c625ac30cc1fdf6b1acc95a8bf512308bd4ede5439b98e5183e4fb8e839161a1",
+        "fixtureDigest": "sha256:200de5b7f935019bd3d4758d3b58620a33b0e7b2a3f79abae2b1feeed6eb1fb8",
+        "retainedParentLayers": 36,
+        "addedLauncherLayers": 1,
+        "launcherSha256": "fd84cbec39d1c0c9bccd2f83c43760d55ef12e35ced2d6fa4696262ae910ddb2",
+        "startupReview": {
+          "startupHash": "5f68e52cc8f86336b4b674e48a465ca9249e27dd4ba5aafa126437b648020afe",
+          "supported": [
+            17,
+            21,
+            25
+          ],
+          "warnings": []
+        },
+        "historicalScan": {
+          "schemaVersion": 2,
+          "profile": "core",
+          "architecture": "amd64",
+          "headSha": "98492c22cbc8c699f38b1ee2b5262063e2bf9da3",
+          "runId": 43281045723,
+          "runAttempt": 1,
+          "status": "complete",
+          "scannerVersion": "0.76.1",
+          "createdAt": "2026-11-12T18:39:29.992976129Z",
+          "policy": {
+            "blockingSeverities": [
+              "HIGH",
+              "CRITICAL"
+            ],
+            "blockUnfixed": false
+          },
+          "counts": {
+            "CRITICAL": {
+              "total": 0,
+              "fixable": 0
+            },
+            "HIGH": {
+              "total": 10,
+              "fixable": 2
+            },
+            "MEDIUM": {
+              "total": 51,
+              "fixable": 4
+            },
+            "LOW": {
+              "total": 24,
+              "fixable": 1
+            },
+            "UNKNOWN": {
+              "total": 5,
+              "fixable": 0
+            }
+          },
+          "total": 90,
+          "blocking": 2,
+          "osEosl": false,
+          "findings": [
+            {
+              "id": "CVE-2026-76844",
+              "package": "zlib1g",
+              "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+              "fixed": "1:1.3.dfsg+really1.3.1-1+deb13u1",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-85091",
+              "package": "zlib1g",
+              "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+              "fixed": "1:1.3.dfsg+really1.3.1-1+deb13u1",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-113351",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-115506",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-117610",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-118370",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-76642",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2025-66382",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-102010",
+              "package": "gcc-14-base",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-102010",
+              "package": "libgcc-s1",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-102010",
+              "package": "libstdc++6",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114690",
+              "package": "gcc-14-base",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114690",
+              "package": "libgcc-s1",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114690",
+              "package": "libstdc++6",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114691",
+              "package": "gcc-14-base",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114691",
+              "package": "libgcc-s1",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114691",
+              "package": "libstdc++6",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            }
+          ]
+        },
+        "publishEligible": false
+      }
+    },
+    {
+      "profile": "aws",
+      "reference": "localhost/keycloak-operator-aws:previous",
+      "nextReference": "localhost/keycloak-operator-aws:candidate",
+      "digest": "sha256:55c28e5f567b58db4201dc4b8a350735318070e53b96e2e03477221697cc8947",
+      "nextDigest": "sha256:1422307235c8ac23e6e6f849b92d10c0bcb9ff9f9d3c9108a7673487ee0057ba",
+      "configDigest": "sha256:6ddd1a4e062b3a140f311362a102017daf5c929a65346334df47db756475b1f2",
+      "nextConfigDigest": "sha256:829b018ff11e23af9fbfde6d4adb34118f2e7a1da9d429c6ef75cdd937a87350",
+      "launcher": {
+        "schemaVersion": 1,
+        "architecture": "amd64",
+        "goVersion": "1.27.4",
+        "cgoEnabled": false,
+        "staticElf": true,
+        "sourceHash": "3cc9c467486cb8a26e4d852de893fad05987be6556caa308f16330ae5465d9c1",
+        "binarySha256": "fd84cbec39d1c0c9bccd2f83c43760d55ef12e35ced2d6fa4696262ae910ddb2",
+        "sourceCommit": "5a2732afbb6a40491e4170362a99357da591cc73"
+      },
+      "rootfsDiffIds": [
+        "sha256:9486261b5a13f63ca6904b36721527ac8f19df53d300560138d69ae9b4c203de",
+        "sha256:621c35e751a51a9a9dc3e80aa0b7fe8be2a93402ea6ccd307d30852cd7776cda",
+        "sha256:b64fe4bb89ff075efc03878811052cbaf4f9dd891aed968e9ed6993fedf1f4a7",
+        "sha256:b5764396d8d3f88c6c91b8e97022f147ec721afcf85710d96775922e0df881af",
+        "sha256:275a30dd8ce958b21daa9ad962c6fbc09f98306ee2f486b65c9075dc257b1412",
+        "sha256:4d049f83d9cf21d1f5cc0e11deaf36df02790d0e60c1a3829538fb4b61685368",
+        "sha256:af5aa97ebe6ce1604747ec1e21af7136ded391bcabe4acef882e718a87c86bcc",
+        "sha256:6f1cdceb6a3146f0ccb986521156bef8a422cdbb0863396f7f751f575ba308f4",
+        "sha256:bd3cdfae1d3fdd83a2231d608969b38b82349777c2fff9a7c12d54f8ac5c9b38",
+        "sha256:4cde6b0bb6f50a5f255eef7b2a42162c661cf776b803225dcac9a659e396bb6b",
+        "sha256:ad51d0769d16ba578106a177987dfe3d2e02c1668c852b795b2f6b024068242a",
+        "sha256:187cfc6d1e3e8a40a5e64653bcd3239c140807dcf1c09e48021178705a5a6139",
+        "sha256:0762a1f6557d1e88a761ab05aa7f65a10dc0e559913ea13befb873d907e1a396",
+        "sha256:8a3b315d45080ecb38e39d42d28e951303c67c2ce7482bcdbbc3b5424be19013",
+        "sha256:e4ba966d7f0527dfe0fcb559e4e18d4da42c4e6beae924719255e0dedb554ed0",
+        "sha256:ed866e58bebf5b90b1db471f4eff229d62dd0682a8b3abb727776c425e93f0b6",
+        "sha256:29d492a034557b4b338ab6ef33e3f1ecfaaa340ff721aae0776149b59cc7052d",
+        "sha256:6c4a78b210237270efb567d7d2542b190c77c20d44adefbc3496d2d085d271e4",
+        "sha256:0cd351bd16de499bf614cf9e35cd1b64e61272119b38dbc95e5eae87163c1f7e",
+        "sha256:a2195e8a560e78570f0ab99b60ee87df454da67fd8d44b49769d007b2a294d92",
+        "sha256:d7e3714f0a7e51c406d3677891a1a0964ea84cd9d2a5d9083db23f55ca974d63",
+        "sha256:d729025149d33e1372a0056f6a791f963d4508abe5fa430109194e31052f291f",
+        "sha256:b6a57a357229275f8cba973b46db4d91dff2c73e8152adabe6d38a17e837e270",
+        "sha256:9c6a905dd4aedbf2544d7f2e1e2d13bd0377d3077e54b94346676dd0ed2b063f",
+        "sha256:6db791322bfcbc72dc54aa46d012ef46a2314819ec9cc28904e9091b4b94e63e",
+        "sha256:6e18ad80f3d64a8cbbcd1ff2e8a0d5ce7282cf664e816b86183a59d30a618e8a",
+        "sha256:c16b2ec4b1493bad1b1de23d659c899e60abb166bda756d02792f0a03ba54a43",
+        "sha256:7db505d90756626f425c6c5468eca565c82f589b144ecaa4f411ad9bbf79e614",
+        "sha256:382ca0f951d4ef69fd736380747f9e1f02161c6dc94af74dafcf96de4466c9d9",
+        "sha256:953871f68b73a0c29f9268de527a33d56fb21e904f9b3b9a52281ead677a015a",
+        "sha256:98227d7e6e3f34aa1cc40516e87587b4107366befc5c74a88b1f7aa5a78dacbd",
+        "sha256:f998043f43bd1599209638d60163e7f5f36a1ce7acdca0f4ea5f83926dafd4ed",
+        "sha256:be4946483c6f4c9c5f5163cb8a1827089c3c20041b293826897bb86bf4e50e3b",
+        "sha256:5fd9b486a88397b3b78535f3d12ed8c79c4ed00cabecf9a5a113a41398ae3cd4",
+        "sha256:28f42ec7b8c2d9df80a763be54a8c1da8edb98cae2c2b8a36ac328718eb8d527",
+        "sha256:c246698041c88caa1fc1b1830aea3d07d018884e4a269782fce57f0997b89512",
+        "sha256:737c6402aaced2faa48251ec46559a757cf2ecd96b0ea9a8aa4cc94ff6f81a6d"
+      ],
+      "archiveSha256": "b095fe298a1dee62cd3ce9546afa7c03539cf25b13b15d86c9c25386eab39640",
+      "scan": {
+        "headSha": "98492c22cbc8c699f38b1ee2b5262063e2bf9da3",
+        "runId": 43281045723,
+        "runAttempt": 1,
+        "blocking": 0
+      },
+      "derivedChange": "Historical 26.8.1-r5 child plus the same static Go launcher only; destination is the exact current-run gated 26.8.2 artifact.",
+      "currentVersion": "26.8.2",
+      "nextVersion": "26.8.2",
+      "nextRootfsDiffIds": [
+        "sha256:bbc872d66e0e5be46bb28cf3927a06197e0b2c8f22531cf2f79eba9c8d31529f",
+        "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+        "sha256:36a8c4d7697c91dc953c963f2cbdf3456c2ec8d6c1e6085fae00e69842f7e276",
+        "sha256:2b3fdd9ad7a0b67487efdf64984ae1c8deb9164a9b65bd50ba2288dfc9d1f399"
+      ],
+      "destination": {
+        "version": "26.8.2",
+        "digest": "sha256:1422307235c8ac23e6e6f849b92d10c0bcb9ff9f9d3c9108a7673487ee0057ba",
+        "configDigest": "sha256:829b018ff11e23af9fbfde6d4adb34118f2e7a1da9d429c6ef75cdd937a87350",
+        "archiveSha256": "f6d847334861e8ca6fe2ef899e9d366c0707e59997b85d3969b6b18a1269153f",
+        "scan": {
+          "headSha": "98492c22cbc8c699f38b1ee2b5262063e2bf9da3",
+          "runId": 43281045723,
+          "runAttempt": 1,
+          "blocking": 0
+        }
+      },
+      "historicalSource": {
+        "release": "v26.8.1-r5",
+        "publishedTag": "26.8.1-r5-aws",
+        "parentDigest": "sha256:b0348dfff6c636a2071a084b66a9f3734678b93558948b57951221fa1828b6f4",
+        "parentConfigDigest": "sha256:ae6c461e480af33c682464bbe7b6739fde59456ca0a57e40abf6a8d9697aaf06",
+        "fixtureDigest": "sha256:55c28e5f567b58db4201dc4b8a350735318070e53b96e2e03477221697cc8947",
+        "retainedParentLayers": 36,
+        "addedLauncherLayers": 1,
+        "launcherSha256": "fd84cbec39d1c0c9bccd2f83c43760d55ef12e35ced2d6fa4696262ae910ddb2",
+        "startupReview": {
+          "startupHash": "5f68e52cc8f86336b4b674e48a465ca9249e27dd4ba5aafa126437b648020afe",
+          "supported": [
+            17,
+            21,
+            25
+          ],
+          "warnings": []
+        },
+        "historicalScan": {
+          "schemaVersion": 2,
+          "profile": "aws",
+          "architecture": "amd64",
+          "headSha": "98492c22cbc8c699f38b1ee2b5262063e2bf9da3",
+          "runId": 43281045723,
+          "runAttempt": 1,
+          "status": "complete",
+          "scannerVersion": "0.76.1",
+          "createdAt": "2026-11-12T18:40:21.424819286Z",
+          "policy": {
+            "blockingSeverities": [
+              "HIGH",
+              "CRITICAL"
+            ],
+            "blockUnfixed": false
+          },
+          "counts": {
+            "CRITICAL": {
+              "total": 0,
+              "fixable": 0
+            },
+            "HIGH": {
+              "total": 10,
+              "fixable": 2
+            },
+            "MEDIUM": {
+              "total": 51,
+              "fixable": 4
+            },
+            "LOW": {
+              "total": 24,
+              "fixable": 1
+            },
+            "UNKNOWN": {
+              "total": 5,
+              "fixable": 0
+            }
+          },
+          "total": 90,
+          "blocking": 2,
+          "osEosl": false,
+          "findings": [
+            {
+              "id": "CVE-2026-76844",
+              "package": "zlib1g",
+              "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+              "fixed": "1:1.3.dfsg+really1.3.1-1+deb13u1",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-85091",
+              "package": "zlib1g",
+              "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+              "fixed": "1:1.3.dfsg+really1.3.1-1+deb13u1",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-113351",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-115506",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-117610",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-118370",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-76642",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2025-66382",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-102010",
+              "package": "gcc-14-base",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-102010",
+              "package": "libgcc-s1",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-102010",
+              "package": "libstdc++6",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114690",
+              "package": "gcc-14-base",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114690",
+              "package": "libgcc-s1",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114690",
+              "package": "libstdc++6",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114691",
+              "package": "gcc-14-base",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114691",
+              "package": "libgcc-s1",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114691",
+              "package": "libstdc++6",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            }
+          ]
+        },
+        "publishEligible": false
+      }
+    }
+  ],
+  "results": [
+    {
+      "profile": "core",
+      "phase": "stock-operator-launch",
+      "status": "passed",
+      "command": null,
+      "args": [
+        "-Djgroups.bind.address=$(POD_IP)",
+        "--verbose",
+        "start",
+        "--optimized"
+      ],
+      "pods": [
+        {
+          "name": "core-0",
+          "uid": "96bf7877-4dd1-43f1-8146-64aaa634af8e",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:d684493ab21cb0bb72423aea4c7f832206de7f3fd336d40fcd35346af2ac13d8"
+        },
+        {
+          "name": "core-1",
+          "uid": "255caf29-13ff-447b-a62e-1fe2c7634084",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:d684493ab21cb0bb72423aea4c7f832206de7f3fd336d40fcd35346af2ac13d8"
+        }
+      ],
+      "identities": [
+        {
+          "pod": "core-0",
+          "uid": "96bf7877-4dd1-43f1-8146-64aaa634af8e",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:d684493ab21cb0bb72423aea4c7f832206de7f3fd336d40fcd35346af2ac13d8",
+          "reportedDigest": "sha256:d684493ab21cb0bb72423aea4c7f832206de7f3fd336d40fcd35346af2ac13d8",
+          "manifest": "sha256:200de5b7f935019bd3d4758d3b58620a33b0e7b2a3f79abae2b1feeed6eb1fb8",
+          "config": "sha256:9cea97e2266b5d6d39b8dd22b6f7c27763810020b32c8ef8a283b1d00aba669d",
+          "architecture": "amd64",
+          "containerImage": "localhost/keycloak-operator-core:previous",
+          "snapshotParent": "sha256:4d00950cdfe14048abce0c20ac36f1c34426f447b13ab031ad3577a72cc79d76"
+        },
+        {
+          "pod": "core-1",
+          "uid": "255caf29-13ff-447b-a62e-1fe2c7634084",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:d684493ab21cb0bb72423aea4c7f832206de7f3fd336d40fcd35346af2ac13d8",
+          "reportedDigest": "sha256:d684493ab21cb0bb72423aea4c7f832206de7f3fd336d40fcd35346af2ac13d8",
+          "manifest": "sha256:200de5b7f935019bd3d4758d3b58620a33b0e7b2a3f79abae2b1feeed6eb1fb8",
+          "config": "sha256:9cea97e2266b5d6d39b8dd22b6f7c27763810020b32c8ef8a283b1d00aba669d",
+          "architecture": "amd64",
+          "containerImage": "localhost/keycloak-operator-core:previous",
+          "snapshotParent": "sha256:4d00950cdfe14048abce0c20ac36f1c34426f447b13ab031ad3577a72cc79d76"
+        }
+      ]
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.1"
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.1"
+    },
+    {
+      "profile": "core",
+      "phase": "restart-recovery",
+      "status": "passed"
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.1"
+    },
+    {
+      "profile": "core",
+      "phase": "realm-import",
+      "status": "passed",
+      "command": [
+        "/opt/keycloak/bin/kc.sh"
+      ],
+      "args": [
+        "--verbose",
+        "import",
+        "--file=/mnt/realm-import/operator-core-realm.json",
+        "--override=false"
+      ],
+      "doneCondition": true,
+      "realm": "operator-core",
+      "podExitCodes": [
+        0
+      ],
+      "runtimeAugmentation": false
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.1"
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.2"
+    },
+    {
+      "profile": "core",
+      "phase": "auto-patch-version-upgrade",
+      "status": "passed",
+      "fromVersion": "26.8.1",
+      "toVersion": "26.8.2",
+      "fromDigest": "sha256:200de5b7f935019bd3d4758d3b58620a33b0e7b2a3f79abae2b1feeed6eb1fb8",
+      "toDigest": "sha256:b61be5eb279a4dd4e7a4029b496b4ff042d9791c09b19770f82866cd66b16f37",
+      "beforeData": {
+        "realmId": "2189258b-c6aa-424c-b83d-5861f8f621ed",
+        "realm": "operator-core",
+        "displayName": "Imported core",
+        "userId": "226ef7e7-12c5-45df-b754-c1f5092284d1",
+        "username": "traffic-core",
+        "email": "traffic-core@example.test",
+        "clientId": "b5644590-d593-42cf-8ba8-b41cb3d6d45d",
+        "clientIdentifier": "operator-traffic"
+      },
+      "afterData": {
+        "realmId": "2189258b-c6aa-424c-b83d-5861f8f621ed",
+        "realm": "operator-core",
+        "displayName": "Imported core",
+        "userId": "226ef7e7-12c5-45df-b754-c1f5092284d1",
+        "username": "traffic-core",
+        "email": "traffic-core@example.test",
+        "clientId": "b5644590-d593-42cf-8ba8-b41cb3d6d45d",
+        "clientIdentifier": "operator-traffic"
+      },
+      "databaseBackup": {
+        "format": "custom",
+        "archiveListVerified": true,
+        "restored": false,
+        "storedOnlyInEphemeralDatabasePod": true
+      },
+      "versionLogs": [
+        {
+          "pod": "core-0",
+          "keycloakVersion": "26.8.2"
+        },
+        {
+          "pod": "core-1",
+          "keycloakVersion": "26.8.2"
+        }
+      ],
+      "oldPods": [
+        {
+          "name": "core-0",
+          "uid": "32f9c2f0-04ee-4944-a6c1-6d65f6cfadb9"
+        },
+        {
+          "name": "core-1",
+          "uid": "255caf29-13ff-447b-a62e-1fe2c7634084"
+        }
+      ],
+      "newPods": [
+        {
+          "name": "core-0",
+          "uid": "0bfb80a0-d941-40e7-ab49-8e60edfe09f6",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:26ccb56e1c86cd64de02421e3d3759cf1756080274d40684e5f0872277209264"
+        },
+        {
+          "name": "core-1",
+          "uid": "41636fb8-3402-4d85-99d6-39368e7f3d16",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:26ccb56e1c86cd64de02421e3d3759cf1756080274d40684e5f0872277209264"
+        }
+      ],
+      "identities": [
+        {
+          "pod": "core-0",
+          "uid": "0bfb80a0-d941-40e7-ab49-8e60edfe09f6",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:26ccb56e1c86cd64de02421e3d3759cf1756080274d40684e5f0872277209264",
+          "reportedDigest": "sha256:26ccb56e1c86cd64de02421e3d3759cf1756080274d40684e5f0872277209264",
+          "manifest": "sha256:b61be5eb279a4dd4e7a4029b496b4ff042d9791c09b19770f82866cd66b16f37",
+          "config": "sha256:76f38beb81a783a61da4c409ce24d7f536dd8b86346d451c17ec6d53f0105aa3",
+          "architecture": "amd64",
+          "containerImage": "localhost/keycloak-operator-core:candidate",
+          "snapshotParent": "sha256:eafc5b5d24599698a99fc55184c2f650b71ecac914f10b118dad03f22f115f7d"
+        },
+        {
+          "pod": "core-1",
+          "uid": "41636fb8-3402-4d85-99d6-39368e7f3d16",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:26ccb56e1c86cd64de02421e3d3759cf1756080274d40684e5f0872277209264",
+          "reportedDigest": "sha256:26ccb56e1c86cd64de02421e3d3759cf1756080274d40684e5f0872277209264",
+          "manifest": "sha256:b61be5eb279a4dd4e7a4029b496b4ff042d9791c09b19770f82866cd66b16f37",
+          "config": "sha256:76f38beb81a783a61da4c409ce24d7f536dd8b86346d451c17ec6d53f0105aa3",
+          "architecture": "amd64",
+          "containerImage": "localhost/keycloak-operator-core:candidate",
+          "snapshotParent": "sha256:eafc5b5d24599698a99fc55184c2f650b71ecac914f10b118dad03f22f115f7d"
+        }
+      ],
+      "compatibilityExitCodes": [
+        0,
+        0
+      ],
+      "recreateUpdateUsed": false,
+      "minReadyReplicas": 1,
+      "gracefulShutdownPods": [
+        "core-0",
+        "core-1"
+      ],
+      "traffic": {
+        "startedAt": "2026-11-12T18:42:46.860Z",
+        "rounds": 175,
+        "requests": 525,
+        "login": 175,
+        "refresh": 175,
+        "userinfo": 175,
+        "failures": [],
+        "maxLatencyMs": 754,
+        "finishedAt": "2026-11-12T18:43:47.603Z"
+      }
+    },
+    {
+      "profile": "aws",
+      "phase": "stock-operator-launch",
+      "status": "passed",
+      "command": null,
+      "args": [
+        "-Djgroups.bind.address=$(POD_IP)",
+        "--verbose",
+        "start",
+        "--optimized"
+      ],
+      "pods": [
+        {
+          "name": "aws-0",
+          "uid": "4854be88-3c70-48a0-9ba7-55ad3bd448b1",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:d46d8db7baa3ab03c0f329b685f54d75ca00e9c946154e681d1aa4ac29c944f6"
+        },
+        {
+          "name": "aws-1",
+          "uid": "30980ffb-e2db-40e0-a8e9-c761589ddfc2",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:d46d8db7baa3ab03c0f329b685f54d75ca00e9c946154e681d1aa4ac29c944f6"
+        }
+      ],
+      "identities": [
+        {
+          "pod": "aws-0",
+          "uid": "4854be88-3c70-48a0-9ba7-55ad3bd448b1",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:d46d8db7baa3ab03c0f329b685f54d75ca00e9c946154e681d1aa4ac29c944f6",
+          "reportedDigest": "sha256:d46d8db7baa3ab03c0f329b685f54d75ca00e9c946154e681d1aa4ac29c944f6",
+          "manifest": "sha256:55c28e5f567b58db4201dc4b8a350735318070e53b96e2e03477221697cc8947",
+          "config": "sha256:6ddd1a4e062b3a140f311362a102017daf5c929a65346334df47db756475b1f2",
+          "architecture": "amd64",
+          "containerImage": "localhost/keycloak-operator-aws:previous",
+          "snapshotParent": "sha256:991987674c2ca69617c4a1d4046d3f4d271ec4cbba4d13a5b1e7ead2aeb75cad"
+        },
+        {
+          "pod": "aws-1",
+          "uid": "30980ffb-e2db-40e0-a8e9-c761589ddfc2",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:d46d8db7baa3ab03c0f329b685f54d75ca00e9c946154e681d1aa4ac29c944f6",
+          "reportedDigest": "sha256:d46d8db7baa3ab03c0f329b685f54d75ca00e9c946154e681d1aa4ac29c944f6",
+          "manifest": "sha256:55c28e5f567b58db4201dc4b8a350735318070e53b96e2e03477221697cc8947",
+          "config": "sha256:6ddd1a4e062b3a140f311362a102017daf5c929a65346334df47db756475b1f2",
+          "architecture": "amd64",
+          "containerImage": "localhost/keycloak-operator-aws:previous",
+          "snapshotParent": "sha256:991987674c2ca69617c4a1d4046d3f4d271ec4cbba4d13a5b1e7ead2aeb75cad"
+        }
+      ]
+    },
+    {
+      "profile": "aws",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://aws.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.1"
+    },
+    {
+      "profile": "aws",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://aws.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.1"
+    },
+    {
+      "profile": "aws",
+      "phase": "restart-recovery",
+      "status": "passed"
+    },
+    {
+      "profile": "aws",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://aws.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.1"
+    },
+    {
+      "profile": "aws",
+      "phase": "realm-import",
+      "status": "passed",
+      "command": [
+        "/opt/keycloak/bin/kc.sh"
+      ],
+      "args": [
+        "--verbose",
+        "import",
+        "--file=/mnt/realm-import/operator-aws-realm.json",
+        "--override=false"
+      ],
+      "doneCondition": true,
+      "realm": "operator-aws",
+      "podExitCodes": [
+        0
+      ],
+      "runtimeAugmentation": false
+    },
+    {
+      "profile": "aws",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://aws.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.1"
+    },
+    {
+      "profile": "aws",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://aws.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.2"
+    },
+    {
+      "profile": "aws",
+      "phase": "auto-patch-version-upgrade",
+      "status": "passed",
+      "fromVersion": "26.8.1",
+      "toVersion": "26.8.2",
+      "fromDigest": "sha256:55c28e5f567b58db4201dc4b8a350735318070e53b96e2e03477221697cc8947",
+      "toDigest": "sha256:1422307235c8ac23e6e6f849b92d10c0bcb9ff9f9d3c9108a7673487ee0057ba",
+      "beforeData": {
+        "realmId": "60f581dd-cde3-44c1-b4e3-aa2f31f69a14",
+        "realm": "operator-aws",
+        "displayName": "Imported aws",
+        "userId": "988ddd83-6245-4af4-971d-ecf97be0953b",
+        "username": "traffic-aws",
+        "email": "traffic-aws@example.test",
+        "clientId": "39ec05b7-8874-4a11-b467-d422286e965a",
+        "clientIdentifier": "operator-traffic"
+      },
+      "afterData": {
+        "realmId": "60f581dd-cde3-44c1-b4e3-aa2f31f69a14",
+        "realm": "operator-aws",
+        "displayName": "Imported aws",
+        "userId": "988ddd83-6245-4af4-971d-ecf97be0953b",
+        "username": "traffic-aws",
+        "email": "traffic-aws@example.test",
+        "clientId": "39ec05b7-8874-4a11-b467-d422286e965a",
+        "clientIdentifier": "operator-traffic"
+      },
+      "databaseBackup": {
+        "format": "custom",
+        "archiveListVerified": true,
+        "restored": false,
+        "storedOnlyInEphemeralDatabasePod": true
+      },
+      "versionLogs": [
+        {
+          "pod": "aws-0",
+          "keycloakVersion": "26.8.2"
+        },
+        {
+          "pod": "aws-1",
+          "keycloakVersion": "26.8.2"
+        }
+      ],
+      "oldPods": [
+        {
+          "name": "aws-0",
+          "uid": "e246e967-2275-4fed-b9bb-949ed1873ac3"
+        },
+        {
+          "name": "aws-1",
+          "uid": "30980ffb-e2db-40e0-a8e9-c761589ddfc2"
+        }
+      ],
+      "newPods": [
+        {
+          "name": "aws-0",
+          "uid": "7ae21c33-5f44-45fb-b11a-e4c7c0f5d843",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:3125a51776a391d2ef624d9bdf9ee4cb47ac2fc2532dd9769743d9ec88aca707"
+        },
+        {
+          "name": "aws-1",
+          "uid": "0a3717e4-7eff-4c4e-a7ee-1a07f79f5cbe",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:3125a51776a391d2ef624d9bdf9ee4cb47ac2fc2532dd9769743d9ec88aca707"
+        }
+      ],
+      "identities": [
+        {
+          "pod": "aws-0",
+          "uid": "7ae21c33-5f44-45fb-b11a-e4c7c0f5d843",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:3125a51776a391d2ef624d9bdf9ee4cb47ac2fc2532dd9769743d9ec88aca707",
+          "reportedDigest": "sha256:3125a51776a391d2ef624d9bdf9ee4cb47ac2fc2532dd9769743d9ec88aca707",
+          "manifest": "sha256:1422307235c8ac23e6e6f849b92d10c0bcb9ff9f9d3c9108a7673487ee0057ba",
+          "config": "sha256:829b018ff11e23af9fbfde6d4adb34118f2e7a1da9d429c6ef75cdd937a87350",
+          "architecture": "amd64",
+          "containerImage": "localhost/keycloak-operator-aws:candidate",
+          "snapshotParent": "sha256:3b292a7b18dcb3f2296d5d09f6c34bb16a8818bff4c15cdc9c22ffddb8c595fe"
+        },
+        {
+          "pod": "aws-1",
+          "uid": "0a3717e4-7eff-4c4e-a7ee-1a07f79f5cbe",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:3125a51776a391d2ef624d9bdf9ee4cb47ac2fc2532dd9769743d9ec88aca707",
+          "reportedDigest": "sha256:3125a51776a391d2ef624d9bdf9ee4cb47ac2fc2532dd9769743d9ec88aca707",
+          "manifest": "sha256:1422307235c8ac23e6e6f849b92d10c0bcb9ff9f9d3c9108a7673487ee0057ba",
+          "config": "sha256:829b018ff11e23af9fbfde6d4adb34118f2e7a1da9d429c6ef75cdd937a87350",
+          "architecture": "amd64",
+          "containerImage": "localhost/keycloak-operator-aws:candidate",
+          "snapshotParent": "sha256:3b292a7b18dcb3f2296d5d09f6c34bb16a8818bff4c15cdc9c22ffddb8c595fe"
+        }
+      ],
+      "compatibilityExitCodes": [
+        0,
+        0
+      ],
+      "recreateUpdateUsed": false,
+      "minReadyReplicas": 1,
+      "gracefulShutdownPods": [
+        "aws-0",
+        "aws-1"
+      ],
+      "traffic": {
+        "startedAt": "2026-11-12T18:45:34.125Z",
+        "rounds": 168,
+        "requests": 504,
+        "login": 168,
+        "refresh": 168,
+        "userinfo": 168,
+        "failures": [],
+        "maxLatencyMs": 432,
+        "finishedAt": "2026-11-12T18:46:34.686Z"
+      }
+    }
+  ],
+  "experiment": "26.8.1-to-26.8.2"
+}
