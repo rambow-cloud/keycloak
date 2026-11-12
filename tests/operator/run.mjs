@@ -4,7 +4,7 @@ import {spawnSync,spawn,fork} from 'node:child_process';
 import {createHash,randomBytes} from 'node:crypto';
 import https from 'node:https';
 import {keycloakResource,podOutcome,redact,markdown} from './model.mjs';
-import {loadCandidateImages} from './images.mjs';
+import {loadCandidateImages,verifyRunningImage} from './images.mjs';
 
 const root=resolve('.cache/operator-kind'),evidence=join(root,'evidence'),privateDir=join(root,'private'),tools=join(root,'tools');
 const architecture=process.env.BUILD_ARCH,native=process.arch==='x64'?'amd64':process.arch;
@@ -110,9 +110,9 @@ async function server(target,phase,resource) {
   });
   const template=get('statefulset',target.profile).spec.template.spec.containers[0];
   if(template.command?.length||template.args.some(argument=>argument==='-cp'||argument.includes('QuarkusEntryPoint'))) throw Error('Stock Operator command was overridden');
-  for(const pod of outcome.pods) if(![target.digest,target.configDigest].some(digest=>pod.status.containerStatuses[0].imageID.endsWith(digest))) throw Error('Running candidate native identity mismatch');
+  const identities=outcome.pods.map(pod=>verifyRunningImage({pod,target,architecture,call}));
   const result={profile:target.profile,phase,status:'passed',command:template.command??null,args:template.args,
-    pods:outcome.pods.map(pod=>({name:pod.metadata.name,uid:pod.metadata.uid,imageID:pod.status.containerStatuses[0].imageID}))};
+    pods:outcome.pods.map(pod=>({name:pod.metadata.name,uid:pod.metadata.uid,imageID:pod.status.containerStatuses[0].imageID})),identities};
   await snapshot(target.profile+'-'+phase);report.results.push(result);return result;
 }
 function serverPods(target) {return get('pods').items.filter(pod=>[target.profile+'-0',target.profile+'-1'].includes(pod.metadata.name)&&!pod.metadata.deletionTimestamp);}
@@ -242,11 +242,11 @@ async function rollingUpdate(resource,target) {
   for(const watch of watches) if(!/Keycloak stopped in/.test(watch.text)) throw Error('Missing graceful JVM shutdown for '+watch.name);
   const codes=observed.jobPods.flatMap(pod=>[...pod.status.initContainerStatuses??[],...pod.status.containerStatuses??[]].map(status=>status.state.terminated?.exitCode));
   if(codes.length<2||codes.some(code=>code!==0)) throw Error('Compatibility metadata/check did not both exit zero');
-  for(const pod of observed.pods) if(![target.nextDigest,target.nextConfigDigest].some(digest=>pod.status.containerStatuses[0].imageID.endsWith(digest))) throw Error('Updated native OCI imageID mismatch');
+  const identities=observed.pods.map(pod=>verifyRunningImage({pod,target,next:true,architecture,call}));
   await snapshot(target.profile+'-rolling-complete');await apiCheck(target);
   report.results.push({profile:target.profile,phase:'auto-image-rolling-update',status:'passed',fromDigest:target.digest,toDigest:target.nextDigest,
     oldPods:old.map(pod=>({name:pod.metadata.name,uid:pod.metadata.uid})),newPods:observed.pods.map(pod=>({name:pod.metadata.name,uid:pod.metadata.uid,imageID:pod.status.containerStatuses[0].imageID})),
-    compatibilityExitCodes:codes,recreateUpdateUsed:false,minReadyReplicas:Math.min(...timeline.map(sample=>sample.readyPods)),gracefulShutdownPods:watches.map(watch=>watch.name),traffic:stats});
+    identities,compatibilityExitCodes:codes,recreateUpdateUsed:false,minReadyReplicas:Math.min(...timeline.map(sample=>sample.readyPods)),gracefulShutdownPods:watches.map(watch=>watch.name),traffic:stats});
 }
 
 let clusterCreated=false;

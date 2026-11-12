@@ -3,6 +3,26 @@ import {createHash} from 'node:crypto';
 import {join,resolve} from 'node:path';
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 
+export function verifyRunningImage({pod,target,next=false,architecture,call}) {
+  const expectedManifest=next?target.nextDigest:target.digest,expectedConfig=next?target.nextConfigDigest:target.configDigest;
+  const imageID=pod.status.containerStatuses[0].imageID;
+  const digest=imageID?.match(/sha256:[a-f0-9]{64}$/)?.[0];
+  if(!digest) throw Error('CRI did not expose an immutable image identity');
+  const info=JSON.parse(call('podman',['exec','operator-test-control-plane','crictl','--runtime-endpoint','unix:///run/containerd/containerd.sock','--image-endpoint','unix:///run/containerd/containerd.sock','inspecti',imageID]).stdout);
+  if(info.status?.id!==expectedConfig) throw Error('Running CRI image config differs from validated native artifact');
+  const content=sha=>{
+    const bytes=Buffer.from(call('podman',['exec','operator-test-control-plane','ctr','-n','k8s.io','content','get',sha]).stdout);
+    if('sha256:'+hash(bytes)!==sha) throw Error('Node OCI content checksum mismatch');return JSON.parse(bytes);
+  };
+  const manifest=content(expectedManifest),config=content(expectedConfig);
+  if(manifest.config.digest!==expectedConfig||config.os!=='linux'||config.architecture!==architecture||JSON.stringify(config.rootfs.diff_ids)!==JSON.stringify(target.rootfsDiffIds)) throw Error('Running child/config/architecture binding mismatch');
+  if(digest!==expectedManifest&&digest!==expectedConfig) {
+    const wrapper=content(digest);
+    if(!wrapper.manifests?.some(child=>child.digest===expectedManifest&&(!child.platform||child.platform.os==='linux'&&child.platform.architecture===architecture))) throw Error('CRI import index does not contain the validated native child');
+  }
+  return {pod:pod.metadata.name,uid:pod.metadata.uid,imageID,reportedDigest:digest,manifest:expectedManifest,config:expectedConfig,architecture};
+}
+
 export async function loadCandidateImages({profiles,architecture,ciCommit,sourceHead,runId,root,call}) {
   const targets=[];
   for(const profile of profiles) {
