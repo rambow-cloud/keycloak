@@ -1,0 +1,142 @@
+name: Public ECR distribution
+on:
+  workflow_call:
+    inputs:
+      release_tag:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing completed formal Quay Release, for example v26.8.2-r4
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: ecr-public-keycloak
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      active: ${{ steps.prepare.outputs.active }}
+      prepared: ${{ steps.prepare.outputs.prepared }}
+      tools_commit: ${{ steps.tools.outputs.commit }}
+    steps:
+      - id: tools
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - id: prepare
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          MIRROR_TOOLS_COMMIT: ${{ steps.tools.outputs.commit }}
+        with:
+          script: |
+            const { prepareMirror } = await import(process.cwd() + '/scripts/ecr-public.mjs');
+            const config = JSON.parse(require('node:fs').readFileSync('config/ecr-public.json','utf8'));
+            const prepared = await prepareMirror({github,context,core,tag:process.env.RELEASE_TAG,config});
+            core.setOutput('active', !!prepared.active);
+            core.setOutput('prepared', JSON.stringify(prepared));
+            await core.summary.addHeading('Public ECR preparation').addCodeBlock(JSON.stringify({active:prepared.active,complete:prepared.complete,plan:prepared.plan},null,2),'json').write();
+  publish:
+    needs: prepare
+    if: needs.prepare.outputs.active == 'true'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 40
+    environment: ecr-public-release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.tools_commit }}
+          persist-credentials: false
+      - name: Install open-source registry client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y skopeo
+          skopeo --version
+          aws --version
+      - name: Verify source signatures and copy exact published indexes using AWS OIDC
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PREPARED: ${{ needs.prepare.outputs.prepared }}
+        with:
+          script: |
+            const { publishMirror } = await import(process.cwd() + '/scripts/ecr-public.mjs');
+            await publishMirror({github,context,core,prepared:JSON.parse(process.env.PREPARED),output:'.cache/ecr-public'});
+      - name: Retain successful or partial mirror state
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ecr-publication-${{ github.run_attempt }}
+          path: .cache/ecr-public/
+          if-no-files-found: error
+          retention-days: 14
+  pull:
+    needs: [prepare, publish]
+    runs-on: ${{ matrix.architecture == 'arm64' && 'ubuntu-26.04-arm' || 'ubuntu-26.04' }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.tools_commit }}
+          persist-credentials: false
+      - name: Install anonymous native OCI clients
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y podman skopeo
+      - name: Pull each profile anonymously and verify native child/config digests
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PREPARED: ${{ needs.prepare.outputs.prepared }}
+          ARCHITECTURE: ${{ matrix.architecture }}
+        with:
+          script: |
+            const { nativePull } = await import(process.cwd() + '/scripts/ecr-public.mjs');
+            await nativePull(JSON.parse(process.env.PREPARED).plan,process.env.ARCHITECTURE,context,'.cache/ecr-pull');
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ecr-pull-${{ matrix.architecture }}-${{ github.run_attempt }}
+          path: .cache/ecr-pull/
+          if-no-files-found: error
+          retention-days: 14
+  record:
+    needs: [prepare, publish, pull]
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.tools_commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: ecr-*-${{ github.run_attempt }}
+          path: .cache/ecr-record
+          merge-multiple: true
+      - name: Freeze mirror record only after both native anonymous pulls
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PREPARED: ${{ needs.prepare.outputs.prepared }}
+        with:
+          script: |
+            const { recordMirror } = await import(process.cwd() + '/scripts/ecr-public.mjs');
+            const record = await recordMirror({github,context,plan:JSON.parse(process.env.PREPARED).plan,directory:'.cache/ecr-record'});
+            await core.summary.addHeading('Public ECR distribution complete').addCodeBlock(JSON.stringify(record,null,2),'json').write();

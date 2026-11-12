@@ -61,6 +61,7 @@ Validation covers this patch-version pair on one-node kind clusters with ordinar
 | [Signatures and SBOMs](docs/supply-chain.md) | Cosign trust policy, per-architecture CycloneDX inventories and verification commands for new release contracts. |
 | [Upstream updates](docs/upstream-updates.md) | Automated dependency updates and review policy. |
 | [Release workflow](docs/quay-releases.md) | Quay publication, immutable tags and recovery. |
+| [Amazon ECR Public](docs/ecr-public.md) | Supplemental digest-preserving distribution, AWS OIDC and anonymous native pull verification. |
 
 ## Contributing
 

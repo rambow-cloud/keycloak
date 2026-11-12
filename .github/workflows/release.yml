@@ -273,3 +273,14 @@ jobs:
             const record = p.recordOnly ? p.record : JSON.parse(await require('node:fs/promises').readFile('.cache/publication/record.json','utf8'));
             const result = await requestCatalog({ github, context, core, record });
             await core.summary.addHeading('Quay publication complete').addCodeBlock(JSON.stringify({tag:record.plan.tag,images:record.plan.images,catalog:result},null,2),'json').write();
+  ecr-public:
+    needs: [prepare, record]
+    if: >-
+      !cancelled() && needs.prepare.result == 'success' && needs.prepare.outputs.preview != 'true' &&
+      (needs.record.result == 'success' || fromJSON(needs.prepare.outputs.prepared).complete == true)
+    permissions:
+      contents: write
+      id-token: write
+    uses: ./.github/workflows/ecr-public.yml
+    with:
+      release_tag: ${{ github.event.release.tag_name || inputs.release_tag }}
