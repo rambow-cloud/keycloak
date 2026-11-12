@@ -8,7 +8,12 @@ export function verifyRunningImage({pod,target,next=false,architecture,call}) {
   const imageID=pod.status.containerStatuses[0].imageID;
   const digest=imageID?.match(/sha256:[a-f0-9]{64}$/)?.[0];
   if(!digest) throw Error('CRI did not expose an immutable image identity');
-  const info=JSON.parse(call('podman',['exec','operator-test-control-plane','crictl','--runtime-endpoint','unix:///run/containerd/containerd.sock','--image-endpoint','unix:///run/containerd/containerd.sock','inspecti',imageID]).stdout);
+  const reference=next?target.nextReference:target.reference;
+  if(pod.spec.containers[0].image!==reference) throw Error('Pod uses another image reference');
+  // CRI imageID can retain a temporary import alias which is no longer resolvable.
+  // Resolve the immutable-in-this-run local tag, and separately bind the running
+  // container's actual snapshot parent to the validated uncompressed layer chain.
+  const info=JSON.parse(call('podman',['exec','operator-test-control-plane','crictl','--runtime-endpoint','unix:///run/containerd/containerd.sock','--image-endpoint','unix:///run/containerd/containerd.sock','inspecti',reference]).stdout);
   if(info.status?.id!==expectedConfig) throw Error('Running CRI image config differs from validated native artifact');
   const content=sha=>{
     const bytes=Buffer.from(call('podman',['exec','operator-test-control-plane','ctr','-n','k8s.io','content','get',sha]).stdout);
@@ -16,11 +21,15 @@ export function verifyRunningImage({pod,target,next=false,architecture,call}) {
   };
   const manifest=content(expectedManifest),config=content(expectedConfig);
   if(manifest.config.digest!==expectedConfig||config.os!=='linux'||config.architecture!==architecture||JSON.stringify(config.rootfs.diff_ids)!==JSON.stringify(target.rootfsDiffIds)) throw Error('Running child/config/architecture binding mismatch');
-  if(digest!==expectedManifest&&digest!==expectedConfig) {
-    const wrapper=content(digest);
-    if(!wrapper.manifests?.some(child=>child.digest===expectedManifest&&(!child.platform||child.platform.os==='linux'&&child.platform.architecture===architecture))) throw Error('CRI import index does not contain the validated native child');
-  }
-  return {pod:pod.metadata.name,uid:pod.metadata.uid,imageID,reportedDigest:digest,manifest:expectedManifest,config:expectedConfig,architecture};
+  const containerID=pod.status.containerStatuses[0].containerID?.match(/^containerd:\/\/([a-f0-9]{64})$/)?.[1];
+  if(!containerID) throw Error('Missing running container identity');
+  const container=JSON.parse(call('podman',['exec','operator-test-control-plane','ctr','-n','k8s.io','containers','info',containerID]).stdout);
+  const containerImage=container.Image??container.image,snapshotKey=container.SnapshotKey??container.snapshotKey,snapshotter=container.Snapshotter??container.snapshotter;
+  if(![reference,expectedConfig,imageID].includes(containerImage)||!snapshotKey||!snapshotter) throw Error('Running container image/snapshot binding mismatch: '+JSON.stringify({containerImage,snapshotKey,snapshotter}));
+  const snapshot=JSON.parse(call('podman',['exec','operator-test-control-plane','ctr','-n','k8s.io','snapshots','--snapshotter',snapshotter,'info',snapshotKey]).stdout);
+  const chain=config.rootfs.diff_ids.reduce((parent,child)=>parent?'sha256:'+hash(Buffer.from(parent+' '+child)):child,'');
+  if((snapshot.Parent??snapshot.parent)!==chain) throw Error('Running snapshot differs from validated native rootfs: '+JSON.stringify({actual:snapshot.Parent??snapshot.parent,expected:chain}));
+  return {pod:pod.metadata.name,uid:pod.metadata.uid,imageID,reportedDigest:digest,manifest:expectedManifest,config:expectedConfig,architecture,containerImage,snapshotParent:chain};
 }
 
 export async function loadCandidateImages({profiles,architecture,ciCommit,sourceHead,runId,root,call}) {
