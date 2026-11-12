@@ -28,6 +28,8 @@ test('direct Java experiment places Operator JVM options before the main class a
   assert.equal(cr.spec.db.passwordSecret.name,'database-auth');
   assert.equal(cr.spec.additionalOptions.find(option=>option.name==='db-tls-mode').value,'verify-server');
   assert.equal(cr.spec.http.tlsSecret,'server-tls');assert.equal(container.securityContext.allowPrivilegeEscalation,false);
+  assert.equal(cr.spec.unsupported.podTemplate.spec.securityContext.fsGroup,65532);
+  assert(container.volumeMounts.some(mount=>mount.mountPath==='/opt/keycloak/data'));
   assert.equal(keycloakResource(target).spec.unsupported.podTemplate.spec.containers[0].command,undefined);
  }
 });

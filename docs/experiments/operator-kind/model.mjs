@@ -12,10 +12,14 @@ export function keycloakResource(target,javaOverride=false) {
   const profile=target.profile;
   const container={name:'keycloak',volumeMounts:[{name:'database-ca',mountPath:'/etc/keycloak-test',readOnly:true}],
     securityContext:{runAsNonRoot:true,runAsUser:65532,runAsGroup:65532,allowPrivilegeEscalation:false,capabilities:{drop:['ALL']}}};
+  const podSpec={containers:[container],volumes:[{name:'database-ca',secret:{secretName:'database-ca'}}]};
   if(javaOverride) {
     // Keep Operator-added -D arguments before the Java main class.
     container.command=['/usr/bin/java','@/opt/keycloak/java.options'];
     container.args=['-cp','/opt/keycloak/lib/quarkus-run.jar','io.quarkus.bootstrap.runner.QuarkusEntryPoint','--verbose','start'];
+    container.volumeMounts.push({name:'keycloak-data',mountPath:'/opt/keycloak/data'});
+    podSpec.volumes.push({name:'keycloak-data',emptyDir:{}});
+    podSpec.securityContext={fsGroup:65532,fsGroupChangePolicy:'OnRootMismatch'};
   }
   const url=(profile==='aws'?'jdbc:aws-wrapper:postgresql':'jdbc:postgresql')+'://postgres:5432/keycloak_'+profile+(profile==='aws'?'?wrapperPlugins=':'');
   return {apiVersion:'k8s.keycloak.org/v2beta1',kind:'Keycloak',metadata:{name:profile,namespace:'keycloak'},spec:{
@@ -24,7 +28,7 @@ export function keycloakResource(target,javaOverride=false) {
     http:{tlsSecret:'server-tls'},hostname:{hostname:'https://'+profile+'.keycloak.test'},ingress:{enabled:false},
     resources:{requests:{cpu:'250m',memory:'768Mi'},limits:{cpu:'2',memory:'1536Mi'}},
     additionalOptions:[{name:'db-url',value:url},{name:'db-tls-mode',value:'verify-server'},{name:'db-tls-trust-store-file',value:'/etc/keycloak-test/ca.crt'}],
-    unsupported:{podTemplate:{spec:{containers:[container],volumes:[{name:'database-ca',secret:{secretName:'database-ca'}}]}}}
+    unsupported:{podTemplate:{spec:podSpec}}
   }};
 }
 

@@ -90,6 +90,10 @@ async function snapshot(prefix) {
     for(const container of [...pod.spec.initContainers??[],...pod.spec.containers??[]]) {
       const result=kubectl(['logs',pod.metadata.name,'-c',container.name,'--tail=1500'],{allowFailure:true});
       await save(prefix+'-'+pod.metadata.name+'-'+container.name+'.log',result.stdout+result.stderr);
+      if([...pod.status.initContainerStatuses??[],...pod.status.containerStatuses??[]].some(status=>status.name===container.name&&status.restartCount>0)) {
+        const previous=kubectl(['logs',pod.metadata.name,'-c',container.name,'--previous','--tail=1500'],{allowFailure:true});
+        await save(prefix+'-'+pod.metadata.name+'-'+container.name+'-previous.log',previous.stdout+previous.stderr);
+      }
     }
   }
 }
