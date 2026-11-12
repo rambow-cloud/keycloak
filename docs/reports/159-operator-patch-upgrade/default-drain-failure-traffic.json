@@ -1,0 +1,16 @@
+{
+  "startedAt": "2026-11-12T18:59:35.096Z",
+  "rounds": 95,
+  "requests": 287,
+  "login": 96,
+  "refresh": 96,
+  "userinfo": 95,
+  "failures": [
+    {
+      "at": "2026-11-12T19:00:05.129Z",
+      "message": "socket hang up"
+    }
+  ],
+  "maxLatencyMs": 189,
+  "finishedAt": "2026-11-12T19:00:05.129Z"
+}
