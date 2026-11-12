@@ -1,6 +1,6 @@
 # Native launcher and Operator validation
 
-This unmerged implementation targets the official Keycloak **26.8.2** Operator with the matching prebuilt distribution. Publication and main merge are outside the current authorization. Refer to the branch's final Actions report before claiming validated behavior.
+This unmerged implementation targets the official Keycloak **26.8.2** Operator with the matching prebuilt distribution. Publication and main merge are outside the current authorization. All four native profile/architecture cases passed; see the [retained Actions acceptance report](reports/159-operator/README.md) for exact commits, digests, results and limits.
 
 The entrypoint `/opt/keycloak/bin/kc.sh` is a static Go ELF executable. The build pins the current Go compiler and native archive checksums in `config/launcher.json`, sets `CGO_ENABLED=0`, disables module downloads and rejects a nonnative binary or ELF interpreter segment. Each native binary is tested and compiled once per CI run and reused by core/aws. No Go toolchain is copied into the image.
 

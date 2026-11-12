@@ -1,0 +1,465 @@
+{
+  "schemaVersion": 1,
+  "architecture": "arm64",
+  "branch": "feat/159-go-launcher",
+  "commit": "14f37e9ed920a0f6301cecd3fc80463e08140023",
+  "ciCommit": "1f6d9dd2dd5222b060735c5dd2abe7357a4c005e",
+  "runId": 43253050525,
+  "runAttempt": 1,
+  "inputs": {
+    "keycloakVersion": "26.8.2",
+    "namespace": "keycloak",
+    "operatorResourcesCommit": "79ba77fd65bb05a8300cd1396d6be9806a0f290f",
+    "operator": {
+      "index": "quay.io/keycloak/keycloak-operator@sha256:92cca02f2fcf549cb86c8e3c0d95de0e7016e4e3ffe2d781f174aa730417e80f",
+      "amd64": "sha256:12b68acdf885fcdb5534c6ec2462918ef7f0dc48dc53d4df4d8bb430046138d9",
+      "arm64": "sha256:1169fc8ac43932acdf01f7617955ee3118a1564015b77c121639deac8ba3247b"
+    },
+    "kind": {
+      "version": "0.33.0",
+      "amd64": "aee6151561422756b764a4ae28e7f44cda5af5a9eead3cc9985112b1de8d8e0d",
+      "arm64": "20022bee6cfcd5086cb7234d218e3454e6090022f2a8f55d1fa7fcf42c3867a2"
+    },
+    "node": "docker.io/kindest/node:v1.35.8@sha256:07b2536e30b803ed61d1677a79df6115f798ce64c80f9e22f6ed45afd09323c0",
+    "kubectl": {
+      "version": "1.35.8",
+      "amd64": "874d5e72dbb819f43cff16bcd1e4f8bac5b7f2361fe1e55049b0a6c676fb0cbf",
+      "arm64": "cc749967b62f4422260bc9c0aa7a7c55f45175ae38cb8d95767b5d2b7e04c1fd"
+    }
+  },
+  "database": "docker.io/library/postgres:17-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+  "targets": [
+    {
+      "profile": "core",
+      "reference": "localhost/keycloak-operator-core:candidate",
+      "nextReference": "localhost/keycloak-operator-core:next",
+      "digest": "sha256:6f936ed65c9da29b34978bbe2ca95ead52e4fe72ef1d39ba4cb81288a1322f08",
+      "nextDigest": "sha256:7e63afaab57bf972d1120b384d849260fbbd43d7e30dbba41908e66e27a9615d",
+      "configDigest": "sha256:8792579aafa2d23eda108d134d7b078aa7e17694ce683547172064cfca00aef9",
+      "nextConfigDigest": "sha256:32e60c865ef5616c27a13308cb343eb1a389390310ea849771443bf3816d222c",
+      "launcher": {
+        "schemaVersion": 1,
+        "architecture": "arm64",
+        "goVersion": "1.27.4",
+        "cgoEnabled": false,
+        "staticElf": true,
+        "sourceHash": "3cc9c467486cb8a26e4d852de893fad05987be6556caa308f16330ae5465d9c1",
+        "binarySha256": "0457fa58981138e240f2e227bd36189e07431acbe1438943f6984c13a670e791",
+        "sourceCommit": "1f6d9dd2dd5222b060735c5dd2abe7357a4c005e"
+      },
+      "rootfsDiffIds": [
+        "sha256:588fc061352c22b468925c9fdfe617508b8f36cec21ba064100c007920379a95",
+        "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+        "sha256:53734c0a0ccd83b763333aa115add4f11cbd702f2d207c9b6262f1fc13af4685",
+        "sha256:28450216e6a6ab0501c01018e04330b2311c9432750ae8aef171bea796cae936"
+      ],
+      "archiveSha256": "123223468704267fbb10349aa739817c609f608b52691355e3eda25495922540",
+      "scan": {
+        "headSha": "14f37e9ed920a0f6301cecd3fc80463e08140023",
+        "runId": 43253050525,
+        "runAttempt": 1,
+        "blocking": 0
+      },
+      "derivedChange": "Only cloud.rambow.keycloak.operator-test-revision=2 is added to image config; all filesystem layers, env, command and executable inputs are retained."
+    },
+    {
+      "profile": "aws",
+      "reference": "localhost/keycloak-operator-aws:candidate",
+      "nextReference": "localhost/keycloak-operator-aws:next",
+      "digest": "sha256:4993a6e3e296cc5095da74bb3f9482eb6b7f6ae1d4324ffc9d38f639ab24ddda",
+      "nextDigest": "sha256:2c89cf74c90e7ce3f4a398c9479e2bf14ad97a3142a787c2a1ea8e988ca66358",
+      "configDigest": "sha256:5c8d1de5cdd60d4674a441c81e1634ec509abcf8be7d115bb93c30c919c64428",
+      "nextConfigDigest": "sha256:2082b4198ddf6cbeed35b17edec483e2fab111cd676a33c1d8543f102bcc4f9c",
+      "launcher": {
+        "schemaVersion": 1,
+        "architecture": "arm64",
+        "goVersion": "1.27.4",
+        "cgoEnabled": false,
+        "staticElf": true,
+        "sourceHash": "3cc9c467486cb8a26e4d852de893fad05987be6556caa308f16330ae5465d9c1",
+        "binarySha256": "0457fa58981138e240f2e227bd36189e07431acbe1438943f6984c13a670e791",
+        "sourceCommit": "1f6d9dd2dd5222b060735c5dd2abe7357a4c005e"
+      },
+      "rootfsDiffIds": [
+        "sha256:588fc061352c22b468925c9fdfe617508b8f36cec21ba064100c007920379a95",
+        "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+        "sha256:086c4fe551654bf05b34f57ecbafef7699deb8b1dd417a356fc82cb846d4f8fc",
+        "sha256:60b3f2520feeea0db5817d64f8ca3f95580f868d529fc26ef0c76b5b02c5a19d"
+      ],
+      "archiveSha256": "9df596ba4b3c26282e258073da2226ec6f3706595038fe669f33a9be77ab112e",
+      "scan": {
+        "headSha": "14f37e9ed920a0f6301cecd3fc80463e08140023",
+        "runId": 43253050525,
+        "runAttempt": 1,
+        "blocking": 0
+      },
+      "derivedChange": "Only cloud.rambow.keycloak.operator-test-revision=2 is added to image config; all filesystem layers, env, command and executable inputs are retained."
+    }
+  ],
+  "results": [
+    {
+      "profile": "core",
+      "phase": "stock-operator-launch",
+      "status": "passed",
+      "command": null,
+      "args": [
+        "-Djgroups.bind.address=$(POD_IP)",
+        "--verbose",
+        "start",
+        "--optimized"
+      ],
+      "pods": [
+        {
+          "name": "core-0",
+          "uid": "8c0eec31-0f1c-45d0-a3ce-23293c706030",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:f1730e72aa5030e8d51ddcf9e3858a2fa05c8874b1e3fa025a17b41d8c568ecf"
+        },
+        {
+          "name": "core-1",
+          "uid": "d0f28271-3d73-4578-9e46-a69c3ad4d2b8",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:f1730e72aa5030e8d51ddcf9e3858a2fa05c8874b1e3fa025a17b41d8c568ecf"
+        }
+      ],
+      "identities": [
+        {
+          "pod": "core-0",
+          "uid": "8c0eec31-0f1c-45d0-a3ce-23293c706030",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:f1730e72aa5030e8d51ddcf9e3858a2fa05c8874b1e3fa025a17b41d8c568ecf",
+          "reportedDigest": "sha256:f1730e72aa5030e8d51ddcf9e3858a2fa05c8874b1e3fa025a17b41d8c568ecf",
+          "manifest": "sha256:6f936ed65c9da29b34978bbe2ca95ead52e4fe72ef1d39ba4cb81288a1322f08",
+          "config": "sha256:8792579aafa2d23eda108d134d7b078aa7e17694ce683547172064cfca00aef9",
+          "architecture": "arm64",
+          "containerImage": "localhost/keycloak-operator-core:candidate",
+          "snapshotParent": "sha256:ce536debf6fc00b34a1dd0aa5991006a55044f557a42b9abdec5fb5b9f0b1e3d"
+        },
+        {
+          "pod": "core-1",
+          "uid": "d0f28271-3d73-4578-9e46-a69c3ad4d2b8",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:f1730e72aa5030e8d51ddcf9e3858a2fa05c8874b1e3fa025a17b41d8c568ecf",
+          "reportedDigest": "sha256:f1730e72aa5030e8d51ddcf9e3858a2fa05c8874b1e3fa025a17b41d8c568ecf",
+          "manifest": "sha256:6f936ed65c9da29b34978bbe2ca95ead52e4fe72ef1d39ba4cb81288a1322f08",
+          "config": "sha256:8792579aafa2d23eda108d134d7b078aa7e17694ce683547172064cfca00aef9",
+          "architecture": "arm64",
+          "containerImage": "localhost/keycloak-operator-core:candidate",
+          "snapshotParent": "sha256:ce536debf6fc00b34a1dd0aa5991006a55044f557a42b9abdec5fb5b9f0b1e3d"
+        }
+      ]
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "core",
+      "phase": "restart-recovery",
+      "status": "passed"
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "core",
+      "phase": "realm-import",
+      "status": "passed",
+      "command": [
+        "/opt/keycloak/bin/kc.sh"
+      ],
+      "args": [
+        "--verbose",
+        "import",
+        "--file=/mnt/realm-import/operator-core-realm.json",
+        "--override=false"
+      ],
+      "doneCondition": true,
+      "realm": "operator-core",
+      "podExitCodes": [
+        0
+      ],
+      "runtimeAugmentation": false
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "core",
+      "phase": "auto-image-rolling-update",
+      "status": "passed",
+      "fromDigest": "sha256:6f936ed65c9da29b34978bbe2ca95ead52e4fe72ef1d39ba4cb81288a1322f08",
+      "toDigest": "sha256:7e63afaab57bf972d1120b384d849260fbbd43d7e30dbba41908e66e27a9615d",
+      "oldPods": [
+        {
+          "name": "core-0",
+          "uid": "b13962f1-97f9-43e7-b364-090b700b96d2"
+        },
+        {
+          "name": "core-1",
+          "uid": "d0f28271-3d73-4578-9e46-a69c3ad4d2b8"
+        }
+      ],
+      "newPods": [
+        {
+          "name": "core-0",
+          "uid": "0c05e066-a8a4-489d-84bc-928a5f94488e",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:dab8b7d5bb3e2df38c2a79b549b4b2b2261bb214595c70194288c9762e629591"
+        },
+        {
+          "name": "core-1",
+          "uid": "bc14a649-24b9-4356-aad2-24fc29bd9025",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:dab8b7d5bb3e2df38c2a79b549b4b2b2261bb214595c70194288c9762e629591"
+        }
+      ],
+      "identities": [
+        {
+          "pod": "core-0",
+          "uid": "0c05e066-a8a4-489d-84bc-928a5f94488e",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:dab8b7d5bb3e2df38c2a79b549b4b2b2261bb214595c70194288c9762e629591",
+          "reportedDigest": "sha256:dab8b7d5bb3e2df38c2a79b549b4b2b2261bb214595c70194288c9762e629591",
+          "manifest": "sha256:7e63afaab57bf972d1120b384d849260fbbd43d7e30dbba41908e66e27a9615d",
+          "config": "sha256:32e60c865ef5616c27a13308cb343eb1a389390310ea849771443bf3816d222c",
+          "architecture": "arm64",
+          "containerImage": "localhost/keycloak-operator-core:next",
+          "snapshotParent": "sha256:ce536debf6fc00b34a1dd0aa5991006a55044f557a42b9abdec5fb5b9f0b1e3d"
+        },
+        {
+          "pod": "core-1",
+          "uid": "bc14a649-24b9-4356-aad2-24fc29bd9025",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:dab8b7d5bb3e2df38c2a79b549b4b2b2261bb214595c70194288c9762e629591",
+          "reportedDigest": "sha256:dab8b7d5bb3e2df38c2a79b549b4b2b2261bb214595c70194288c9762e629591",
+          "manifest": "sha256:7e63afaab57bf972d1120b384d849260fbbd43d7e30dbba41908e66e27a9615d",
+          "config": "sha256:32e60c865ef5616c27a13308cb343eb1a389390310ea849771443bf3816d222c",
+          "architecture": "arm64",
+          "containerImage": "localhost/keycloak-operator-core:next",
+          "snapshotParent": "sha256:ce536debf6fc00b34a1dd0aa5991006a55044f557a42b9abdec5fb5b9f0b1e3d"
+        }
+      ],
+      "compatibilityExitCodes": [
+        0,
+        0
+      ],
+      "recreateUpdateUsed": false,
+      "minReadyReplicas": 1,
+      "gracefulShutdownPods": [
+        "core-0",
+        "core-1"
+      ],
+      "traffic": {
+        "startedAt": "2026-11-12T16:02:50.499Z",
+        "rounds": 164,
+        "requests": 492,
+        "login": 164,
+        "refresh": 164,
+        "userinfo": 164,
+        "failures": [],
+        "maxLatencyMs": 845,
+        "finishedAt": "2026-11-12T16:03:45.024Z"
+      }
+    },
+    {
+      "profile": "aws",
+      "phase": "stock-operator-launch",
+      "status": "passed",
+      "command": null,
+      "args": [
+        "-Djgroups.bind.address=$(POD_IP)",
+        "--verbose",
+        "start",
+        "--optimized"
+      ],
+      "pods": [
+        {
+          "name": "aws-0",
+          "uid": "d53dab7c-0bb5-42c9-a142-1f68b670cd1d",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:138274f98cba833d54c29c5a527b579ecc421f2802c7059cf0f497b55e9ef7f0"
+        },
+        {
+          "name": "aws-1",
+          "uid": "4be09a7b-4bc7-42a0-84f2-6bfaef2acf60",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:138274f98cba833d54c29c5a527b579ecc421f2802c7059cf0f497b55e9ef7f0"
+        }
+      ],
+      "identities": [
+        {
+          "pod": "aws-0",
+          "uid": "d53dab7c-0bb5-42c9-a142-1f68b670cd1d",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:138274f98cba833d54c29c5a527b579ecc421f2802c7059cf0f497b55e9ef7f0",
+          "reportedDigest": "sha256:138274f98cba833d54c29c5a527b579ecc421f2802c7059cf0f497b55e9ef7f0",
+          "manifest": "sha256:4993a6e3e296cc5095da74bb3f9482eb6b7f6ae1d4324ffc9d38f639ab24ddda",
+          "config": "sha256:5c8d1de5cdd60d4674a441c81e1634ec509abcf8be7d115bb93c30c919c64428",
+          "architecture": "arm64",
+          "containerImage": "localhost/keycloak-operator-aws:candidate",
+          "snapshotParent": "sha256:f617d0e0469503890f096eb70ff9bc44dc806b85aeef20c71caf124efb9112a1"
+        },
+        {
+          "pod": "aws-1",
+          "uid": "4be09a7b-4bc7-42a0-84f2-6bfaef2acf60",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:138274f98cba833d54c29c5a527b579ecc421f2802c7059cf0f497b55e9ef7f0",
+          "reportedDigest": "sha256:138274f98cba833d54c29c5a527b579ecc421f2802c7059cf0f497b55e9ef7f0",
+          "manifest": "sha256:4993a6e3e296cc5095da74bb3f9482eb6b7f6ae1d4324ffc9d38f639ab24ddda",
+          "config": "sha256:5c8d1de5cdd60d4674a441c81e1634ec509abcf8be7d115bb93c30c919c64428",
+          "architecture": "arm64",
+          "containerImage": "localhost/keycloak-operator-aws:candidate",
+          "snapshotParent": "sha256:f617d0e0469503890f096eb70ff9bc44dc806b85aeef20c71caf124efb9112a1"
+        }
+      ]
+    },
+    {
+      "profile": "aws",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://aws.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "aws",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://aws.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "aws",
+      "phase": "restart-recovery",
+      "status": "passed"
+    },
+    {
+      "profile": "aws",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://aws.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "aws",
+      "phase": "realm-import",
+      "status": "passed",
+      "command": [
+        "/opt/keycloak/bin/kc.sh"
+      ],
+      "args": [
+        "--verbose",
+        "import",
+        "--file=/mnt/realm-import/operator-aws-realm.json",
+        "--override=false"
+      ],
+      "doneCondition": true,
+      "realm": "operator-aws",
+      "podExitCodes": [
+        0
+      ],
+      "runtimeAugmentation": false
+    },
+    {
+      "profile": "aws",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://aws.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "aws",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://aws.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "aws",
+      "phase": "auto-image-rolling-update",
+      "status": "passed",
+      "fromDigest": "sha256:4993a6e3e296cc5095da74bb3f9482eb6b7f6ae1d4324ffc9d38f639ab24ddda",
+      "toDigest": "sha256:2c89cf74c90e7ce3f4a398c9479e2bf14ad97a3142a787c2a1ea8e988ca66358",
+      "oldPods": [
+        {
+          "name": "aws-0",
+          "uid": "97ca87d7-2268-4b71-9167-a193e855f1f1"
+        },
+        {
+          "name": "aws-1",
+          "uid": "4be09a7b-4bc7-42a0-84f2-6bfaef2acf60"
+        }
+      ],
+      "newPods": [
+        {
+          "name": "aws-0",
+          "uid": "c04bd997-f825-4c85-bd0a-7c84cfa002c8",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:6b790080a27631f8c6154ff120647c30d348bac1bbcfb7e56262a2cbe3056fc1"
+        },
+        {
+          "name": "aws-1",
+          "uid": "44378e28-0e67-4d26-8510-f80917fba79c",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:6b790080a27631f8c6154ff120647c30d348bac1bbcfb7e56262a2cbe3056fc1"
+        }
+      ],
+      "identities": [
+        {
+          "pod": "aws-0",
+          "uid": "c04bd997-f825-4c85-bd0a-7c84cfa002c8",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:6b790080a27631f8c6154ff120647c30d348bac1bbcfb7e56262a2cbe3056fc1",
+          "reportedDigest": "sha256:6b790080a27631f8c6154ff120647c30d348bac1bbcfb7e56262a2cbe3056fc1",
+          "manifest": "sha256:2c89cf74c90e7ce3f4a398c9479e2bf14ad97a3142a787c2a1ea8e988ca66358",
+          "config": "sha256:2082b4198ddf6cbeed35b17edec483e2fab111cd676a33c1d8543f102bcc4f9c",
+          "architecture": "arm64",
+          "containerImage": "localhost/keycloak-operator-aws:next",
+          "snapshotParent": "sha256:f617d0e0469503890f096eb70ff9bc44dc806b85aeef20c71caf124efb9112a1"
+        },
+        {
+          "pod": "aws-1",
+          "uid": "44378e28-0e67-4d26-8510-f80917fba79c",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:6b790080a27631f8c6154ff120647c30d348bac1bbcfb7e56262a2cbe3056fc1",
+          "reportedDigest": "sha256:6b790080a27631f8c6154ff120647c30d348bac1bbcfb7e56262a2cbe3056fc1",
+          "manifest": "sha256:2c89cf74c90e7ce3f4a398c9479e2bf14ad97a3142a787c2a1ea8e988ca66358",
+          "config": "sha256:2082b4198ddf6cbeed35b17edec483e2fab111cd676a33c1d8543f102bcc4f9c",
+          "architecture": "arm64",
+          "containerImage": "localhost/keycloak-operator-aws:next",
+          "snapshotParent": "sha256:f617d0e0469503890f096eb70ff9bc44dc806b85aeef20c71caf124efb9112a1"
+        }
+      ],
+      "compatibilityExitCodes": [
+        0,
+        0
+      ],
+      "recreateUpdateUsed": false,
+      "minReadyReplicas": 1,
+      "gracefulShutdownPods": [
+        "aws-0",
+        "aws-1"
+      ],
+      "traffic": {
+        "startedAt": "2026-11-12T16:05:24.309Z",
+        "rounds": 167,
+        "requests": 501,
+        "login": 167,
+        "refresh": 167,
+        "userinfo": 167,
+        "failures": [],
+        "maxLatencyMs": 699,
+        "finishedAt": "2026-11-12T16:06:20.841Z"
+      }
+    }
+  ]
+}
