@@ -8,17 +8,17 @@ Published profiles are OCI indexes selecting native Linux amd64 or arm64. See [r
 
 | Profile | Latest published tag | Image reference |
 | --- | --- | --- |
-| aws | `26.8.2-r3-aws` | `quay.io/rambow-cloud/keycloak:26.8.2-r3-aws` |
-| core | `26.8.2-r3-core` | `quay.io/rambow-cloud/keycloak:26.8.2-r3-core` |
+| aws | `26.8.2-r4-aws` | `quay.io/rambow-cloud/keycloak:26.8.2-r4-aws` |
+| core | `26.8.2-r4-core` | `quay.io/rambow-cloud/keycloak:26.8.2-r4-core` |
 
 Pull a profile with Podman:
 
 ```sh
-podman pull quay.io/rambow-cloud/keycloak:26.8.2-r3-aws
-podman pull quay.io/rambow-cloud/keycloak:26.8.2-r3-core
+podman pull quay.io/rambow-cloud/keycloak:26.8.2-r4-aws
+podman pull quay.io/rambow-cloud/keycloak:26.8.2-r4-core
 ```
 
-Runtime digest updates publish with a [paired CVE comparison](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r3). No `latest` tag is published.
+Current release: [26.8.2-r4 — shell-free Operator support](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r4). Runtime-update revisions retain their [paired CVE comparison contract](docs/distroless-updates.md). No `latest` tag is published.
 
 ## Features
 
