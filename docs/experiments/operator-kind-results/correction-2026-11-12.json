@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "recordedOn": "2026-11-12",
+  "kind": "interpretation-correction",
+  "issue": 154,
+  "sourceRun": 43180568273,
+  "sourceCommit": "7f827179ace83042b38a7b923bda2b9c2eca322e",
+  "supersedesInterpretation": "The Auto-check limitation text in the original native result JSON and historical harness README stating that preview rolling updates were not enabled.",
+  "correction": "Keycloak 26.8.2 defines rolling-updates:v2 as a default, essential feature family. No extra preview feature flag is required. The observed Auto Job failure was Java main-class argument parsing before update-compatibility executed; the test did not demonstrate a disabled feature or a successful rolling upgrade.",
+  "preservedFacts": "Original result files, hashes, executed source, exit codes, startup/import/Auto failure observations and positive HTTPS/database/restart evidence are unchanged.",
+  "evidence": [
+    "https://github.com/keycloak/keycloak/blob/26.8.2/common/src/main/java/org/keycloak/common/Profile.java",
+    "https://www.keycloak.org/docs/26.8.2/upgrading/",
+    "https://github.com/rambow-cloud/keycloak/actions/runs/43180568273"
+  ]
+}

@@ -12,6 +12,8 @@ The published `v26.8.2-r3` images are **not directly compatible with the default
 - Original architecture-bound result files are retained in Git: [amd64](operator-kind-results/amd64.json), [arm64](operator-kind-results/arm64.json). Their SHA-256 values are respectively `9756bc97f1fdd624e1d5f10147a710b8a320ba211af4036c02a6fe7a052c252c` and `15222e6643658e01964df0e7e7a8c3ae6426ae3529e58fdacbd8864b00e21a2f`.
 - Later report-only commits preserve these tested source/run references and do not alter the tested harness or rerun image work.
 
+Interpretation correction (2026-11-12): the original results' Auto-check `limitation` text and the historical harness README incorrectly say that a preview rolling-updates feature was not enabled. In the tagged 26.8.2 source, `ROLLING_UPDATES_V2` is `Type.DEFAULT` and its family is essential. No extra preview flag is required. The observed failure occurred before the compatibility command ran, at Java main-class argument parsing; it did not demonstrate a disabled feature. Original result bytes/hashes and the executed harness are preserved. See the [append-only correction](operator-kind-results/correction-2026-11-12.json) and [tagged feature definitions](https://github.com/keycloak/keycloak/blob/26.8.2/common/src/main/java/org/keycloak/common/Profile.java).
+
 ## Inputs and platform
 
 Both runs used Ubuntu 26.04 native GitHub-hosted runners, kind **0.33.0** with its explicit **Podman** provider, Kubernetes **1.35.8**, the official **26.8.2** Operator, and the already published **26.8.2-r3** core/aws images. The Operator resources commit is `79ba77fd65bb05a8300cd1396d6be9806a0f290f`. Tool checksums, node index and Operator index/children are frozen in [inputs.json](operator-kind/inputs.json). Node architecture and actual running Operator/Keycloak child image IDs were verified against these inputs.
@@ -125,11 +127,11 @@ Error: Could not find or load main class update-compatibility
 Caused by: java.lang.ClassNotFoundException: update-compatibility
 ```
 
-This is a limitation of the tested podTemplate workaround. The test does not show that every shell-free launcher must fail Auto checks. No automatic rolling upgrade was demonstrated, aws Auto was not exercised, and the published images were not built with the preview rolling-updates feature enabled.
+This is a limitation of the tested podTemplate workaround. The test does not show that every shell-free launcher must fail Auto checks. No automatic rolling upgrade was demonstrated and aws Auto was not exercised. Keycloak 26.8.2 enables `rolling-updates:v2` by default; the failed Java invocation did not reach that feature or the compatibility logic.
 
 ## Interpretation and remaining work
 
-The current image is usable for the tested single-instance Operator-managed server only with explicit unsupported CR adaptation. It must not be advertised as an out-of-the-box or fully Operator-compatible image. Full support would need a reviewed launcher contract covering JVM options, the import executable path and optimized-import behavior, update-compatibility invocation, writable runtime data, and the separate build-time requirements of rolling updates. This investigation does not implement that adapter or add a shell.
+The current image is usable for the tested single-instance Operator-managed server only with explicit unsupported CR adaptation. It must not be advertised as an out-of-the-box or fully Operator-compatible image. Full support would need a reviewed launcher contract covering JVM options, the import executable path and optimized-import behavior, update-compatibility invocation, writable runtime data, and actual multi-replica rolling-update validation. This investigation does not implement that adapter or add a shell.
 
 The aws profile used its existing AWS JDBC wrapper with plugins disabled against local TLS-only PostgreSQL. No RDS IAM, AWS API, Aurora/PolarDB failover, Kubernetes HA, multi-node behavior, OpenShift, FIPS, runtime reaugmentation or new vulnerability scan was tested. HTTPS used a private test CA with normal hostname/certificate verification. No test credentials, private keys, kubeconfig, Secret objects or JWTs are retained in the result files; downloaded sanitized artifacts were checked for private-key material, Secret resources and JWTs before retaining the JSON summaries.
 
