@@ -1,4 +1,4 @@
-import {readFile,writeFile} from 'node:fs/promises';
+import {readFile,writeFile,copyFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {join} from 'node:path';
 import {inspectCompatibility} from '../../../scripts/lib/upstream.mjs';
@@ -12,21 +12,42 @@ export async function historicalUpgradeTargets({targets,architecture,root,eviden
   if(review.warnings.length) throw Error('Historical launcher/Java review failed: '+review.warnings.join('; '));
   call('node',['scripts/launcher.mjs','--require-existing']);
   const binary=await readFile('.cache/launcher/keycloak-launcher');
+  const addition=join(root,'launcher-addition'),additionReference='localhost/keycloak-operator-launcher:layer';
+  call('buildah',['build','--format','oci','--platform','linux/'+architecture,'--tag',additionReference,'--file','tests/operator/upgrade/Containerfile','.'],{timeout:300000});
+  call('skopeo',['copy','--preserve-digests','containers-storage:'+additionReference,'oci:'+addition+':candidate'],{timeout:300000});
+  const addedIndex=JSON.parse(await readFile(join(addition,'index.json'),'utf8'));
+  const addedManifest=JSON.parse(await readFile(join(addition,'blobs/sha256',addedIndex.manifests[0].digest.slice(7)),'utf8'));
+  const addedConfig=JSON.parse(await readFile(join(addition,'blobs/sha256',addedManifest.config.digest.slice(7)),'utf8'));
+  if(addedManifest.layers.length!==1||addedConfig.rootfs.diff_ids.length!==1||addedConfig.architecture!==architecture) throw Error('Expected one native additive launcher layer');
   const upgraded=[];
   for(const target of targets) {
     if(target.launcher.binarySha256!==hash(binary).slice(7)||target.launcher.sourceCommit!==ciCommit) throw Error('Historical fixture launcher is not the destination native artifact');
     const published=record.plan.images.find(image=>image.profile===target.profile);
     const parent=published.children.find(child=>child.architecture===architecture).digest;
     const source='quay.io/rambow-cloud/keycloak@'+parent;
-    const manifestBytes=Buffer.from(call('skopeo',['inspect','--raw','docker://'+source]).stdout);
-    const configBytes=Buffer.from(call('skopeo',['inspect','--raw','--config','docker://'+source]).stdout);
+    const reference='localhost/keycloak-operator-'+target.profile+':previous',layout=join(root,target.profile+'-previous'),output=join(root,target.profile+'-previous.tar');
+    call('skopeo',['copy','--preserve-digests','docker://'+source,'oci:'+layout+':candidate'],{timeout:300000});
+    const manifestBytes=await readFile(join(layout,'blobs/sha256',parent.slice(7)));
+    const configBytes=await readFile(join(layout,'blobs/sha256',JSON.parse(manifestBytes).config.digest.slice(7)));
     const parentManifest=JSON.parse(manifestBytes),parentConfig=JSON.parse(configBytes);
     if(hash(manifestBytes)!==parent||hash(configBytes)!==parentManifest.config.digest||parentConfig.architecture!==architecture||parentConfig.os!=='linux'||parentConfig.config.Labels?.['org.opencontainers.image.version']!=='26.8.1') throw Error('Historical published child identity mismatch');
-    const reference='localhost/keycloak-operator-'+target.profile+':previous',layout=join(root,target.profile+'-previous'),output=join(root,target.profile+'-previous.tar');
-    call('buildah',['build','--format','oci','--platform','linux/'+architecture,'--build-arg','SOURCE_IMAGE='+source,'--tag',reference,'--file','tests/operator/upgrade/Containerfile','.'],{timeout:300000});
-    call('skopeo',['copy','--preserve-digests','containers-storage:'+reference,'oci:'+layout+':candidate'],{timeout:300000});
     const index=JSON.parse(await readFile(join(layout,'index.json'),'utf8'));
     if(index.manifests.length!==1) throw Error('Historical fixture must have one native child');
+    // Keep every published compressed blob/descriptor and config field except
+    // the bounded entrypoint plus append-only rootfs/history for the launcher.
+    const composedConfig=structuredClone(parentConfig);
+    composedConfig.config.Entrypoint=['/opt/keycloak/bin/kc.sh'];composedConfig.config.Cmd=['start','--optimized'];
+    composedConfig.rootfs.diff_ids.push(...addedConfig.rootfs.diff_ids);
+    composedConfig.history=[...parentConfig.history??[],{created:addedConfig.created,created_by:'Buildah native static launcher layer; historical fixture only'}];
+    const composedConfigBytes=Buffer.from(JSON.stringify(composedConfig)),composedConfigDigest=hash(composedConfigBytes);
+    const composedManifest=structuredClone(parentManifest);
+    composedManifest.layers.push(...addedManifest.layers);composedManifest.config={...parentManifest.config,digest:composedConfigDigest,size:composedConfigBytes.length};
+    const composedManifestBytes=Buffer.from(JSON.stringify(composedManifest)),composedDigest=hash(composedManifestBytes);
+    await copyFile(join(addition,'blobs/sha256',addedManifest.layers[0].digest.slice(7)),join(layout,'blobs/sha256',addedManifest.layers[0].digest.slice(7)));
+    await writeFile(join(layout,'blobs/sha256',composedConfigDigest.slice(7)),composedConfigBytes);
+    await writeFile(join(layout,'blobs/sha256',composedDigest.slice(7)),composedManifestBytes);
+    index.manifests[0]={...index.manifests[0],digest:composedDigest,size:composedManifestBytes.length};
+    await writeFile(join(layout,'index.json'),JSON.stringify(index));
     const digest=index.manifests[0].digest,fixtureBytes=await readFile(join(layout,'blobs/sha256',digest.slice(7))),manifest=JSON.parse(fixtureBytes);
     const fixtureConfigBytes=await readFile(join(layout,'blobs/sha256',manifest.config.digest.slice(7))),config=JSON.parse(fixtureConfigBytes);
     if(hash(fixtureBytes)!==digest||hash(fixtureConfigBytes)!==manifest.config.digest||config.architecture!==architecture||config.config.User!=='65532:65532'||
