@@ -3,9 +3,9 @@
   "changes": [
     {
       "type": "maintenance",
-      "summary": "Refresh builder digest from 95e350ad1eb738f9 to 80f67fb3d6f76e2d.",
+      "summary": "Refresh keycloak digest from 723b1d6e254c0fc9 to c68e286cacd87b94.",
       "issues": [
-        156
+        161
       ],
       "profiles": [
         "core",
