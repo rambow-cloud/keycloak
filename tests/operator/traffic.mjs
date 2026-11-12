@@ -15,7 +15,9 @@ process.on('message',async message=>{
         if(response.statusCode!==200) return reject(Error('HTTP '+response.statusCode+' '+path));
         try {resolve(JSON.parse(Buffer.concat(parts).toString('utf8')));}catch {reject(Error('Non-JSON response'));}
       });
-    });req.setTimeout(5000,()=>req.destroy(Error('Request timeout')));req.on('error',reject);req.end(body);
+    });req.setTimeout(5000,()=>req.destroy(Error('Request timeout')));
+    req.on('error',error=>reject(Error(error.message+'; '+(body?'POST':'GET')+' '+path+'; code='+(error.code??'unknown')+'; reusedSocket='+req.reusedSocket)));
+    req.end(body);
   });
   const endpoint='/realms/'+realm+'/protocol/openid-connect/';
   let session;

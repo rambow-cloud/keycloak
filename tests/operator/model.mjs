@@ -3,7 +3,7 @@ export function keycloakResource(target) {
   const container={name:'keycloak',volumeMounts:[{name:'database-ca',mountPath:'/etc/keycloak-test',readOnly:true}],
     imagePullPolicy:'Never',securityContext:{runAsNonRoot:true,runAsUser:65532,runAsGroup:65532,readOnlyRootFilesystem:true,allowPrivilegeEscalation:false,capabilities:{drop:['ALL']}}};
   container.volumeMounts.push({name:'keycloak-data',mountPath:'/opt/keycloak/data'},{name:'temporary',mountPath:'/tmp'});
-  const podSpec={containers:[container],volumes:[{name:'database-ca',secret:{secretName:'database-ca'}},{name:'keycloak-data',emptyDir:{}},{name:'temporary',emptyDir:{}}],
+  const podSpec={containers:[container],terminationGracePeriodSeconds:120,volumes:[{name:'database-ca',secret:{secretName:'database-ca'}},{name:'keycloak-data',emptyDir:{}},{name:'temporary',emptyDir:{}}],
     securityContext:{fsGroup:65532,fsGroupChangePolicy:'OnRootMismatch'}};
   const url=(profile==='aws'?'jdbc:aws-wrapper:postgresql':'jdbc:postgresql')+'://postgres:5432/keycloak_'+profile+(profile==='aws'?'?wrapperPlugins=':'');
   return {apiVersion:'k8s.keycloak.org/v2beta1',kind:'Keycloak',metadata:{name:profile,namespace:'keycloak'},spec:{
@@ -11,7 +11,8 @@ export function keycloakResource(target) {
     db:{vendor:'postgres',host:'postgres',database:'keycloak_'+profile,usernameSecret:{name:'database-auth',key:'username'},passwordSecret:{name:'database-auth',key:'password'}},
     http:{tlsSecret:'server-tls'},hostname:{hostname:'https://'+profile+'.keycloak.test'},ingress:{enabled:false},
     resources:{requests:{cpu:'250m',memory:'768Mi'},limits:{cpu:'2',memory:'1536Mi'}},
-    additionalOptions:[{name:'db-url',value:url},{name:'db-tls-mode',value:'verify-server'},{name:'db-tls-trust-store-file',value:'/etc/keycloak-test/ca.crt'}],
+    additionalOptions:[{name:'db-url',value:url},{name:'db-tls-mode',value:'verify-server'},{name:'db-tls-trust-store-file',value:'/etc/keycloak-test/ca.crt'},
+      {name:'shutdown-delay',value:'30s'},{name:'shutdown-timeout',value:'10s'}],
     unsupported:{podTemplate:{spec:podSpec}}
   }};
 }
