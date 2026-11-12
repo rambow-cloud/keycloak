@@ -199,7 +199,7 @@ try {
   call('git',['init',upstream]);call('git',['-C',upstream,'remote','add','origin','https://github.com/keycloak/keycloak-k8s-resources.git']);
   call('git',['-C',upstream,'fetch','--depth=1','origin',inputs.operatorResourcesCommit]);call('git',['-C',upstream,'checkout','--detach','FETCH_HEAD']);
   if(call('git',['-C',upstream,'rev-parse','HEAD']).stdout.trim()!==inputs.operatorResourcesCommit) throw Error('Operator resource commit mismatch');
-  await writeFile(join(root,'kustomization.json'),JSON.stringify({apiVersion:'kustomize.config.k8s.io/v1beta1',kind:'Kustomization',resources:['./upstream/kubernetes'],
+  await writeFile(join(root,'kustomization.yaml'),JSON.stringify({apiVersion:'kustomize.config.k8s.io/v1beta1',kind:'Kustomization',resources:['./upstream/kubernetes'],
     images:[{name:'quay.io/keycloak/keycloak-operator',newName:'quay.io/keycloak/keycloak-operator',digest:inputs.operator[architecture]}]}));
   call('kubectl',['create','namespace','keycloak']);call('kubectl',['apply','-k',root]);
   call('kubectl',['wait','--for=condition=Established','crd/keycloaks.k8s.keycloak.org','crd/keycloakrealmimports.k8s.keycloak.org','--timeout=60s']);
