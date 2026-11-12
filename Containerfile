@@ -35,7 +35,7 @@ RUN /opt/keycloak/bin/kc.sh build --tracing-enabled=true
 FROM source AS core-builder
 RUN /opt/keycloak/bin/kc.sh build --tracing-enabled=false
 USER 0
-RUN rm -rf /opt/keycloak/bin && mkdir -p /opt/keycloak/data && chmod -R a+rX /opt/keycloak
+RUN rm -rf /opt/keycloak/bin /opt/keycloak/data && chmod -R a+rX /opt/keycloak
 
 FROM source AS aws-builder
 COPY .cache/aws/providers/ /opt/keycloak/providers/
@@ -44,22 +44,24 @@ RUN javac -cp '/opt/keycloak/providers/*:/opt/keycloak/lib/lib/main/*' -d /tmp /
     && java -cp '/tmp:/opt/keycloak/providers/*:/opt/keycloak/lib/lib/main/*' AwsHttpTransport
 ENV KC_DB_DRIVER=software.amazon.jdbc.Driver KC_TRANSACTION_XA_ENABLED=false
 RUN /opt/keycloak/bin/kc.sh build --tracing-enabled=false
-RUN rm -rf /opt/keycloak/bin && mkdir -p /opt/keycloak/data && chmod -R a+rX /opt/keycloak
+RUN rm -rf /opt/keycloak/bin /opt/keycloak/data && chmod -R a+rX /opt/keycloak
 
 FROM ${RUNTIME_IMAGE} AS runtime
 COPY --chown=0:0 config/java.options /opt/keycloak/java.options
+COPY --chown=0:0 --chmod=0755 .cache/launcher/keycloak-launcher /opt/keycloak/bin/kc.sh
 ENV KC_DB=postgres KC_HEALTH_ENABLED=true KC_METRICS_ENABLED=true \
     JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=70 -XX:MinRAMPercentage=70 -XX:InitialRAMPercentage=50"
 WORKDIR /opt/keycloak
 USER 65532:65532
-VOLUME ["/tmp", "/opt/keycloak/data"]
+VOLUME ["/tmp"]
 EXPOSE 8080 8443 9000
-ENTRYPOINT ["/usr/bin/java", "@/opt/keycloak/java.options", "-cp", "/opt/keycloak/lib/quarkus-run.jar", "io.quarkus.bootstrap.runner.QuarkusEntryPoint"]
+ENTRYPOINT ["/opt/keycloak/bin/kc.sh"]
 CMD ["start", "--optimized"]
 
 FROM runtime AS aws
 COPY --from=aws-builder --chown=0:0 /opt/keycloak /opt/keycloak
-COPY --from=aws-builder --chown=65532:65532 /opt/keycloak/data /opt/keycloak/data
+COPY --chown=65532:65532 config/runtime-data/ /opt/keycloak/
+VOLUME ["/opt/keycloak/data"]
 COPY --chown=0:0 .cache/aws/certs/rds-ca-bundle.pem /opt/keycloak/certs/rds-ca-bundle.pem
 ENV KC_DB_DRIVER=software.amazon.jdbc.Driver KC_TRANSACTION_XA_ENABLED=false \
     KC_DB_TLS_MODE=verify-server KC_DB_TLS_TRUST_STORE_FILE=/opt/keycloak/certs/rds-ca-bundle.pem
@@ -67,4 +69,5 @@ ENV KC_DB_DRIVER=software.amazon.jdbc.Driver KC_TRANSACTION_XA_ENABLED=false \
 # Keep the generic image as the default final target for direct Containerfile users.
 FROM runtime AS core
 COPY --from=core-builder --chown=0:0 /opt/keycloak /opt/keycloak
-COPY --from=core-builder --chown=65532:65532 /opt/keycloak/data /opt/keycloak/data
+COPY --chown=65532:65532 config/runtime-data/ /opt/keycloak/
+VOLUME ["/opt/keycloak/data"]

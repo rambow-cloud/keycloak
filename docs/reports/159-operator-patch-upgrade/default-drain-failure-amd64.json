@@ -1,0 +1,764 @@
+{
+  "schemaVersion": 1,
+  "architecture": "amd64",
+  "branch": "feat/159-go-launcher",
+  "commit": "78e70d57a59a2892d0f8f0d618228d5e5eed3e79",
+  "ciCommit": "a8ca16f25419c592cba8cd35af55276e326f3ded",
+  "runId": 43284141540,
+  "runAttempt": 1,
+  "inputs": {
+    "keycloakVersion": "26.8.2",
+    "namespace": "keycloak",
+    "operatorResourcesCommit": "79ba77fd65bb05a8300cd1396d6be9806a0f290f",
+    "operator": {
+      "index": "quay.io/keycloak/keycloak-operator@sha256:92cca02f2fcf549cb86c8e3c0d95de0e7016e4e3ffe2d781f174aa730417e80f",
+      "amd64": "sha256:12b68acdf885fcdb5534c6ec2462918ef7f0dc48dc53d4df4d8bb430046138d9",
+      "arm64": "sha256:1169fc8ac43932acdf01f7617955ee3118a1564015b77c121639deac8ba3247b"
+    },
+    "kind": {
+      "version": "0.33.0",
+      "amd64": "aee6151561422756b764a4ae28e7f44cda5af5a9eead3cc9985112b1de8d8e0d",
+      "arm64": "20022bee6cfcd5086cb7234d218e3454e6090022f2a8f55d1fa7fcf42c3867a2"
+    },
+    "node": "docker.io/kindest/node:v1.35.8@sha256:07b2536e30b803ed61d1677a79df6115f798ce64c80f9e22f6ed45afd09323c0",
+    "kubectl": {
+      "version": "1.35.8",
+      "amd64": "874d5e72dbb819f43cff16bcd1e4f8bac5b7f2361fe1e55049b0a6c676fb0cbf",
+      "arm64": "cc749967b62f4422260bc9c0aa7a7c55f45175ae38cb8d95767b5d2b7e04c1fd"
+    }
+  },
+  "database": "docker.io/library/postgres:17-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+  "targets": [
+    {
+      "profile": "core",
+      "reference": "localhost/keycloak-operator-core:previous",
+      "nextReference": "localhost/keycloak-operator-core:candidate",
+      "digest": "sha256:51ffab5286f7ba12e86fe2692359482d849cd5bd91fe29ae1ab22aff03d39680",
+      "nextDigest": "sha256:6aeccbbc2fba4934cf1762f79bd5e38cadb7b77a400cb723b1f3c8a4c5c0d601",
+      "configDigest": "sha256:a8f10c5e16dc4b92b5becc5e3f1e29ea548e2f009d7c5f825ede598582b4c167",
+      "nextConfigDigest": "sha256:aab659e3a0e5999d7ddcc99d8bb59f734b94724b8955925b7b695c0ac6678fcc",
+      "launcher": {
+        "schemaVersion": 1,
+        "architecture": "amd64",
+        "goVersion": "1.27.4",
+        "cgoEnabled": false,
+        "staticElf": true,
+        "sourceHash": "3cc9c467486cb8a26e4d852de893fad05987be6556caa308f16330ae5465d9c1",
+        "binarySha256": "0adc090187cfe9e1724a273c9a9c1164f107ba5facc3d814390772508fa0b007",
+        "sourceCommit": "a8ca16f25419c592cba8cd35af55276e326f3ded"
+      },
+      "rootfsDiffIds": [
+        "sha256:9486261b5a13f63ca6904b36721527ac8f19df53d300560138d69ae9b4c203de",
+        "sha256:621c35e751a51a9a9dc3e80aa0b7fe8be2a93402ea6ccd307d30852cd7776cda",
+        "sha256:b64fe4bb89ff075efc03878811052cbaf4f9dd891aed968e9ed6993fedf1f4a7",
+        "sha256:b5764396d8d3f88c6c91b8e97022f147ec721afcf85710d96775922e0df881af",
+        "sha256:275a30dd8ce958b21daa9ad962c6fbc09f98306ee2f486b65c9075dc257b1412",
+        "sha256:4d049f83d9cf21d1f5cc0e11deaf36df02790d0e60c1a3829538fb4b61685368",
+        "sha256:af5aa97ebe6ce1604747ec1e21af7136ded391bcabe4acef882e718a87c86bcc",
+        "sha256:6f1cdceb6a3146f0ccb986521156bef8a422cdbb0863396f7f751f575ba308f4",
+        "sha256:bd3cdfae1d3fdd83a2231d608969b38b82349777c2fff9a7c12d54f8ac5c9b38",
+        "sha256:4cde6b0bb6f50a5f255eef7b2a42162c661cf776b803225dcac9a659e396bb6b",
+        "sha256:ad51d0769d16ba578106a177987dfe3d2e02c1668c852b795b2f6b024068242a",
+        "sha256:187cfc6d1e3e8a40a5e64653bcd3239c140807dcf1c09e48021178705a5a6139",
+        "sha256:0762a1f6557d1e88a761ab05aa7f65a10dc0e559913ea13befb873d907e1a396",
+        "sha256:8a3b315d45080ecb38e39d42d28e951303c67c2ce7482bcdbbc3b5424be19013",
+        "sha256:e4ba966d7f0527dfe0fcb559e4e18d4da42c4e6beae924719255e0dedb554ed0",
+        "sha256:ed866e58bebf5b90b1db471f4eff229d62dd0682a8b3abb727776c425e93f0b6",
+        "sha256:29d492a034557b4b338ab6ef33e3f1ecfaaa340ff721aae0776149b59cc7052d",
+        "sha256:6c4a78b210237270efb567d7d2542b190c77c20d44adefbc3496d2d085d271e4",
+        "sha256:0cd351bd16de499bf614cf9e35cd1b64e61272119b38dbc95e5eae87163c1f7e",
+        "sha256:a2195e8a560e78570f0ab99b60ee87df454da67fd8d44b49769d007b2a294d92",
+        "sha256:d7e3714f0a7e51c406d3677891a1a0964ea84cd9d2a5d9083db23f55ca974d63",
+        "sha256:d729025149d33e1372a0056f6a791f963d4508abe5fa430109194e31052f291f",
+        "sha256:b6a57a357229275f8cba973b46db4d91dff2c73e8152adabe6d38a17e837e270",
+        "sha256:9c6a905dd4aedbf2544d7f2e1e2d13bd0377d3077e54b94346676dd0ed2b063f",
+        "sha256:6db791322bfcbc72dc54aa46d012ef46a2314819ec9cc28904e9091b4b94e63e",
+        "sha256:6e18ad80f3d64a8cbbcd1ff2e8a0d5ce7282cf664e816b86183a59d30a618e8a",
+        "sha256:c16b2ec4b1493bad1b1de23d659c899e60abb166bda756d02792f0a03ba54a43",
+        "sha256:7db505d90756626f425c6c5468eca565c82f589b144ecaa4f411ad9bbf79e614",
+        "sha256:382ca0f951d4ef69fd736380747f9e1f02161c6dc94af74dafcf96de4466c9d9",
+        "sha256:953871f68b73a0c29f9268de527a33d56fb21e904f9b3b9a52281ead677a015a",
+        "sha256:98227d7e6e3f34aa1cc40516e87587b4107366befc5c74a88b1f7aa5a78dacbd",
+        "sha256:f998043f43bd1599209638d60163e7f5f36a1ce7acdca0f4ea5f83926dafd4ed",
+        "sha256:be4946483c6f4c9c5f5163cb8a1827089c3c20041b293826897bb86bf4e50e3b",
+        "sha256:5fd9b486a88397b3b78535f3d12ed8c79c4ed00cabecf9a5a113a41398ae3cd4",
+        "sha256:71299c933567c6f5f5dfc3b8976bf7f7dd6beda4180a2fadcbaa3ba94ef84379",
+        "sha256:83c0532ffcf76e4514a428fa8df8b25acd6750d5e7b0402e6c3c5f8e9f4628c1",
+        "sha256:964976acad2a95841a3ac672e276a62622a43366bd106a071982260c6590b41c"
+      ],
+      "archiveSha256": "3fd8ee5c830e9bbe08b4d03dd30eb51edceb385f26305b86b14c799290558612",
+      "scan": {
+        "headSha": "78e70d57a59a2892d0f8f0d618228d5e5eed3e79",
+        "runId": 43284141540,
+        "runAttempt": 1,
+        "blocking": 0
+      },
+      "derivedChange": "Historical 26.8.1-r5 child plus the same static Go launcher only; destination is the exact current-run gated 26.8.2 artifact.",
+      "currentVersion": "26.8.1",
+      "nextVersion": "26.8.2",
+      "nextRootfsDiffIds": [
+        "sha256:bbc872d66e0e5be46bb28cf3927a06197e0b2c8f22531cf2f79eba9c8d31529f",
+        "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+        "sha256:5cdf5b5a6144995845efb555e1add64e162007ee7e9d8e51e52350a092d19526",
+        "sha256:f2559bfd7becb00cf7f868559d563b95d47fb83783863a15b95065fd373ee75a"
+      ],
+      "destination": {
+        "version": "26.8.2",
+        "digest": "sha256:6aeccbbc2fba4934cf1762f79bd5e38cadb7b77a400cb723b1f3c8a4c5c0d601",
+        "configDigest": "sha256:aab659e3a0e5999d7ddcc99d8bb59f734b94724b8955925b7b695c0ac6678fcc",
+        "archiveSha256": "8749e42d3aa14ed2fd0677c678608e5b1c2733b153726ffe0a4fe36110bf534d",
+        "scan": {
+          "headSha": "78e70d57a59a2892d0f8f0d618228d5e5eed3e79",
+          "runId": 43284141540,
+          "runAttempt": 1,
+          "blocking": 0
+        }
+      },
+      "historicalSource": {
+        "release": "v26.8.1-r5",
+        "publishedTag": "26.8.1-r5-core",
+        "parentDigest": "sha256:c0125fa1b8c4023f0af289bc32e53f65eece9d6c314da19e9dc92fb98eb13ca9",
+        "parentConfigDigest": "sha256:c625ac30cc1fdf6b1acc95a8bf512308bd4ede5439b98e5183e4fb8e839161a1",
+        "fixtureDigest": "sha256:51ffab5286f7ba12e86fe2692359482d849cd5bd91fe29ae1ab22aff03d39680",
+        "retainedParentLayers": 36,
+        "addedLauncherLayers": 1,
+        "launcherSha256": "0adc090187cfe9e1724a273c9a9c1164f107ba5facc3d814390772508fa0b007",
+        "startupReview": {
+          "startupHash": "5f68e52cc8f86336b4b674e48a465ca9249e27dd4ba5aafa126437b648020afe",
+          "supported": [
+            17,
+            21,
+            25
+          ],
+          "warnings": []
+        },
+        "historicalScan": {
+          "schemaVersion": 2,
+          "profile": "core",
+          "architecture": "amd64",
+          "headSha": "78e70d57a59a2892d0f8f0d618228d5e5eed3e79",
+          "runId": 43284141540,
+          "runAttempt": 1,
+          "status": "complete",
+          "scannerVersion": "0.76.1",
+          "createdAt": "2026-11-12T18:56:54.282238037Z",
+          "policy": {
+            "blockingSeverities": [
+              "HIGH",
+              "CRITICAL"
+            ],
+            "blockUnfixed": false
+          },
+          "counts": {
+            "CRITICAL": {
+              "total": 0,
+              "fixable": 0
+            },
+            "HIGH": {
+              "total": 10,
+              "fixable": 2
+            },
+            "MEDIUM": {
+              "total": 51,
+              "fixable": 4
+            },
+            "LOW": {
+              "total": 24,
+              "fixable": 1
+            },
+            "UNKNOWN": {
+              "total": 5,
+              "fixable": 0
+            }
+          },
+          "total": 90,
+          "blocking": 2,
+          "osEosl": false,
+          "findings": [
+            {
+              "id": "CVE-2026-76844",
+              "package": "zlib1g",
+              "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+              "fixed": "1:1.3.dfsg+really1.3.1-1+deb13u1",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-85091",
+              "package": "zlib1g",
+              "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+              "fixed": "1:1.3.dfsg+really1.3.1-1+deb13u1",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-113351",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-115506",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-117610",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-118370",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-76642",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2025-66382",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-102010",
+              "package": "gcc-14-base",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-102010",
+              "package": "libgcc-s1",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-102010",
+              "package": "libstdc++6",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114690",
+              "package": "gcc-14-base",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114690",
+              "package": "libgcc-s1",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114690",
+              "package": "libstdc++6",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114691",
+              "package": "gcc-14-base",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114691",
+              "package": "libgcc-s1",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114691",
+              "package": "libstdc++6",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/core-previous (debian 13.7)"
+            }
+          ]
+        },
+        "publishEligible": false
+      }
+    },
+    {
+      "profile": "aws",
+      "reference": "localhost/keycloak-operator-aws:previous",
+      "nextReference": "localhost/keycloak-operator-aws:candidate",
+      "digest": "sha256:8491ff54360dd4e47786db4d795af35b50f1dbbc5ba1d7b80b5dcfa59166fad4",
+      "nextDigest": "sha256:3692541565749c73a5c81707e88efeae48edf8d150d6cfa30dbed7786931ca28",
+      "configDigest": "sha256:9fd617ee4b664a07b349661d19685f5e0a9cbc0f54100011a95f455b235be757",
+      "nextConfigDigest": "sha256:1bacdebc33f8ac7f223113817be1b4bf0ed04da0167d3b52ce7f67dbce89c8d5",
+      "launcher": {
+        "schemaVersion": 1,
+        "architecture": "amd64",
+        "goVersion": "1.27.4",
+        "cgoEnabled": false,
+        "staticElf": true,
+        "sourceHash": "3cc9c467486cb8a26e4d852de893fad05987be6556caa308f16330ae5465d9c1",
+        "binarySha256": "0adc090187cfe9e1724a273c9a9c1164f107ba5facc3d814390772508fa0b007",
+        "sourceCommit": "a8ca16f25419c592cba8cd35af55276e326f3ded"
+      },
+      "rootfsDiffIds": [
+        "sha256:9486261b5a13f63ca6904b36721527ac8f19df53d300560138d69ae9b4c203de",
+        "sha256:621c35e751a51a9a9dc3e80aa0b7fe8be2a93402ea6ccd307d30852cd7776cda",
+        "sha256:b64fe4bb89ff075efc03878811052cbaf4f9dd891aed968e9ed6993fedf1f4a7",
+        "sha256:b5764396d8d3f88c6c91b8e97022f147ec721afcf85710d96775922e0df881af",
+        "sha256:275a30dd8ce958b21daa9ad962c6fbc09f98306ee2f486b65c9075dc257b1412",
+        "sha256:4d049f83d9cf21d1f5cc0e11deaf36df02790d0e60c1a3829538fb4b61685368",
+        "sha256:af5aa97ebe6ce1604747ec1e21af7136ded391bcabe4acef882e718a87c86bcc",
+        "sha256:6f1cdceb6a3146f0ccb986521156bef8a422cdbb0863396f7f751f575ba308f4",
+        "sha256:bd3cdfae1d3fdd83a2231d608969b38b82349777c2fff9a7c12d54f8ac5c9b38",
+        "sha256:4cde6b0bb6f50a5f255eef7b2a42162c661cf776b803225dcac9a659e396bb6b",
+        "sha256:ad51d0769d16ba578106a177987dfe3d2e02c1668c852b795b2f6b024068242a",
+        "sha256:187cfc6d1e3e8a40a5e64653bcd3239c140807dcf1c09e48021178705a5a6139",
+        "sha256:0762a1f6557d1e88a761ab05aa7f65a10dc0e559913ea13befb873d907e1a396",
+        "sha256:8a3b315d45080ecb38e39d42d28e951303c67c2ce7482bcdbbc3b5424be19013",
+        "sha256:e4ba966d7f0527dfe0fcb559e4e18d4da42c4e6beae924719255e0dedb554ed0",
+        "sha256:ed866e58bebf5b90b1db471f4eff229d62dd0682a8b3abb727776c425e93f0b6",
+        "sha256:29d492a034557b4b338ab6ef33e3f1ecfaaa340ff721aae0776149b59cc7052d",
+        "sha256:6c4a78b210237270efb567d7d2542b190c77c20d44adefbc3496d2d085d271e4",
+        "sha256:0cd351bd16de499bf614cf9e35cd1b64e61272119b38dbc95e5eae87163c1f7e",
+        "sha256:a2195e8a560e78570f0ab99b60ee87df454da67fd8d44b49769d007b2a294d92",
+        "sha256:d7e3714f0a7e51c406d3677891a1a0964ea84cd9d2a5d9083db23f55ca974d63",
+        "sha256:d729025149d33e1372a0056f6a791f963d4508abe5fa430109194e31052f291f",
+        "sha256:b6a57a357229275f8cba973b46db4d91dff2c73e8152adabe6d38a17e837e270",
+        "sha256:9c6a905dd4aedbf2544d7f2e1e2d13bd0377d3077e54b94346676dd0ed2b063f",
+        "sha256:6db791322bfcbc72dc54aa46d012ef46a2314819ec9cc28904e9091b4b94e63e",
+        "sha256:6e18ad80f3d64a8cbbcd1ff2e8a0d5ce7282cf664e816b86183a59d30a618e8a",
+        "sha256:c16b2ec4b1493bad1b1de23d659c899e60abb166bda756d02792f0a03ba54a43",
+        "sha256:7db505d90756626f425c6c5468eca565c82f589b144ecaa4f411ad9bbf79e614",
+        "sha256:382ca0f951d4ef69fd736380747f9e1f02161c6dc94af74dafcf96de4466c9d9",
+        "sha256:953871f68b73a0c29f9268de527a33d56fb21e904f9b3b9a52281ead677a015a",
+        "sha256:98227d7e6e3f34aa1cc40516e87587b4107366befc5c74a88b1f7aa5a78dacbd",
+        "sha256:f998043f43bd1599209638d60163e7f5f36a1ce7acdca0f4ea5f83926dafd4ed",
+        "sha256:be4946483c6f4c9c5f5163cb8a1827089c3c20041b293826897bb86bf4e50e3b",
+        "sha256:5fd9b486a88397b3b78535f3d12ed8c79c4ed00cabecf9a5a113a41398ae3cd4",
+        "sha256:28f42ec7b8c2d9df80a763be54a8c1da8edb98cae2c2b8a36ac328718eb8d527",
+        "sha256:c246698041c88caa1fc1b1830aea3d07d018884e4a269782fce57f0997b89512",
+        "sha256:964976acad2a95841a3ac672e276a62622a43366bd106a071982260c6590b41c"
+      ],
+      "archiveSha256": "3ec7fd7f610a0a866c4b7527deb1b1590c221bf2cc3c566c36f48a4531213839",
+      "scan": {
+        "headSha": "78e70d57a59a2892d0f8f0d618228d5e5eed3e79",
+        "runId": 43284141540,
+        "runAttempt": 1,
+        "blocking": 0
+      },
+      "derivedChange": "Historical 26.8.1-r5 child plus the same static Go launcher only; destination is the exact current-run gated 26.8.2 artifact.",
+      "currentVersion": "26.8.1",
+      "nextVersion": "26.8.2",
+      "nextRootfsDiffIds": [
+        "sha256:bbc872d66e0e5be46bb28cf3927a06197e0b2c8f22531cf2f79eba9c8d31529f",
+        "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+        "sha256:3957c368a5dfd6e4abb1fc4f71b1e2c40ddc08d2345fb260ecfba61ed4bde86f",
+        "sha256:a1d2fa973732209ca08e2cdbc1ff044306b42795c27662394ae1a4c612a08039"
+      ],
+      "destination": {
+        "version": "26.8.2",
+        "digest": "sha256:3692541565749c73a5c81707e88efeae48edf8d150d6cfa30dbed7786931ca28",
+        "configDigest": "sha256:1bacdebc33f8ac7f223113817be1b4bf0ed04da0167d3b52ce7f67dbce89c8d5",
+        "archiveSha256": "ead08a9aeaa66b6fc73d2d7113babe940c0086127b1e11fb7c32e3bec28fbbd0",
+        "scan": {
+          "headSha": "78e70d57a59a2892d0f8f0d618228d5e5eed3e79",
+          "runId": 43284141540,
+          "runAttempt": 1,
+          "blocking": 0
+        }
+      },
+      "historicalSource": {
+        "release": "v26.8.1-r5",
+        "publishedTag": "26.8.1-r5-aws",
+        "parentDigest": "sha256:b0348dfff6c636a2071a084b66a9f3734678b93558948b57951221fa1828b6f4",
+        "parentConfigDigest": "sha256:ae6c461e480af33c682464bbe7b6739fde59456ca0a57e40abf6a8d9697aaf06",
+        "fixtureDigest": "sha256:8491ff54360dd4e47786db4d795af35b50f1dbbc5ba1d7b80b5dcfa59166fad4",
+        "retainedParentLayers": 36,
+        "addedLauncherLayers": 1,
+        "launcherSha256": "0adc090187cfe9e1724a273c9a9c1164f107ba5facc3d814390772508fa0b007",
+        "startupReview": {
+          "startupHash": "5f68e52cc8f86336b4b674e48a465ca9249e27dd4ba5aafa126437b648020afe",
+          "supported": [
+            17,
+            21,
+            25
+          ],
+          "warnings": []
+        },
+        "historicalScan": {
+          "schemaVersion": 2,
+          "profile": "aws",
+          "architecture": "amd64",
+          "headSha": "78e70d57a59a2892d0f8f0d618228d5e5eed3e79",
+          "runId": 43284141540,
+          "runAttempt": 1,
+          "status": "complete",
+          "scannerVersion": "0.76.1",
+          "createdAt": "2026-11-12T18:57:42.695811225Z",
+          "policy": {
+            "blockingSeverities": [
+              "HIGH",
+              "CRITICAL"
+            ],
+            "blockUnfixed": false
+          },
+          "counts": {
+            "CRITICAL": {
+              "total": 0,
+              "fixable": 0
+            },
+            "HIGH": {
+              "total": 10,
+              "fixable": 2
+            },
+            "MEDIUM": {
+              "total": 51,
+              "fixable": 4
+            },
+            "LOW": {
+              "total": 24,
+              "fixable": 1
+            },
+            "UNKNOWN": {
+              "total": 5,
+              "fixable": 0
+            }
+          },
+          "total": 90,
+          "blocking": 2,
+          "osEosl": false,
+          "findings": [
+            {
+              "id": "CVE-2026-76844",
+              "package": "zlib1g",
+              "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+              "fixed": "1:1.3.dfsg+really1.3.1-1+deb13u1",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-85091",
+              "package": "zlib1g",
+              "installed": "1:1.3.dfsg+really1.3.1-1+b1",
+              "fixed": "1:1.3.dfsg+really1.3.1-1+deb13u1",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-113351",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-115506",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-117610",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-118370",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-76642",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-78408",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-78409",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-78410",
+              "package": "libuuid1",
+              "installed": "2.41.5-0+deb13u1",
+              "fixed": "",
+              "severity": "HIGH",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2025-66382",
+              "package": "libexpat1",
+              "installed": "2.9.0-1~deb13u1",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-102010",
+              "package": "gcc-14-base",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-102010",
+              "package": "libgcc-s1",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-102010",
+              "package": "libstdc++6",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114690",
+              "package": "gcc-14-base",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114690",
+              "package": "libgcc-s1",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114690",
+              "package": "libstdc++6",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114691",
+              "package": "gcc-14-base",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114691",
+              "package": "libgcc-s1",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            },
+            {
+              "id": "CVE-2026-114691",
+              "package": "libstdc++6",
+              "installed": "14.2.0-19",
+              "fixed": "",
+              "severity": "MEDIUM",
+              "target": "/home/runner/work/keycloak/keycloak/.cache/operator-kind/aws-previous (debian 13.7)"
+            }
+          ]
+        },
+        "publishEligible": false
+      }
+    }
+  ],
+  "results": [
+    {
+      "profile": "core",
+      "phase": "stock-operator-launch",
+      "status": "passed",
+      "command": null,
+      "args": [
+        "-Djgroups.bind.address=$(POD_IP)",
+        "--verbose",
+        "start",
+        "--optimized"
+      ],
+      "pods": [
+        {
+          "name": "core-0",
+          "uid": "061702d9-8cb1-4b58-8073-70c0a6bd4339",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:b89e532c593ddf0e751d26bc28668cad317e3ab8b7e9b261c5b962eb942287ca"
+        },
+        {
+          "name": "core-1",
+          "uid": "0b327350-da06-46f6-94c3-0e4a91bf50c5",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:b89e532c593ddf0e751d26bc28668cad317e3ab8b7e9b261c5b962eb942287ca"
+        }
+      ],
+      "identities": [
+        {
+          "pod": "core-0",
+          "uid": "061702d9-8cb1-4b58-8073-70c0a6bd4339",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:b89e532c593ddf0e751d26bc28668cad317e3ab8b7e9b261c5b962eb942287ca",
+          "reportedDigest": "sha256:b89e532c593ddf0e751d26bc28668cad317e3ab8b7e9b261c5b962eb942287ca",
+          "manifest": "sha256:51ffab5286f7ba12e86fe2692359482d849cd5bd91fe29ae1ab22aff03d39680",
+          "config": "sha256:a8f10c5e16dc4b92b5becc5e3f1e29ea548e2f009d7c5f825ede598582b4c167",
+          "architecture": "amd64",
+          "containerImage": "localhost/keycloak-operator-core:previous",
+          "snapshotParent": "sha256:13588b29528d8521ff4af39d63019cd2ad85c8b9436eaff0b6bd336d3dafaa5d"
+        },
+        {
+          "pod": "core-1",
+          "uid": "0b327350-da06-46f6-94c3-0e4a91bf50c5",
+          "imageID": "docker.io/library/import-2026-11-12@sha256:b89e532c593ddf0e751d26bc28668cad317e3ab8b7e9b261c5b962eb942287ca",
+          "reportedDigest": "sha256:b89e532c593ddf0e751d26bc28668cad317e3ab8b7e9b261c5b962eb942287ca",
+          "manifest": "sha256:51ffab5286f7ba12e86fe2692359482d849cd5bd91fe29ae1ab22aff03d39680",
+          "config": "sha256:a8f10c5e16dc4b92b5becc5e3f1e29ea548e2f009d7c5f825ede598582b4c167",
+          "architecture": "amd64",
+          "containerImage": "localhost/keycloak-operator-core:previous",
+          "snapshotParent": "sha256:13588b29528d8521ff4af39d63019cd2ad85c8b9436eaff0b6bd336d3dafaa5d"
+        }
+      ]
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.1"
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.1"
+    },
+    {
+      "profile": "core",
+      "phase": "restart-recovery",
+      "status": "passed"
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.1"
+    },
+    {
+      "profile": "core",
+      "phase": "realm-import",
+      "status": "passed",
+      "command": [
+        "/opt/keycloak/bin/kc.sh"
+      ],
+      "args": [
+        "--verbose",
+        "import",
+        "--file=/mnt/realm-import/operator-core-realm.json",
+        "--override=false"
+      ],
+      "doneCondition": true,
+      "realm": "operator-core",
+      "podExitCodes": [
+        0
+      ],
+      "runtimeAugmentation": false
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true,
+      "keycloakVersion": "26.8.1"
+    }
+  ],
+  "experiment": "26.8.1-to-26.8.2",
+  "error": "Error: Authenticated traffic failed during rollout\n    at file:///home/runner/work/keycloak/keycloak/tests/operator/run.mjs:244:40\n    at until (file:///home/runner/work/keycloak/keycloak/tests/operator/run.mjs:41:49)\n    at async rollingUpdate (file:///home/runner/work/keycloak/keycloak/tests/operator/run.mjs:239:14)\n    at async file:///home/runner/work/keycloak/keycloak/tests/operator/run.mjs:310:5"
+}

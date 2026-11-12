@@ -1,0 +1,21 @@
+{
+  "keycloakVersion": "26.8.2",
+  "namespace": "keycloak",
+  "operatorResourcesCommit": "79ba77fd65bb05a8300cd1396d6be9806a0f290f",
+  "operator": {
+    "index": "quay.io/keycloak/keycloak-operator@sha256:92cca02f2fcf549cb86c8e3c0d95de0e7016e4e3ffe2d781f174aa730417e80f",
+    "amd64": "sha256:12b68acdf885fcdb5534c6ec2462918ef7f0dc48dc53d4df4d8bb430046138d9",
+    "arm64": "sha256:1169fc8ac43932acdf01f7617955ee3118a1564015b77c121639deac8ba3247b"
+  },
+  "kind": {
+    "version": "0.33.0",
+    "amd64": "aee6151561422756b764a4ae28e7f44cda5af5a9eead3cc9985112b1de8d8e0d",
+    "arm64": "20022bee6cfcd5086cb7234d218e3454e6090022f2a8f55d1fa7fcf42c3867a2"
+  },
+  "node": "docker.io/kindest/node:v1.35.8@sha256:07b2536e30b803ed61d1677a79df6115f798ce64c80f9e22f6ed45afd09323c0",
+  "kubectl": {
+    "version": "1.35.8",
+    "amd64": "874d5e72dbb819f43cff16bcd1e4f8bac5b7f2361fe1e55049b0a6c676fb0cbf",
+    "arm64": "cc749967b62f4422260bc9c0aa7a7c55f45175ae38cb8d95767b5d2b7e04c1fd"
+  }
+}

@@ -7,6 +7,11 @@ for tool in buildah node; do command -v "$tool" >/dev/null || { echo "Missing $t
 architecture=$(node scripts/platform.mjs native)
 [[ "${BUILD_ARCH:-$architecture}" == "$architecture" ]] || { echo 'Build on a native runner for the requested architecture' >&2; exit 1; }
 node scripts/platform.mjs require "$architecture"
+if [[ -f .cache/launcher/launcher.json ]]; then
+  node scripts/launcher.mjs --require-existing
+else
+  node scripts/launcher.mjs
+fi
 read_lock() { node -p "require('./images.lock.json').$1"; }
 keycloak=$(read_lock keycloak)
 builder=$(read_lock builder)

@@ -1,0 +1,118 @@
+{
+  "source": "Exact runner Kubernetes snapshot; reduced to public compatibility Job fields",
+  "runId": 43281045723,
+  "runAttempt": 1,
+  "architecture": "amd64",
+  "jobs": [
+    {
+      "profile": "core",
+      "name": "core-update-job",
+      "uid": "7dd95e89-0097-4864-89ee-1882dfaade1b",
+      "metadataContainers": [
+        {
+          "name": "actual",
+          "image": "localhost/keycloak-operator-core:previous",
+          "command": null,
+          "args": [
+            "update-compatibility",
+            "metadata",
+            "--file",
+            "/mnt/keycloak-update-job-temporary-workdir/updates.json",
+            "-Djgroups.bind.address=$(POD_IP)",
+            "--verbose",
+            "--optimized"
+          ]
+        }
+      ],
+      "checkContainers": [
+        {
+          "name": "desired",
+          "image": "localhost/keycloak-operator-core:candidate",
+          "command": null,
+          "args": [
+            "update-compatibility",
+            "check",
+            "--file",
+            "/mnt/keycloak-update-job-temporary-workdir/updates.json",
+            "-Djgroups.bind.address=$(POD_IP)",
+            "--verbose",
+            "--optimized"
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "lastProbeTime": "2026-11-12T18:42:57Z",
+          "lastTransitionTime": "2026-11-12T18:42:57Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "SuccessCriteriaMet"
+        },
+        {
+          "lastProbeTime": "2026-11-12T18:42:57Z",
+          "lastTransitionTime": "2026-11-12T18:42:57Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "Complete"
+        }
+      ]
+    },
+    {
+      "profile": "aws",
+      "name": "aws-update-job",
+      "uid": "a106b9d0-3c54-4065-9485-2417a1607d4e",
+      "metadataContainers": [
+        {
+          "name": "actual",
+          "image": "localhost/keycloak-operator-aws:previous",
+          "command": null,
+          "args": [
+            "update-compatibility",
+            "metadata",
+            "--file",
+            "/mnt/keycloak-update-job-temporary-workdir/updates.json",
+            "-Djgroups.bind.address=$(POD_IP)",
+            "--verbose",
+            "--optimized"
+          ]
+        }
+      ],
+      "checkContainers": [
+        {
+          "name": "desired",
+          "image": "localhost/keycloak-operator-aws:candidate",
+          "command": null,
+          "args": [
+            "update-compatibility",
+            "check",
+            "--file",
+            "/mnt/keycloak-update-job-temporary-workdir/updates.json",
+            "-Djgroups.bind.address=$(POD_IP)",
+            "--verbose",
+            "--optimized"
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "lastProbeTime": "2026-11-12T18:45:44Z",
+          "lastTransitionTime": "2026-11-12T18:45:44Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "SuccessCriteriaMet"
+        },
+        {
+          "lastProbeTime": "2026-11-12T18:45:44Z",
+          "lastTransitionTime": "2026-11-12T18:45:44Z",
+          "message": "Reached expected number of succeeded pods",
+          "reason": "CompletionsReached",
+          "status": "True",
+          "type": "Complete"
+        }
+      ]
+    }
+  ]
+}
