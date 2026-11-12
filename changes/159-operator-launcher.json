@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "changes": [
+    {
+      "type": "feature",
+      "summary": "Add a bounded shell-free Go launcher for optimized Keycloak Operator startup, realm import and update compatibility, with nonroot runtime data ownership.",
+      "issues": [159],
+      "profiles": ["core", "aws"]
+    }
+  ]
+}

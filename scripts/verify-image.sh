@@ -41,6 +41,13 @@ podman export "$probe" > "$rootfs"
 podman rm -v "$probe" >/dev/null
 probe=''
 entries=$(tar -tf "$rootfs")
+[[ "$(podman image inspect --format '{{json .Config.Entrypoint}}' "$image")" == '["/opt/keycloak/bin/kc.sh"]' ]]
+launcher_sha=$(node -p "require('./.cache/launcher/launcher.json').binarySha256")
+tar -xOf "$rootfs" opt/keycloak/bin/kc.sh > "$fixture/launcher"
+[[ "$(sha256sum "$fixture/launcher" | cut -d ' ' -f 1)" == "$launcher_sha" ]]
+[[ "$(od -An -tx1 -N4 "$fixture/launcher" | tr -d ' \n')" == '7f454c46' ]]
+data_owner=$(tar --numeric-owner -tvf "$rootfs" opt/keycloak/data/ | head -n 1 | awk '{print $2}')
+[[ "$data_owner" == '65532/65532' ]] || { echo 'Runtime data directory is not owned by the nonroot user' >&2; exit 1; }
 guava_path="opt/keycloak/lib/lib/main/com.google.guava.guava-$(node -p "require('./dependencies/keycloak/overrides.lock.json').upstreamVersion").jar"
 guava_sha=$(node -p "require('./dependencies/keycloak/overrides.lock.json').sha256")
 [[ "$(grep -Ec '(^|/)com\.google\.guava\.guava-[^/]+\.jar$' <<< "$entries")" == 1 ]]
