@@ -2,6 +2,8 @@
 
 Amazon ECR Public is an additional distribution endpoint for completed Quay publications. The repository is `public.ecr.aws/j2a6d6e3/keycloak` ([gallery](https://gallery.ecr.aws/j2a6d6e3/keycloak)). Activation is controlled by reviewed `config/ecr-public.json`; creating the repository alone does not mean its images have been published.
 
+The first verified mirror is **v26.8.2-r4**, with tags `26.8.2-r4-core` and `26.8.2-r4-aws`. Both tags select native Linux amd64 or arm64. The [delivery report](reports/169-public-ecr/README.md) records all index/child/config digests, anonymous pull evidence, the completed no-op retry and the initial failure history.
+
 ## Publication and recovery
 
 After a formal Quay Release has completed its catalog PR, the release workflow calls `ecr-public.yml`. Ordinary main pushes, PRs, builder updates and documentation changes do not publish images. A maintainer can run **Public ECR distribution** from **main**, supplying the exact existing formal Release tag, to populate or recover that Release without rerunning Quay builds/scans. There is one serialized publisher across automatic and manual paths.

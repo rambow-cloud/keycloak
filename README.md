@@ -2,6 +2,8 @@
 
 Minimal Keycloak OCI images for PostgreSQL deployments, with a **distroless Java 25 LTS** runtime, **non-root execution** and build-time optimization. Images are built with Buildah, verified with Podman and published to Quay. See the [Amazon Linux runtime and scan contract](docs/amazon-linux-runtime.md).
 
+Also available from [Amazon ECR Public](https://gallery.ecr.aws/j2a6d6e3/keycloak) at `public.ecr.aws/j2a6d6e3/keycloak`, using the same profile tags and digests as completed Quay publications. Both registries select native Linux amd64 or arm64 automatically. See [Public ECR pull commands and publication evidence](docs/ecr-public.md).
+
 ## Current images
 
 Published profiles are OCI indexes selecting native Linux amd64 or arm64. See [recorded digests and validation](releases/README.md).
