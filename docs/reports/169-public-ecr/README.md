@@ -42,13 +42,25 @@ The [source Release](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8
 
 The existing public repository is in account `060065238923`. Stack `Rambow-keycloak-public-ecr-oidc-v2` in `ap-southeast-2` created the GitHub provider and bounded publisher, reaching `CREATE_COMPLETE` at 09:19:11. GitHub Environment `ecr-public-release` permits main branches and formal `v*-r*` tags; the workflow separately checks exact caller/tag/immutable OIDC claims. STS sessions last 15 minutes. No static AWS keys were configured.
 
-The first stack, `Rambow-keycloak-public-ecr-oidc`, reached `ROLLBACK_COMPLETE` at 08:44:23 because the account's pre-activation SCP explicitly denied IAM provider creation. It is retained as an empty historical stack. AWS Settings subsequently displayed successful advanced-feature activation; the unchanged reviewed template then succeeded using the original restricted executor. No organization policy was manually edited or bypassed.
+The first stack, `Rambow-keycloak-public-ecr-oidc`, reached `ROLLBACK_COMPLETE` at 08:44:23 because the account's pre-activation SCP explicitly denied IAM provider creation. It was initially retained as an empty historical stack and was subsequently removed as recorded below. AWS Settings subsequently displayed successful advanced-feature activation; the unchanged reviewed template then succeeded using the original restricted executor. No organization policy was manually edited or bypassed.
 
 [First mirror 43344300965](https://github.com/rambow-cloud/keycloak/actions/runs/43344300965) verified source signing and assumed the OIDC role but failed at ECR login, before uploads. [Diagnostic recovery 43345191348](https://github.com/rambow-cloud/keycloak/actions/runs/43345191348) identified `sts:GetServiceBearerToken` denied by its identity policy. [#170 / PR #171](https://github.com/rambow-cloud/keycloak/pull/171) added allowlisted error facts without exposing arbitrary authentication responses or credentials.
 
 ECR Public omits the bearer `sts:AWSServiceName` key, matching [the AWS roadmap report](https://github.com/aws/containers-roadmap/issues/2896). The owner approved [#172 / PR #173](https://github.com/rambow-cloud/keycloak/pull/173): change only `StringEquals` to `StringEqualsIfExists`. A supplied value must still equal `ecr-public.amazonaws.com`; a missing key is allowed. No other service authentication API was granted. Change set `keycloak-ecr-bearer-context-172/1377879a-528d-4895-9d89-e37f8ba4031f` modified only `PublisherRole`, without replacement; the stack reached `UPDATE_COMPLETE` at 09:40:47. [The infrastructure guide](../../ecr-public.md) records this limitation.
 
 Implementation: [PR #168](https://github.com/rambow-cloud/keycloak/pull/168). Final publisher-source main CI: [43346857445](https://github.com/rambow-cloud/keycloak/actions/runs/43346857445). CI passed 174 tests and required static/Issue checks; distribution changes intentionally skipped image construction. No local tests or container runs were performed.
+
+## Empty bootstrap stack cleanup
+
+Under [#176](https://github.com/rambow-cloud/keycloak/issues/176), the owner confirmed deletion of only the failed original stack. Before deletion, CloudFormation showed one historical resource entry, `GitHubOidcProvider`, already `DELETE_COMPLETE` with physical ID `-`; no live managed resource remained. The exact deleted stack was:
+
+```text
+arn:aws:cloudformation:ap-southeast-2:060065238923:stack/Rambow-keycloak-public-ecr-oidc/0e5dec70-defb-11f1-847e-02ffe9ec9611
+```
+
+CloudFormation recorded stack `DELETE_COMPLETE` at **2026-11-13 10:18:00 UTC+0800**, operation `7d224500-a6ba-4a46-8abe-47a508b88af9`. The active stack list continued to show `Rambow-keycloak-public-ecr-oidc-v2` as `UPDATE_COMPLETE`. The cleanup did not change the working provider/publisher, shared executor, Public ECR repository, alias request, images or immutable publication assets. The original failure history above remains part of this report.
+
+Validation used the browser-visible CloudFormation resource inventory, active stack list and final deletion event. No local tests, container runs, image rebuilds or repeated registry validation were performed for this metadata cleanup.
 
 ## Pull commands and limits
 
