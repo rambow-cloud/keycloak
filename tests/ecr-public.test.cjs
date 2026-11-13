@@ -106,6 +106,10 @@ test('IAM grants and workflow boundaries exclude deletes, static keys and image 
   assert.doesNotMatch(JSON.stringify(policy),/Delete|CreateRepository|iam:|Action":"\*"/);
   const stack=JSON.parse(readFileSync('infra/ecr-public/iam-stack.json','utf8'));
   assert.deepEqual(stack.Resources.PublisherRole.Properties.Policies[0].PolicyDocument,policy);
+  const executor=JSON.parse(readFileSync('infra/ecr-public/stack-executor-policy.json','utf8'));
+  assert.deepEqual(executor.Statement.map(s=>s.Resource),[config.roleArn,'arn:aws:iam::060065238923:oidc-provider/token.actions.githubusercontent.com']);
+  assert.ok(executor.Statement.every(s=>s.Action.every(a=>a.startsWith('iam:')&&!a.includes('*'))));
+  assert.doesNotMatch(JSON.stringify(executor),/PassRole|AttachRolePolicy|CreateAccessKey/);
   const trust=stack.Resources.PublisherRole.Properties.AssumeRolePolicyDocument.Statement[0];
   assert.equal(trust.Condition.StringEquals['token.actions.githubusercontent.com:sub'],config.subject);
   const workflowText=readFileSync('.github/workflows/ecr-public.yml','utf8');
