@@ -94,7 +94,11 @@ test('Quay malformed, missing, oversized and unsafe tokens fail closed', async (
 test('only protected publisher gets OIDC; no static secret, token output or environment persistence', async () => {
   const workflow = await readFile(require('node:path').join(__dirname, '../.github/workflows/release.yml'), 'utf8');
   const publisher = workflow.slice(workflow.indexOf('\n  publish:'), workflow.indexOf('\n  audit:'));
-  assert.equal((workflow.match(/id-token: write/g) ?? []).length, 1);
+  const mirror = workflow.slice(workflow.indexOf('\n  ecr-public:'));
+  assert.equal((workflow.match(/id-token: write/g) ?? []).length, 2);
+  assert.equal((publisher.match(/id-token: write/g) ?? []).length, 1);
+  assert.match(mirror, /uses: \.\/\.github\/workflows\/ecr-public\.yml/);
+  assert.match(mirror, /needs: \[prepare, record\]/);
   assert.match(publisher, /id-token: write/);
   assert.match(publisher, /environment: quay-release/);
   assert.match(publisher, /vars\.QUAY_USERNAME/);

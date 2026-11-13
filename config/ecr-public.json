@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "enabled": true,
+  "accountId": "060065238923",
+  "region": "us-east-1",
+  "repository": "public.ecr.aws/j2a6d6e3/keycloak",
+  "repositoryArn": "arn:aws:ecr-public::060065238923:repository/keycloak",
+  "roleArn": "arn:aws:iam::060065238923:role/RambowKeycloakPublicEcrPublisher",
+  "environment": "ecr-public-release",
+  "audience": "sts.amazonaws.com",
+  "subject": "repo:rambow-cloud@333554680/keycloak@1433566126:environment:ecr-public-release"
+}

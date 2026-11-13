@@ -13,6 +13,7 @@ const metadata = /^(?:docs\/|releases\/|changes\/|\.github\/(?:ISSUE_TEMPLATE\/|
 const bookkeeping = /^scripts\/(?:r2-architecture-migration|quay-release|release-catalog|catalog-broker|releases|upstream-update|lock-images|issue-policy|trivy-comment)\.(?:mjs|cjs)$|^scripts\/lib\/(?:release-policy|release-events|image-changes|releases|quay-publish|quay-auth|upstream)\.mjs$|^config\/r2-architecture-migration\.json$|^\.github\/workflows\/(?!ci\.yml$)[^/]+\.yml$|^tests\/[^/]+\.test\.cjs$/;
 const validation = /^scripts\/(?:verify-|scan-image|scan-release|package-images|platform|trivy-gate|release-image|check-upstream-compatibility)|^scripts\/lib\/(?:trivy|oci|image-changes|multiarch|platforms|runtime-sbom)\.mjs$|^config\/(?:trivy|upstream-compatibility)\.json$|^dependencies\/runtime\/|^\.github\/workflows\/ci\.yml$|^tests\//;
 export function sourceProfiles(path) {
+  if(path==='config/ecr-public.json'||path==='scripts/ecr-public.mjs'||path.startsWith('infra/ecr-public/')) return [];
   if(path==='config/operator-tests.json'||/^launcher\/.*_test\.go$/.test(path)) return [];
   if (/^scripts\/lib\/(?:rambow-runtime|runtime-family)\.mjs$/.test(path)) return [];
   if (/^scripts\/(?:sign-release|lib\/(?:sbom|supply-chain))\.mjs$/.test(path) || path === 'config/cosign.json') return [];
@@ -23,6 +24,7 @@ export function sourceProfiles(path) {
   return imageProfiles;
 }
 export function validationProfiles(path) {
+  if(path==='config/ecr-public.json'||path==='scripts/ecr-public.mjs'||path.startsWith('infra/ecr-public/')) return [];
   if(path==='config/operator-tests.json'||/^launcher\/.*_test\.go$/.test(path)) return imageProfiles;
   if (/^scripts\/lib\/(?:rambow-runtime|runtime-family)\.mjs$/.test(path)) return imageProfiles;
   if (path === 'scripts/lib/sbom.mjs') return imageProfiles;

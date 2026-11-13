@@ -39,6 +39,8 @@ Build Keycloak OCI images for Rambow Cloud. Prefer distroless Java, a non-root u
 
 ## Validation and delivery
 
+- Public ECR is supplemental distribution of completed, active Quay publications. Freeze its separate Release attachment plan before requesting AWS OIDC (`sts.amazonaws.com`) through the protected `ecr-public-release` main/formal-release publisher. Preserve all index/child digests and source change history; reject target conflicts, verify source signing/SBOMs, and require anonymous native pulls before recording completion. Never rebuild unchanged images, add AWS static keys, rewrite Quay records, or broaden catalog auto-merge permissions. See `docs/ecr-public.md`.
+
 - Keep this file limited to durable working agreements. Record concrete Issues, temporary tasks, experiment branches, run identifiers and execution status in their Issues, PRs or evidence reports.
 - Record security repairs and reviewed existing-image verifications in `docs/security/records.jsonl`, with explicit published tag/profile/digest, advisories or event IDs, local Issues/PRs, evidence and limitations. Preserve existing lines; append corrections with `supersedes`. Add concise wording for completed repairs to `docs/security/release-notes.json`. Generate the version-descending `docs/security/README.md` and detailed `docs/security/history.md` with `node docs/security/ledger.mjs render`; never hand-edit them or claim unpublished repairs as published. Evidence-only records do not justify rebuilding unchanged images. Keep isolated regression code on a dedicated retained branch when requested; store its exact branch, commit and run references in the report.
 

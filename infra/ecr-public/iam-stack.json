@@ -1,0 +1,69 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Repository-scoped GitHub OIDC publication to the existing Rambow Keycloak Public ECR repository. No access keys or registry creation.",
+  "Parameters": {
+    "ExistingGitHubProviderArn": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Leave empty to create the GitHub OIDC provider; otherwise supply its existing ARN with sts.amazonaws.com configured as an audience.",
+      "AllowedPattern": "^$|^arn:aws:iam::060065238923:oidc-provider/token\\.actions\\.githubusercontent\\.com$"
+    }
+  },
+  "Conditions": {
+    "CreateProvider": { "Fn::Equals": [ { "Ref": "ExistingGitHubProviderArn" }, "" ] }
+  },
+  "Resources": {
+    "GitHubOidcProvider": {
+      "Type": "AWS::IAM::OIDCProvider",
+      "Condition": "CreateProvider",
+      "Properties": {
+        "Url": "https://token.actions.githubusercontent.com",
+        "ClientIdList": [ "sts.amazonaws.com" ],
+        "Tags": [ { "Key": "Project", "Value": "rambow-cloud-keycloak" } ]
+      }
+    },
+    "PublisherRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "RambowKeycloakPublicEcrPublisher",
+        "MaxSessionDuration": 3600,
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Effect": "Allow",
+            "Principal": { "Federated": { "Fn::If": [ "CreateProvider", { "Ref": "GitHubOidcProvider" }, { "Ref": "ExistingGitHubProviderArn" } ] } },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition": { "StringEquals": {
+              "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+              "token.actions.githubusercontent.com:sub": "repo:rambow-cloud@333554680/keycloak@1433566126:environment:ecr-public-release"
+            } }
+          } ]
+        },
+        "Policies": [ {
+          "PolicyName": "PushOnlyKeycloakPublicImages",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Sid": "PushAndInspectOnlyKeycloak",
+                "Effect": "Allow",
+                "Action": [ "ecr-public:BatchCheckLayerAvailability", "ecr-public:InitiateLayerUpload", "ecr-public:UploadLayerPart", "ecr-public:CompleteLayerUpload", "ecr-public:PutImage", "ecr-public:DescribeImages" ],
+                "Resource": "arn:aws:ecr-public::060065238923:repository/keycloak"
+              },
+              { "Sid": "PublicRegistryAuthentication", "Effect": "Allow", "Action": "ecr-public:GetAuthorizationToken", "Resource": "*" },
+              { "Sid": "OnlyEcrPublicServiceBearerToken", "Effect": "Allow", "Action": "sts:GetServiceBearerToken", "Resource": "*", "Condition": { "StringEquals": { "sts:AWSServiceName": "ecr-public.amazonaws.com" } } }
+            ]
+          }
+        } ],
+        "Tags": [ { "Key": "Project", "Value": "rambow-cloud-keycloak" } ]
+      }
+    }
+  },
+  "Outputs": {
+    "RoleArn": { "Value": { "Fn::GetAtt": [ "PublisherRole", "Arn" ] } },
+    "Repository": { "Value": "public.ecr.aws/j2a6d6e3/keycloak" },
+    "RepositoryArn": { "Value": "arn:aws:ecr-public::060065238923:repository/keycloak" },
+    "OidcAudience": { "Value": "sts.amazonaws.com" },
+    "GitHubEnvironment": { "Value": "ecr-public-release" }
+  }
+}
