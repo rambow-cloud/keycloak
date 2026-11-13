@@ -51,7 +51,7 @@
                 "Resource": "arn:aws:ecr-public::060065238923:repository/keycloak"
               },
               { "Sid": "PublicRegistryAuthentication", "Effect": "Allow", "Action": "ecr-public:GetAuthorizationToken", "Resource": "*" },
-              { "Sid": "OnlyEcrPublicServiceBearerToken", "Effect": "Allow", "Action": "sts:GetServiceBearerToken", "Resource": "*", "Condition": { "StringEquals": { "sts:AWSServiceName": "ecr-public.amazonaws.com" } } }
+              { "Sid": "OnlyEcrPublicServiceBearerToken", "Effect": "Allow", "Action": "sts:GetServiceBearerToken", "Resource": "*", "Condition": { "StringEqualsIfExists": { "sts:AWSServiceName": "ecr-public.amazonaws.com" } } }
             ]
           }
         } ],
