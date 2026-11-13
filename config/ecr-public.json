@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "enabled": false,
+  "enabled": true,
   "accountId": "060065238923",
   "region": "us-east-1",
   "repository": "public.ecr.aws/j2a6d6e3/keycloak",
