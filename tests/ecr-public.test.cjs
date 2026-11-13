@@ -122,3 +122,17 @@ test('IAM grants and workflow boundaries exclude deletes, static keys and image 
     assert.deepEqual(sourceProfiles(path),[]);assert.deepEqual(validationProfiles(path),[]);
   }
 });
+
+test('AWS diagnostics expose only known operation/error/denial facts and never arbitrary output',async()=>{
+  const {commandFailure}=await lib;
+  const secret='FAKE_PRIVATE_AUTHORIZATION_VALUE';
+  const error={status:254,stdout:secret,stderr:'An error occurred (AccessDeniedException) when calling the GetAuthorizationToken operation: User is not authorized to perform: sts:GetServiceBearerToken because no identity-based policy allows it. '+secret};
+  const message=commandFailure('aws',error);
+  assert.match(message,/AccessDeniedException; GetAuthorizationToken; denied sts:GetServiceBearerToken; identity-policy/);
+  assert.doesNotMatch(message,new RegExp(secret));
+  assert.match(commandFailure('aws',{...error,stderr:error.stderr.replace('no identity-based policy allows it','an explicit deny in a service control policy')}),/service-control-policy/);
+  assert.equal(commandFailure('aws',{...error,stderr:secret}),'aws failed (exit 254)');
+  assert.equal(commandFailure('aws',{...error,stderr:'An error occurred ('+secret+') when calling the GetAuthorizationToken operation'}),'aws failed (exit 254)');
+  assert.equal(commandFailure('aws',{...error,stderr:'An error occurred (AccessDeniedException) when calling the '+secret+' operation'}),'aws failed (exit 254)');
+  assert.equal(commandFailure('skopeo',error),'skopeo failed (exit 254)');
+});

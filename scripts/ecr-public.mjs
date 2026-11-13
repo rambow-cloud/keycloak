@@ -53,9 +53,29 @@ export function mirrorPlan(record, config) {
     images: record.plan.images.map(({ profile, tag, digest, children, changes }) => ({ profile, tag, digest, children, changes })),
     supplyChainSha256: canonicalHash(record.plan.supplyChain), sboms: record.plan.supplyChain.sboms };
 }
+export function commandFailure(command, result) {
+  const facts = [];
+  if (command === 'aws') {
+    const match = /An error occurred \(([A-Za-z0-9]+)\) when calling the ([A-Za-z0-9]+) operation/.exec(result.stderr ?? '');
+    const codes = ['AccessDeniedException','AccessDenied','InvalidIdentityToken','IDPRejectedClaim','ExpiredTokenException',
+      'ExpiredToken','InvalidClientTokenId','UnrecognizedClientException','SignatureDoesNotMatch','ServerException',
+      'InvalidParameterException','ThrottlingException','RequestLimitExceeded','RegionDisabledException','OptInRequired'];
+    const operations = ['GetAuthorizationToken','AssumeRoleWithWebIdentity','DescribeImages'];
+    if (match && codes.includes(match[1]) && operations.includes(match[2])) {
+      facts.push(match[1], match[2]);
+      const denied = /(?:perform:\s*|perform\s+)(sts:GetServiceBearerToken|ecr-public:GetAuthorizationToken|ecr-public:DescribeImages)\b/.exec(result.stderr);
+      if (denied) facts.push('denied ' + denied[1]);
+      if (/explicit deny in a service control policy/.test(result.stderr)) facts.push('service-control-policy');
+      else if (/permissions boundary/.test(result.stderr)) facts.push('permissions-boundary');
+      else if (/no identity-based policy allows/.test(result.stderr)) facts.push('identity-policy');
+    }
+  }
+  // Never expose arguments, stdout, arbitrary stderr, credentials or error objects.
+  return command + ' failed (exit ' + result.status + (facts.length ? '; ' + facts.join('; ') : '') + ')';
+}
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { encoding: 'utf8', timeout: 240000, maxBuffer: 24000000, ...options });
-  if (result.error || result.status !== 0) throw Error(command + ' failed (exit ' + result.status + ')');
+  if (result.error || result.status !== 0) throw Error(commandFailure(command, result));
   return result.stdout;
 }
 function identity(context, plan) {
@@ -169,7 +189,7 @@ export function describeDestination(result, expected) {
   if (result.error) throw Error('AWS DescribeImages could not execute');
   if (result.status !== 0) {
     if (/\(ImageNotFoundException\)/.test(result.stderr ?? '')) return destinationAction(null, expected);
-    throw Error('AWS DescribeImages failed; access/service errors are not missing tags');
+    throw Error(commandFailure('aws', result) + '; access/service errors are not missing tags');
   }
   const details = JSON.parse(result.stdout).imageDetails;
   if (!Array.isArray(details) || details.length !== 1) throw Error('Ambiguous destination tag');
