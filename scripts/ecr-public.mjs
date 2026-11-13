@@ -51,7 +51,7 @@ export function mirrorPlan(record, config) {
     sourceRecordSha256: hash(json(record)), sourceCommit: record.plan.sourceCommit,
     sourceRegistry: record.plan.registry, target: config,
     images: record.plan.images.map(({ profile, tag, digest, children, changes }) => ({ profile, tag, digest, children, changes })),
-    supplyChainSha256: canonicalHash(record.plan.supplyChain) };
+    supplyChainSha256: canonicalHash(record.plan.supplyChain), sboms: record.plan.supplyChain.sboms };
 }
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, { encoding: 'utf8', timeout: 240000, maxBuffer: 24000000, ...options });
@@ -78,7 +78,8 @@ export function validateMirrorRecord(record, plan) {
     'https://github.com/' + repository + '/.github/workflows/release.yml@refs/tags/' + plan.tag ]) ||
       verification.targets?.length !== expected.length || expected.some(t => verification.targets.filter(v =>
         v.profile === t.profile && v.digest === t.digest && v.architecture === t.architecture && v.signatureVerified === true &&
-        (!t.architecture || v.attestationVerified === true && /^[a-f0-9]{64}$/.test(v.sbomSha256))).length !== 1)) throw Error('Incomplete source signature/attestation verification');
+        (!t.architecture || v.attestationVerified === true && v.sbomSha256 === plan.sboms.find(s =>
+          s.profile === t.profile && s.architecture === t.architecture && s.digest === t.digest)?.sha256)).length !== 1)) throw Error('Incomplete source signature/attestation verification');
   if (!Number.isSafeInteger(record.publication.runId) || record.publication.runId < 1 ||
       !Number.isSafeInteger(record.publication.attempt) || record.publication.attempt < 1 ||
       !/^[a-f0-9]{40}$/.test(record.publication.headSha)) throw Error('Invalid publication run identity');
