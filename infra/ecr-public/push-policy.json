@@ -26,7 +26,7 @@
       "Action": "sts:GetServiceBearerToken",
       "Resource": "*",
       "Condition": {
-        "StringEquals": {
+        "StringEqualsIfExists": {
           "sts:AWSServiceName": "ecr-public.amazonaws.com"
         }
       }

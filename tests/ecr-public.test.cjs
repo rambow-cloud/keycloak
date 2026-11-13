@@ -103,6 +103,10 @@ test('IAM grants and workflow boundaries exclude deletes, static keys and image 
   const scoped=policy.Statement.find(s=>Array.isArray(s.Action));
   assert.equal(scoped.Resource,config.repositoryArn);
   assert.equal(scoped.Action.length,6); assert.ok(scoped.Action.includes('ecr-public:PutImage'));
+  assert.deepEqual(policy.Statement.find(s=>s.Action==='sts:GetServiceBearerToken').Condition,
+    {StringEqualsIfExists:{'sts:AWSServiceName':'ecr-public.amazonaws.com'}});
+  assert.deepEqual(policy.Statement.filter(s=>!Array.isArray(s.Action)).map(s=>s.Action).sort(),
+    ['ecr-public:GetAuthorizationToken','sts:GetServiceBearerToken']);
   assert.doesNotMatch(JSON.stringify(policy),/Delete|CreateRepository|iam:|Action":"\*"/);
   const stack=JSON.parse(readFileSync('infra/ecr-public/iam-stack.json','utf8'));
   assert.deepEqual(stack.Resources.PublisherRole.Properties.Policies[0].PolicyDocument,policy);
