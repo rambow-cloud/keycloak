@@ -1,8 +1,14 @@
-export function rambowJavaVersion(reference) {
-  const match = /^ghcr\.io\/rambow-cloud\/java:(25)\.(\d+)\.(\d+)-r([1-9]\d*)@sha256:[a-f0-9]{64}$/.exec(reference ?? '');
+export function rambowJavaTagVersion(tag) {
+  const match = /^(25)\.(\d+)\.(\d+)(?:\.(\d+))?-r([1-9]\d*)$/.exec(tag ?? '');
   if (!match) return null;
-  const version = match.slice(1).map(Number);
+  // Compare the Corretto version before the image revision, even for older three-component tags.
+  const version = match.slice(1).map(component => Number(component ?? 0));
   return version.every(Number.isSafeInteger) ? version : null;
+}
+
+export function rambowJavaVersion(reference) {
+  const match = /^ghcr\.io\/rambow-cloud\/java:([^@]+)@sha256:[a-f0-9]{64}$/.exec(reference ?? '');
+  return match ? rambowJavaTagVersion(match[1]) : null;
 }
 
 export function compareRuntimeVersions(a, b) {

@@ -1,6 +1,6 @@
 import { readImageObject } from './oci.mjs';
 import { assertBasePlatforms } from './platforms.mjs';
-import { rambowJavaVersion, compareRuntimeVersions } from './runtime-family.mjs';
+import { rambowJavaTagVersion, rambowJavaVersion, compareRuntimeVersions } from './runtime-family.mjs';
 import { validateRuntimeInventory } from './runtime-sbom.mjs';
 import { createHash } from 'node:crypto';
 
@@ -14,8 +14,8 @@ export function chooseRuntimeRelease(current, releases) {
   if (!before) throw Error('Expected the reviewed Rambow Java 25 runtime');
   return releases.filter(release => !release.draft && !release.prerelease)
     .map(release => {
-      const match = /^java25-(25\.\d+\.\d+-r[1-9]\d*)$/.exec(release.tag_name ?? '');
-      const version = match && rambowJavaVersion('ghcr.io/rambow-cloud/java:' + match[1] + '@sha256:' + '0'.repeat(64));
+      const tag = release.tag_name ?? '';
+      const version = tag.startsWith('java25-') ? rambowJavaTagVersion(tag.slice('java25-'.length)) : null;
       return { release, version };
     }).filter(item => item.version && item.version[1] === before[1] && compareRuntimeVersions(item.version, before) > 0)
     .sort((a, b) => compareRuntimeVersions(b.version, a.version))[0]?.release ?? null;
