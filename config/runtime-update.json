@@ -2,59 +2,59 @@
   "schemaVersion": 1,
   "request": {
     "schemaVersion": 1,
-    "id": "33bd785e8473bd37d16aa98f538f8695043f3c118a2238534db217a6078e673e",
+    "id": "794e397f2925627f4c9560e5f511b23dd9d51f694c4fedc63d59556bd56c5eb2",
     "from": {
-      "core": "ghcr.io/rambow-cloud/java:25.0.5-r3@sha256:b71ac597d7174fcf14d8449af30f17dc4516651cbf3ed3ca0b7a98d1557e5b4a",
-      "aws": "ghcr.io/rambow-cloud/java:25.0.5-r3@sha256:b71ac597d7174fcf14d8449af30f17dc4516651cbf3ed3ca0b7a98d1557e5b4a"
+      "core": "ghcr.io/rambow-cloud/java:25.0.5-r4@sha256:d056e13afc62f0652334f009ae9843c307b44dfa488c301d602748af744a7d74",
+      "aws": "ghcr.io/rambow-cloud/java:25.0.5-r4@sha256:d056e13afc62f0652334f009ae9843c307b44dfa488c301d602748af744a7d74"
     },
-    "to": "ghcr.io/rambow-cloud/java:25.0.5-r4@sha256:d056e13afc62f0652334f009ae9843c307b44dfa488c301d602748af744a7d74",
+    "to": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779",
     "baselines": [
       {
         "profile": "core",
         "architecture": "amd64",
-        "tag": "26.8.2-r4-core",
-        "digest": "sha256:bf94d502bd0872dd1eba5f8019eb0bba2316c74dc9b67f6eb6a582d640754484",
-        "indexDigest": "sha256:1ad8160dd0071659b740d97a99a1e42966dc36efc999ee7b42a96b571d13d026",
-        "release": "v26.8.2-r4",
-        "sourceCommit": "afc78df2fa453ecb097ed703b0316ca03502165e",
-        "runtime": "ghcr.io/rambow-cloud/java:25.0.5-r3@sha256:b71ac597d7174fcf14d8449af30f17dc4516651cbf3ed3ca0b7a98d1557e5b4a",
-        "reference": "quay.io/rambow-cloud/keycloak@sha256:bf94d502bd0872dd1eba5f8019eb0bba2316c74dc9b67f6eb6a582d640754484"
+        "tag": "26.8.2-r5-core",
+        "digest": "sha256:ed777fe90c4de1b6329560c08979949667e778690952d4591cc409ebac4a1374",
+        "indexDigest": "sha256:71cca2f522fbf8eb3ee735e7c8fd1d874ad7ca1165f6c3c88bfe6fda6d4585bc",
+        "release": "v26.8.2-r5",
+        "sourceCommit": "e2508d5ad473f92f09cb0ce47beb32fc309a2273",
+        "runtime": "ghcr.io/rambow-cloud/java:25.0.5-r4@sha256:d056e13afc62f0652334f009ae9843c307b44dfa488c301d602748af744a7d74",
+        "reference": "quay.io/rambow-cloud/keycloak@sha256:ed777fe90c4de1b6329560c08979949667e778690952d4591cc409ebac4a1374"
       },
       {
         "profile": "core",
         "architecture": "arm64",
-        "tag": "26.8.2-r4-core",
-        "digest": "sha256:80f882cb5977b4d694b2d9ce2b67add0e6eed09c6e0604229ee4f1339d8f019b",
-        "indexDigest": "sha256:1ad8160dd0071659b740d97a99a1e42966dc36efc999ee7b42a96b571d13d026",
-        "release": "v26.8.2-r4",
-        "sourceCommit": "afc78df2fa453ecb097ed703b0316ca03502165e",
-        "runtime": "ghcr.io/rambow-cloud/java:25.0.5-r3@sha256:b71ac597d7174fcf14d8449af30f17dc4516651cbf3ed3ca0b7a98d1557e5b4a",
-        "reference": "quay.io/rambow-cloud/keycloak@sha256:80f882cb5977b4d694b2d9ce2b67add0e6eed09c6e0604229ee4f1339d8f019b"
+        "tag": "26.8.2-r5-core",
+        "digest": "sha256:d00a621cb0dc88ee3a57cb95788fe29678e1f81ac9f447dc72541cbdd5d8ffce",
+        "indexDigest": "sha256:71cca2f522fbf8eb3ee735e7c8fd1d874ad7ca1165f6c3c88bfe6fda6d4585bc",
+        "release": "v26.8.2-r5",
+        "sourceCommit": "e2508d5ad473f92f09cb0ce47beb32fc309a2273",
+        "runtime": "ghcr.io/rambow-cloud/java:25.0.5-r4@sha256:d056e13afc62f0652334f009ae9843c307b44dfa488c301d602748af744a7d74",
+        "reference": "quay.io/rambow-cloud/keycloak@sha256:d00a621cb0dc88ee3a57cb95788fe29678e1f81ac9f447dc72541cbdd5d8ffce"
       },
       {
         "profile": "aws",
         "architecture": "amd64",
-        "tag": "26.8.2-r4-aws",
-        "digest": "sha256:46580fe5ad1a9679e2d6f31d10a58f0ecbeb689f071ddbdcd63277f7813ada03",
-        "indexDigest": "sha256:c6d175aaef490ee36ec7dc8db56bccc212c0f47d65c265824ad69c7b8fc8960d",
-        "release": "v26.8.2-r4",
-        "sourceCommit": "afc78df2fa453ecb097ed703b0316ca03502165e",
-        "runtime": "ghcr.io/rambow-cloud/java:25.0.5-r3@sha256:b71ac597d7174fcf14d8449af30f17dc4516651cbf3ed3ca0b7a98d1557e5b4a",
-        "reference": "quay.io/rambow-cloud/keycloak@sha256:46580fe5ad1a9679e2d6f31d10a58f0ecbeb689f071ddbdcd63277f7813ada03"
+        "tag": "26.8.2-r5-aws",
+        "digest": "sha256:b0976bdc9b0afca7ad862848d37e006fe86a1321cdd8c677778800d2c7925652",
+        "indexDigest": "sha256:1b2259b61a75625f7e93874bfd6aa41a80bc86f14b7365bc75082d1d108587be",
+        "release": "v26.8.2-r5",
+        "sourceCommit": "e2508d5ad473f92f09cb0ce47beb32fc309a2273",
+        "runtime": "ghcr.io/rambow-cloud/java:25.0.5-r4@sha256:d056e13afc62f0652334f009ae9843c307b44dfa488c301d602748af744a7d74",
+        "reference": "quay.io/rambow-cloud/keycloak@sha256:b0976bdc9b0afca7ad862848d37e006fe86a1321cdd8c677778800d2c7925652"
       },
       {
         "profile": "aws",
         "architecture": "arm64",
-        "tag": "26.8.2-r4-aws",
-        "digest": "sha256:bbbe70a150fcc3bd7d06ab2d9ed377c9d06556ebd4ac291f0ef19e2f41a44bfe",
-        "indexDigest": "sha256:c6d175aaef490ee36ec7dc8db56bccc212c0f47d65c265824ad69c7b8fc8960d",
-        "release": "v26.8.2-r4",
-        "sourceCommit": "afc78df2fa453ecb097ed703b0316ca03502165e",
-        "runtime": "ghcr.io/rambow-cloud/java:25.0.5-r3@sha256:b71ac597d7174fcf14d8449af30f17dc4516651cbf3ed3ca0b7a98d1557e5b4a",
-        "reference": "quay.io/rambow-cloud/keycloak@sha256:bbbe70a150fcc3bd7d06ab2d9ed377c9d06556ebd4ac291f0ef19e2f41a44bfe"
+        "tag": "26.8.2-r5-aws",
+        "digest": "sha256:b77b601f5880ce6076456be4da48a90357f27a9bb2489ae0c5a27df6e2661aed",
+        "indexDigest": "sha256:1b2259b61a75625f7e93874bfd6aa41a80bc86f14b7365bc75082d1d108587be",
+        "release": "v26.8.2-r5",
+        "sourceCommit": "e2508d5ad473f92f09cb0ce47beb32fc309a2273",
+        "runtime": "ghcr.io/rambow-cloud/java:25.0.5-r4@sha256:d056e13afc62f0652334f009ae9843c307b44dfa488c301d602748af744a7d74",
+        "reference": "quay.io/rambow-cloud/keycloak@sha256:b77b601f5880ce6076456be4da48a90357f27a9bb2489ae0c5a27df6e2661aed"
       }
     ],
-    "issue": 179,
-    "fragment": "changes/179-distroless.json"
+    "issue": 188,
+    "fragment": "changes/188-distroless.json"
   }
 }
