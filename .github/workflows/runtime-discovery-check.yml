@@ -4,6 +4,7 @@ on:
     paths:
       - scripts/lib/rambow-runtime.mjs
       - scripts/lib/runtime-family.mjs
+      - scripts/lib/runtime-sbom.mjs
       - scripts/lib/oci.mjs
       - scripts/runtime-update.mjs
       - images.lock.json
@@ -25,7 +26,8 @@ jobs:
           script: |
             const fs = require('node:fs/promises');
             const {discoverRambowRuntime} = await import(process.cwd()+'/scripts/lib/rambow-runtime.mjs');
-            const baseline = JSON.parse(await fs.readFile('releases/records/v26.8.2-r2.json','utf8'));
+            // The next stable Corretto release after this baseline used a fourth version component.
+            const baseline = JSON.parse(await fs.readFile('releases/records/v26.8.2-r5.json','utf8'));
             const result = await discoverRambowRuntime({github,current:baseline.plan.imageLock.runtime});
             if(result.runtime===baseline.plan.imageLock.runtime || Object.keys(result.files).length!==3) {
               throw Error('The published newer Java runtime was not discovered with both inventories');

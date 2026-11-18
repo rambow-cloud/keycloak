@@ -4,7 +4,7 @@ The owner authorizes a new image revision for a changed distroless runtime withi
 
 ## Update and comparison
 
-For `ghcr.io/rambow-cloud/java`, the updater discovers stable `java25-25.x.y-rN` releases in `rambow-cloud/amazon-linux-distroless` and compares versions numerically. It rejects downgrade candidates, changed Java minor lines and moved immutable tags. It reads the selected `stable.json`, verifies the short GHCR reference against the actual index and both child/config digests, and imports the exact architecture CycloneDX assets from the referenced qualified build. Stable scan checksums, package inventories, UID and source revision must agree. The new lock remains an immutable tag plus digest.
+For `ghcr.io/rambow-cloud/java`, the updater discovers stable `java25-25.x.y-rN` and `java25-25.x.y.z-rN` releases in `rambow-cloud/amazon-linux-distroless`. It compares the Corretto version numerically before comparing the image revision. It rejects downgrade candidates, changed Java minor lines and moved immutable tags. It reads the selected `stable.json`, verifies the short GHCR reference against the actual index and both child/config digests, and imports the exact architecture CycloneDX assets from the referenced qualified build. Stable scan checksums, package inventories, UID and source revision must agree. The new lock remains an immutable tag plus digest.
 
 The generated PR includes the new `dependencies/runtime/<digest>/base.json` and both original SBOM files. These exact paths participate in the existing bot ownership, body and file-hash guard. Existing inventory directories remain available for baseline comparisons. A merged but unpublished runtime reuses its existing inventory.
 

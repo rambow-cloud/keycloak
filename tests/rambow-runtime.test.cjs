@@ -18,13 +18,18 @@ test('runtime discovery orders stable revisions numerically and keeps the review
   assert.equal(chooseRuntimeRelease(current, releases).tag_name, 'java25-25.0.5-r10');
   assert.equal(chooseRuntimeRelease(ref('25.0.5-r10'), releases), null);
   assert.equal(chooseRuntimeRelease(current, [{ tag_name: 'java25-25.0.6-r1' }]).tag_name, 'java25-25.0.6-r1');
+
+  const correttoUpdate = { tag_name: 'java25-25.0.5.1-r1' };
+  assert.equal(chooseRuntimeRelease(ref('25.0.5-r10'), [...releases, correttoUpdate]), correttoUpdate);
+  assert.equal(chooseRuntimeRelease(ref('25.0.5.1-r1'), [...releases, correttoUpdate]), null);
 });
 
-function importFixture() {
-  const release = { id: 1, tag_name: 'java25-25.0.5-r3', html_url: prefix + 'java25-25.0.5-r3' };
+function importFixture(version = '25.0.5', revision = 3) {
+  const tag_name = 'java25-' + version + '-r' + revision;
+  const release = { id: 1, tag_name, html_url: prefix + tag_name };
   const preview = { id: 2, tag_name: 'java25-' + 'a'.repeat(12) + '-run123', prerelease: true };
   preview.html_url = prefix + preview.tag_name;
-  const stable = { schemaVersion: 1, runtime: 'java25', version: '25.0.5', revision: 3, sourceCommit: 'a'.repeat(40),
+  const stable = { schemaVersion: 1, runtime: 'java25', version, revision, sourceCommit: 'a'.repeat(40),
     reference: 'ghcr.io/rambow-cloud/amazon-linux-distroless/java25@' + digest('b'),
     previewRelease: preview.html_url, releaseUrl: release.html_url, leaves: {}, scanHashes: {} };
   const assets = {};
@@ -69,9 +74,9 @@ function importFixture() {
 
 test('runtime candidate imports both original SBOMs with exact index, config and scan identities', async () => {
   const { discoverRambowRuntime } = await import('../scripts/lib/rambow-runtime.mjs');
-  const f = importFixture();
+  const f = importFixture('25.0.5.1', 1);
   const result = await discoverRambowRuntime(f);
-  assert.equal(result.runtime, 'ghcr.io/rambow-cloud/java:25.0.5-r3@' + digest('b'));
+  assert.equal(result.runtime, 'ghcr.io/rambow-cloud/java:25.0.5.1-r1@' + digest('b'));
   assert.equal(Object.keys(result.files).length, 3);
   const metadata = JSON.parse(result.files['dependencies/runtime/' + 'b'.repeat(64) + '/base.json']);
   assert.equal(metadata.architectures.arm64.config, digest('e'));
@@ -103,6 +108,8 @@ test('same-family revision automation permits forward updates and rejects immuta
   assert.equal(sameRuntimeFamily(next.runtime, current.runtime), false);
   assert.equal(sameRuntimeFamily(current.runtime, current.runtime.split('@')[0] + '@' + digest('0')), false);
   assert.equal(sameRuntimeFamily(current.runtime, ref('25.1.0-r1')), false);
+  assert.equal(sameRuntimeFamily(ref('25.0.5-r10'), ref('25.0.5.1-r1')), true);
+  assert.equal(sameRuntimeFamily(ref('25.0.5.1-r1'), ref('25.0.5-r10')), false);
   const intent = runtimeIntent([currentRecord], next);
   assert.equal(validateRequest({ schemaVersion: 1, ...intent, issue: 146, fragment: 'changes/146-distroless.json' }).to, next.runtime);
   const { validateChanges } = await import('../scripts/lib/image-changes.mjs');
