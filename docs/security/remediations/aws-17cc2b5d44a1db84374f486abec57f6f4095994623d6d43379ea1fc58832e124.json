@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "key": "17cc2b5d44a1db84374f486abec57f6f4095994623d6d43379ea1fc58832e124",
+  "issue": 194,
+  "profile": "aws",
+  "cves": [
+    "CVE-2026-119210",
+    "CVE-2026-119276",
+    "CVE-2026-119280",
+    "CVE-2026-119281"
+  ],
+  "targets": [
+    {
+      "profile": "aws",
+      "architecture": "amd64",
+      "tag": "26.8.2-r6-aws",
+      "digest": "sha256:739aafbd53a998d55ff13e9d25d9528e3b6c16c739543e7bcd0d5895fefa94e4",
+      "indexDigest": "sha256:7a4bce4f6f4afb6264df120e8c51f4b7cebd56f1dcbfbc40aa52d44ce74b5dda",
+      "release": "v26.8.2-r6",
+      "sourceCommit": "5b10e806894c418ddaeec145454f4ea2ca4a1fde",
+      "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779",
+      "reference": "quay.io/rambow-cloud/keycloak@sha256:739aafbd53a998d55ff13e9d25d9528e3b6c16c739543e7bcd0d5895fefa94e4"
+    },
+    {
+      "profile": "aws",
+      "architecture": "arm64",
+      "tag": "26.8.2-r6-aws",
+      "digest": "sha256:dbc7d1a2a574ad305e59bfd248839312f984dc1e7249f6d38011526facefe196",
+      "indexDigest": "sha256:7a4bce4f6f4afb6264df120e8c51f4b7cebd56f1dcbfbc40aa52d44ce74b5dda",
+      "release": "v26.8.2-r6",
+      "sourceCommit": "5b10e806894c418ddaeec145454f4ea2ca4a1fde",
+      "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779",
+      "reference": "quay.io/rambow-cloud/keycloak@sha256:dbc7d1a2a574ad305e59bfd248839312f984dc1e7249f6d38011526facefe196"
+    }
+  ],
+  "scanRun": 44521038473,
+  "scanAttempt": 1,
+  "monitorCommit": "4fe39142ca6ce9bda28e9a6e126a259318c99ea9",
+  "candidate": {
+    "keycloak": "quay.io/keycloak/keycloak:26.8.2@sha256:7e66a96e4739239070aeaf72e4c5decf0f7f682cfc725b9f7ea2b336eaba38b3",
+    "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779"
+  },
+  "status": "candidate-pending-verification"
+}
