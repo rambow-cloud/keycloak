@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "reference": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779",
+  "sourceCommit": "8ce547175406949c89e4c4a9926d960da7234906",
+  "sourceRelease": "https://github.com/rambow-cloud/amazon-linux-distroless/releases/tag/java25-25.0.5.1-r1",
+  "architectures": {
+    "amd64": {
+      "manifest": "sha256:6238a66510230bdd95847236b284f54c7709501658deac50e8b88c4e93c145f9",
+      "config": "sha256:571674b86ea107c9538dfc6c5b9e4b131c2ead6f88001a8b4dc696fbc2990e3e",
+      "diffIds": [
+        "sha256:44460914ce19672874a0766c0613fabf51342f588e6c7447a83565301eb431bd",
+        "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+      ],
+      "sbomSha256": "9d6cdfe0592598d80c733de6087b27f0475032bc47d8b358ed3ae0da3e063c5e"
+    },
+    "arm64": {
+      "manifest": "sha256:5dd8c2a5f7910aa1ce38d4a17795dedbd755be812f23cb9c4a63878b807b0d1b",
+      "config": "sha256:65d6bab38fc278e7317be3208f734a4c3ca790e57e693fb29022bbf4026cf947",
+      "diffIds": [
+        "sha256:d7fddb00cf52ca1cf9e98dae6ae703c9ccc3f345a1efd9867edd95da9233a6db",
+        "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+      ],
+      "sbomSha256": "5a16b93a1939b59afc0ea15c6a0cdf82710aac70a3ef21a9589d16c4cc2f9b98"
+    }
+  }
+}
