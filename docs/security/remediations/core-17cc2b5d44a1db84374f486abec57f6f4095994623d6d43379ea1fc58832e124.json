@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "key": "17cc2b5d44a1db84374f486abec57f6f4095994623d6d43379ea1fc58832e124",
+  "issue": 194,
+  "profile": "core",
+  "cves": [
+    "CVE-2026-119210",
+    "CVE-2026-119276",
+    "CVE-2026-119280",
+    "CVE-2026-119281"
+  ],
+  "targets": [
+    {
+      "profile": "core",
+      "architecture": "amd64",
+      "tag": "26.8.2-r6-core",
+      "digest": "sha256:093e7edff43d26c8d424d7979d1d58bc88e836bfb048ca495adec8c557759a23",
+      "indexDigest": "sha256:1ac9cc6f0b901a65261565023c107dc3b62c156e373f785199be8548e83ac8b9",
+      "release": "v26.8.2-r6",
+      "sourceCommit": "5b10e806894c418ddaeec145454f4ea2ca4a1fde",
+      "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779",
+      "reference": "quay.io/rambow-cloud/keycloak@sha256:093e7edff43d26c8d424d7979d1d58bc88e836bfb048ca495adec8c557759a23"
+    },
+    {
+      "profile": "core",
+      "architecture": "arm64",
+      "tag": "26.8.2-r6-core",
+      "digest": "sha256:b3555f2570c5ba3489601d76e3853a3abd8f6776d419ec3f6a8697489f0e5af5",
+      "indexDigest": "sha256:1ac9cc6f0b901a65261565023c107dc3b62c156e373f785199be8548e83ac8b9",
+      "release": "v26.8.2-r6",
+      "sourceCommit": "5b10e806894c418ddaeec145454f4ea2ca4a1fde",
+      "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779",
+      "reference": "quay.io/rambow-cloud/keycloak@sha256:b3555f2570c5ba3489601d76e3853a3abd8f6776d419ec3f6a8697489f0e5af5"
+    }
+  ],
+  "scanRun": 44521038473,
+  "scanAttempt": 1,
+  "monitorCommit": "4fe39142ca6ce9bda28e9a6e126a259318c99ea9",
+  "candidate": {
+    "keycloak": "quay.io/keycloak/keycloak:26.8.2@sha256:7e66a96e4739239070aeaf72e4c5decf0f7f682cfc725b9f7ea2b336eaba38b3",
+    "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779"
+  },
+  "status": "candidate-pending-verification"
+}
