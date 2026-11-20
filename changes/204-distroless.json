@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "changes": [
+    {
+      "type": "runtime-update",
+      "summary": "Refresh the reviewed distroless runtime digest and compare published versus candidate CVEs with identical scanner databases; no repair is assumed before comparison.",
+      "issues": [
+        204
+      ],
+      "profiles": [
+        "core",
+        "aws"
+      ],
+      "runtime": {
+        "from": {
+          "core": "ghcr.io/rambow-cloud/java:25.0.5.1-r2@sha256:8b81c704d8eee430978bdbc40edccde94f8a47a0b3193b6b37fdfb8ec9c46c5e",
+          "aws": "ghcr.io/rambow-cloud/java:25.0.5.1-r2@sha256:8b81c704d8eee430978bdbc40edccde94f8a47a0b3193b6b37fdfb8ec9c46c5e"
+        },
+        "to": "ghcr.io/rambow-cloud/java:25.0.5.1-r3@sha256:2b91832afe7b4845de2e70ca7407867959dedc956f529361328f4d05c4b1088d"
+      }
+    }
+  ]
+}
