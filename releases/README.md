@@ -6,6 +6,8 @@ Registry: `quay.io/rambow-cloud/keycloak`. Formal releases only; no `latest` tag
 
 | Release | Keycloak | Profile | Image tag | Digest | Aliases | Published (UTC) |
 | --- | --- | --- | --- | --- | --- | --- |
+| [v26.8.2-r8](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r8) | 26.8.2 | core | `26.8.2-r8-core` | `sha256:6df3ddf0e1f09b6a843484ed7ca805157fc5ab791561d196a1c92199d361f4f4` | — | 2026-11-20T04:07:15.228Z |
+| [v26.8.2-r8](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r8) | 26.8.2 | aws | `26.8.2-r8-aws` | `sha256:c233e686747c0f10f3295785411e5b61ebf9aa7371fa02472c8084972a49902a` | — | 2026-11-20T04:07:15.228Z |
 | [v26.8.2-r7](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r7) | 26.8.2 | core | `26.8.2-r7-core` | `sha256:af2e6fbbae20c5e43e7f66f7d935ab420e103fe3fbf344b6765b9074b047a8d5` | — | 2026-11-19T14:02:16.637Z |
 | [v26.8.2-r7](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r7) | 26.8.2 | aws | `26.8.2-r7-aws` | `sha256:ad097f6fa3ce3353fe8c9e657d39006ff69b7ee66542c228e22cdd431151afc6` | — | 2026-11-19T14:02:16.637Z |
 | [v26.8.2-r6](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r6) | 26.8.2 | core | `26.8.2-r6-core` | `sha256:1ac9cc6f0b901a65261565023c107dc3b62c156e373f785199be8548e83ac8b9` | — | 2026-11-19T00:24:24.904Z |
@@ -28,6 +30,31 @@ Registry: `quay.io/rambow-cloud/keycloak`. Formal releases only; no `latest` tag
 | [v26.8.1-r2](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r2) | 26.8.1 | aws | `26.8.1-r2-aws` | `sha256:2cea43c26ef0676d922f68de30504a6d9355a420c4c9544cda40aa10ab166129` | — | 2026-10-28T20:08:15.664Z |
 | [v26.8.1-r1](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r1) | 26.8.1 | core | `26.8.1-r1-core` | `sha256:e0975379e3f2080cc4b9a4e852ce3341c54041e8a733a529b01cca2922beaa32` | — | 2026-10-26T02:41:36.090Z |
 | [v26.8.1-r1](https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.1-r1) | 26.8.1 | aws | `26.8.1-r1-aws` | `sha256:0771ae5db0bc40e057ce51d2609d50a56a0d867a66411e411179ecf12f9608a7` | — | 2026-10-26T02:41:36.090Z |
+
+## v26.8.2-r8
+
+[Source commit](https://github.com/rambow-cloud/keycloak/commit/a8a9f7e864518ead9724fd858caca495300473b2) · [Source CI](https://github.com/rambow-cloud/keycloak/actions/runs/44669750216) · [Publication and fresh scans](https://github.com/rambow-cloud/keycloak/actions/runs/44671643197)
+
+### `26.8.2-r8-core` (core)
+
+- **runtime-update:** Refresh the reviewed distroless runtime digest; paired native scans detect no resolved CVEs. ([#204](https://github.com/rambow-cloud/keycloak/issues/204))
+
+Architectures: `linux/amd64` (`sha256:5d8843af620c169b0f64ab78e0264fd6202c6dbee80f77898600f220f0008ae6`), `linux/arm64` (`sha256:fa83a9d1db6935ade0508d57a65e97f0c40b3c15b22a91070c39f2a4b767afb8`). The tag and pull reference select the OCI index.
+
+```sh
+podman pull quay.io/rambow-cloud/keycloak@sha256:6df3ddf0e1f09b6a843484ed7ca805157fc5ab791561d196a1c92199d361f4f4
+```
+
+### `26.8.2-r8-aws` (aws)
+
+- **runtime-update:** Refresh the reviewed distroless runtime digest; paired native scans detect no resolved CVEs. ([#204](https://github.com/rambow-cloud/keycloak/issues/204))
+
+Architectures: `linux/amd64` (`sha256:39741663065a75e9d8bc4bef2b483e9d69b941a87f233785391126c9a28b993b`), `linux/arm64` (`sha256:2ac5b2cc9cc82a11704d54217025f2943030b0850bef509af76ae2e6de84cb29`). The tag and pull reference select the OCI index.
+
+```sh
+podman pull quay.io/rambow-cloud/keycloak@sha256:c233e686747c0f10f3295785411e5b61ebf9aa7371fa02472c8084972a49902a
+```
+
 
 ## v26.8.2-r7
 
