@@ -2,59 +2,59 @@
   "schemaVersion": 1,
   "request": {
     "schemaVersion": 1,
-    "id": "0e2b3c9ec606f25d516230df9a254f57bc359a174df02be0292c222699b740dd",
+    "id": "ae6d5ae5e887a472fe0391ec6f1d58bf3dcd14f8a152f114f22f330d40e53670",
     "from": {
-      "core": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779",
-      "aws": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779"
+      "core": "ghcr.io/rambow-cloud/java:25.0.5.1-r2@sha256:8b81c704d8eee430978bdbc40edccde94f8a47a0b3193b6b37fdfb8ec9c46c5e",
+      "aws": "ghcr.io/rambow-cloud/java:25.0.5.1-r2@sha256:8b81c704d8eee430978bdbc40edccde94f8a47a0b3193b6b37fdfb8ec9c46c5e"
     },
-    "to": "ghcr.io/rambow-cloud/java:25.0.5.1-r2@sha256:8b81c704d8eee430978bdbc40edccde94f8a47a0b3193b6b37fdfb8ec9c46c5e",
+    "to": "ghcr.io/rambow-cloud/java:25.0.5.1-r3@sha256:2b91832afe7b4845de2e70ca7407867959dedc956f529361328f4d05c4b1088d",
     "baselines": [
       {
         "profile": "core",
         "architecture": "amd64",
-        "tag": "26.8.2-r6-core",
-        "digest": "sha256:093e7edff43d26c8d424d7979d1d58bc88e836bfb048ca495adec8c557759a23",
-        "indexDigest": "sha256:1ac9cc6f0b901a65261565023c107dc3b62c156e373f785199be8548e83ac8b9",
-        "release": "v26.8.2-r6",
-        "sourceCommit": "5b10e806894c418ddaeec145454f4ea2ca4a1fde",
-        "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779",
-        "reference": "quay.io/rambow-cloud/keycloak@sha256:093e7edff43d26c8d424d7979d1d58bc88e836bfb048ca495adec8c557759a23"
+        "tag": "26.8.2-r7-core",
+        "digest": "sha256:faf625228cecadb971ec3e17edc55a4f029ae7aec8c7c6cae4435dd6991fee1f",
+        "indexDigest": "sha256:af2e6fbbae20c5e43e7f66f7d935ab420e103fe3fbf344b6765b9074b047a8d5",
+        "release": "v26.8.2-r7",
+        "sourceCommit": "58216ef4cee8e5d9f6a1628e27558aa5654164af",
+        "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r2@sha256:8b81c704d8eee430978bdbc40edccde94f8a47a0b3193b6b37fdfb8ec9c46c5e",
+        "reference": "quay.io/rambow-cloud/keycloak@sha256:faf625228cecadb971ec3e17edc55a4f029ae7aec8c7c6cae4435dd6991fee1f"
       },
       {
         "profile": "core",
         "architecture": "arm64",
-        "tag": "26.8.2-r6-core",
-        "digest": "sha256:b3555f2570c5ba3489601d76e3853a3abd8f6776d419ec3f6a8697489f0e5af5",
-        "indexDigest": "sha256:1ac9cc6f0b901a65261565023c107dc3b62c156e373f785199be8548e83ac8b9",
-        "release": "v26.8.2-r6",
-        "sourceCommit": "5b10e806894c418ddaeec145454f4ea2ca4a1fde",
-        "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779",
-        "reference": "quay.io/rambow-cloud/keycloak@sha256:b3555f2570c5ba3489601d76e3853a3abd8f6776d419ec3f6a8697489f0e5af5"
+        "tag": "26.8.2-r7-core",
+        "digest": "sha256:5095081562693d54e1ad1f9a8306ccd4c78aeaea38cdb99b3faf33da82da0ac5",
+        "indexDigest": "sha256:af2e6fbbae20c5e43e7f66f7d935ab420e103fe3fbf344b6765b9074b047a8d5",
+        "release": "v26.8.2-r7",
+        "sourceCommit": "58216ef4cee8e5d9f6a1628e27558aa5654164af",
+        "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r2@sha256:8b81c704d8eee430978bdbc40edccde94f8a47a0b3193b6b37fdfb8ec9c46c5e",
+        "reference": "quay.io/rambow-cloud/keycloak@sha256:5095081562693d54e1ad1f9a8306ccd4c78aeaea38cdb99b3faf33da82da0ac5"
       },
       {
         "profile": "aws",
         "architecture": "amd64",
-        "tag": "26.8.2-r6-aws",
-        "digest": "sha256:739aafbd53a998d55ff13e9d25d9528e3b6c16c739543e7bcd0d5895fefa94e4",
-        "indexDigest": "sha256:7a4bce4f6f4afb6264df120e8c51f4b7cebd56f1dcbfbc40aa52d44ce74b5dda",
-        "release": "v26.8.2-r6",
-        "sourceCommit": "5b10e806894c418ddaeec145454f4ea2ca4a1fde",
-        "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779",
-        "reference": "quay.io/rambow-cloud/keycloak@sha256:739aafbd53a998d55ff13e9d25d9528e3b6c16c739543e7bcd0d5895fefa94e4"
+        "tag": "26.8.2-r7-aws",
+        "digest": "sha256:5fac3383413e8f6a2be4394421da55ad63c561a98c1915fccd2a5158fc3cdb8d",
+        "indexDigest": "sha256:ad097f6fa3ce3353fe8c9e657d39006ff69b7ee66542c228e22cdd431151afc6",
+        "release": "v26.8.2-r7",
+        "sourceCommit": "58216ef4cee8e5d9f6a1628e27558aa5654164af",
+        "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r2@sha256:8b81c704d8eee430978bdbc40edccde94f8a47a0b3193b6b37fdfb8ec9c46c5e",
+        "reference": "quay.io/rambow-cloud/keycloak@sha256:5fac3383413e8f6a2be4394421da55ad63c561a98c1915fccd2a5158fc3cdb8d"
       },
       {
         "profile": "aws",
         "architecture": "arm64",
-        "tag": "26.8.2-r6-aws",
-        "digest": "sha256:dbc7d1a2a574ad305e59bfd248839312f984dc1e7249f6d38011526facefe196",
-        "indexDigest": "sha256:7a4bce4f6f4afb6264df120e8c51f4b7cebd56f1dcbfbc40aa52d44ce74b5dda",
-        "release": "v26.8.2-r6",
-        "sourceCommit": "5b10e806894c418ddaeec145454f4ea2ca4a1fde",
-        "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r1@sha256:10fd4833e70422b522e6b8e3b77d1dda0b87a41223bca3dd81cc6751a8980779",
-        "reference": "quay.io/rambow-cloud/keycloak@sha256:dbc7d1a2a574ad305e59bfd248839312f984dc1e7249f6d38011526facefe196"
+        "tag": "26.8.2-r7-aws",
+        "digest": "sha256:bcd53f26fd365dcdfa5ba069d7bd27f636ca17863a387a610ceee313bb6457c7",
+        "indexDigest": "sha256:ad097f6fa3ce3353fe8c9e657d39006ff69b7ee66542c228e22cdd431151afc6",
+        "release": "v26.8.2-r7",
+        "sourceCommit": "58216ef4cee8e5d9f6a1628e27558aa5654164af",
+        "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r2@sha256:8b81c704d8eee430978bdbc40edccde94f8a47a0b3193b6b37fdfb8ec9c46c5e",
+        "reference": "quay.io/rambow-cloud/keycloak@sha256:bcd53f26fd365dcdfa5ba069d7bd27f636ca17863a387a610ceee313bb6457c7"
       }
     ],
-    "issue": 196,
-    "fragment": "changes/196-distroless.json"
+    "issue": 204,
+    "fragment": "changes/204-distroless.json"
   }
 }
