@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "architecture": "arm64",
+  "release": "v26.8.2-r3",
+  "branch": "chore/154-operator-kind",
+  "commit": "7f827179ace83042b38a7b923bda2b9c2eca322e",
+  "runId": 43180568273,
+  "runAttempt": 1,
+  "inputs": {
+    "keycloakVersion": "26.8.2",
+    "release": "v26.8.2-r3",
+    "operatorResourcesCommit": "79ba77fd65bb05a8300cd1396d6be9806a0f290f",
+    "operator": {
+      "index": "quay.io/keycloak/keycloak-operator@sha256:92cca02f2fcf549cb86c8e3c0d95de0e7016e4e3ffe2d781f174aa730417e80f",
+      "amd64": "sha256:12b68acdf885fcdb5534c6ec2462918ef7f0dc48dc53d4df4d8bb430046138d9",
+      "arm64": "sha256:1169fc8ac43932acdf01f7617955ee3118a1564015b77c121639deac8ba3247b"
+    },
+    "kind": {
+      "version": "0.33.0",
+      "amd64": "aee6151561422756b764a4ae28e7f44cda5af5a9eead3cc9985112b1de8d8e0d",
+      "arm64": "20022bee6cfcd5086cb7234d218e3454e6090022f2a8f55d1fa7fcf42c3867a2"
+    },
+    "node": "docker.io/kindest/node:v1.35.8@sha256:07b2536e30b803ed61d1677a79df6115f798ce64c80f9e22f6ed45afd09323c0",
+    "kubectl": {
+      "version": "1.35.8",
+      "amd64": "874d5e72dbb819f43cff16bcd1e4f8bac5b7f2361fe1e55049b0a6c676fb0cbf",
+      "arm64": "cc749967b62f4422260bc9c0aa7a7c55f45175ae38cb8d95767b5d2b7e04c1fd"
+    }
+  },
+  "targets": [
+    {
+      "profile": "core",
+      "index": "sha256:3d1fd81d9f001a611b825667b39de2a537cda2debc6862d465651dc04b15daec",
+      "digest": "sha256:7c5019e4f79f696e6cbb32ea92698500e4bc2d717bacae1ed2a80c99395c99c0",
+      "reference": "quay.io/rambow-cloud/keycloak@sha256:7c5019e4f79f696e6cbb32ea92698500e4bc2d717bacae1ed2a80c99395c99c0"
+    },
+    {
+      "profile": "aws",
+      "index": "sha256:0d2471cce148a0007251d352717f7e0f418d31643086e547b88f1d4da6c13758",
+      "digest": "sha256:b235e6ca6dfb382e0508deb768808313679cd0770b81341fbae3a899ae6818d4",
+      "reference": "quay.io/rambow-cloud/keycloak@sha256:b235e6ca6dfb382e0508deb768808313679cd0770b81341fbae3a899ae6818d4"
+    }
+  ],
+  "results": [
+    {
+      "profile": "core",
+      "phase": "default",
+      "status": "failed",
+      "reason": "Error",
+      "exitCode": 2,
+      "command": null,
+      "args": [
+        "-Djgroups.bind.address=$(POD_IP)",
+        "--verbose",
+        "start",
+        "--optimized"
+      ],
+      "imageID": "quay.io/rambow-cloud/keycloak@sha256:7c5019e4f79f696e6cbb32ea92698500e4bc2d717bacae1ed2a80c99395c99c0"
+    },
+    {
+      "profile": "core",
+      "phase": "direct-java-pod-template",
+      "status": "ready",
+      "command": [
+        "/usr/bin/java",
+        "@/opt/keycloak/java.options"
+      ],
+      "args": [
+        "-Djgroups.bind.address=$(POD_IP)",
+        "-cp",
+        "/opt/keycloak/lib/quarkus-run.jar",
+        "io.quarkus.bootstrap.runner.QuarkusEntryPoint",
+        "--verbose",
+        "start",
+        "--optimized"
+      ],
+      "imageID": "quay.io/rambow-cloud/keycloak@sha256:7c5019e4f79f696e6cbb32ea92698500e4bc2d717bacae1ed2a80c99395c99c0"
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "core",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://core.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "core",
+      "phase": "restart-recovery",
+      "status": "passed"
+    },
+    {
+      "profile": "core",
+      "phase": "realm-import",
+      "status": "failed",
+      "command": [
+        "/opt/keycloak/bin/kc.sh"
+      ],
+      "args": [
+        "--verbose",
+        "import",
+        "--file=/mnt/realm-import/operator-core-realm.json",
+        "--override=false"
+      ],
+      "message": "failed to create containerd task: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: exec: \"/opt/keycloak/bin/kc.sh\": stat /opt/keycloak/bin/kc.sh: no such file or directory",
+      "reason": "StartError",
+      "exitCode": 128
+    },
+    {
+      "profile": "core",
+      "phase": "auto-update-compatibility",
+      "status": "job-failed",
+      "initContainers": [
+        {
+          "command": [
+            "/usr/bin/java",
+            "@/opt/keycloak/java.options"
+          ],
+          "args": [
+            "update-compatibility",
+            "metadata",
+            "--file",
+            "/mnt/keycloak-update-job-temporary-workdir/updates.json",
+            "-Djgroups.bind.address=$(POD_IP)",
+            "-cp",
+            "/opt/keycloak/lib/quarkus-run.jar",
+            "io.quarkus.bootstrap.runner.QuarkusEntryPoint",
+            "--verbose",
+            "--optimized"
+          ]
+        }
+      ],
+      "containers": [
+        {
+          "command": [
+            "/usr/bin/java",
+            "@/opt/keycloak/java.options"
+          ],
+          "args": [
+            "update-compatibility",
+            "check",
+            "--file",
+            "/mnt/keycloak-update-job-temporary-workdir/updates.json",
+            "-Djgroups.bind.address=$(POD_IP)",
+            "-cp",
+            "/opt/keycloak/lib/quarkus-run.jar",
+            "io.quarkus.bootstrap.runner.QuarkusEntryPoint",
+            "--verbose",
+            "--optimized"
+          ]
+        }
+      ],
+      "failure": {
+        "status": "failed",
+        "container": "actual",
+        "exitCode": 1,
+        "message": "",
+        "reason": "Error"
+      },
+      "limitation": "A compatibility-job observation is not a successful rolling-upgrade test; rolling updates were not enabled at image build time."
+    },
+    {
+      "profile": "aws",
+      "phase": "default",
+      "status": "failed",
+      "reason": "Error",
+      "exitCode": 2,
+      "command": null,
+      "args": [
+        "-Djgroups.bind.address=$(POD_IP)",
+        "--verbose",
+        "start",
+        "--optimized"
+      ],
+      "imageID": "quay.io/rambow-cloud/keycloak@sha256:b235e6ca6dfb382e0508deb768808313679cd0770b81341fbae3a899ae6818d4"
+    },
+    {
+      "profile": "aws",
+      "phase": "direct-java-pod-template",
+      "status": "ready",
+      "command": [
+        "/usr/bin/java",
+        "@/opt/keycloak/java.options"
+      ],
+      "args": [
+        "-Djgroups.bind.address=$(POD_IP)",
+        "-cp",
+        "/opt/keycloak/lib/quarkus-run.jar",
+        "io.quarkus.bootstrap.runner.QuarkusEntryPoint",
+        "--verbose",
+        "start",
+        "--optimized"
+      ],
+      "imageID": "quay.io/rambow-cloud/keycloak@sha256:b235e6ca6dfb382e0508deb768808313679cd0770b81341fbae3a899ae6818d4"
+    },
+    {
+      "profile": "aws",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://aws.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "aws",
+      "phase": "verified-https-admin-and-db-tls",
+      "status": "passed",
+      "issuer": "https://aws.keycloak.test/realms/master",
+      "databaseTls": true
+    },
+    {
+      "profile": "aws",
+      "phase": "restart-recovery",
+      "status": "passed"
+    },
+    {
+      "profile": "aws",
+      "phase": "realm-import",
+      "status": "failed",
+      "command": [
+        "/opt/keycloak/bin/kc.sh"
+      ],
+      "args": [
+        "--verbose",
+        "import",
+        "--file=/mnt/realm-import/operator-aws-realm.json",
+        "--override=false"
+      ],
+      "message": "failed to create containerd task: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: exec: \"/opt/keycloak/bin/kc.sh\": stat /opt/keycloak/bin/kc.sh: no such file or directory",
+      "reason": "StartError",
+      "exitCode": 128
+    }
+  ]
+}
