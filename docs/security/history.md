@@ -20,6 +20,8 @@ Git-backed JSONL records; no database service. This page documents reviewed repa
 | [SEC-2026-008](#sec-2026-008) | CVE-2026-86805 | Fix pending publication; listed images are affected | `26.8.2-r2-core`, `26.8.2-r2-aws` | [#146](https://github.com/rambow-cloud/keycloak/issues/146) |
 | [SEC-2026-009](#sec-2026-009) | CVE-2026-86805 | Fixed before first publication | `26.8.2-r3-core` | [#146](https://github.com/rambow-cloud/keycloak/issues/146), [#150](https://github.com/rambow-cloud/keycloak/issues/150) |
 | [SEC-2026-010](#sec-2026-010) | CVE-2026-86805 | Fixed before first publication | `26.8.2-r3-aws` | [#146](https://github.com/rambow-cloud/keycloak/issues/146), [#150](https://github.com/rambow-cloud/keycloak/issues/150) |
+| [SEC-2026-011](#sec-2026-011) | CVE-2026-90781, CVE-2026-96675 | Fixed before first publication | `26.8.2-r5-core` | [#179](https://github.com/rambow-cloud/keycloak/issues/179), [#183](https://github.com/rambow-cloud/keycloak/issues/183) |
+| [SEC-2026-012](#sec-2026-012) | CVE-2026-90781, CVE-2026-96675 | Fixed before first publication | `26.8.2-r5-aws` | [#179](https://github.com/rambow-cloud/keycloak/issues/179), [#183](https://github.com/rambow-cloud/keycloak/issues/183) |
 
 ## CVE and security event index
 
@@ -44,6 +46,7 @@ Git-backed JSONL records; no database service. This page documents reviewed repa
 - **CVE-2026-64607**: [SEC-2026-001](#sec-2026-001)
 - **CVE-2026-82965**: [SEC-2026-007](#sec-2026-007)
 - **CVE-2026-86805**: [SEC-2026-008](#sec-2026-008), [SEC-2026-009](#sec-2026-009), [SEC-2026-010](#sec-2026-010)
+- **CVE-2026-90781**: [SEC-2026-011](#sec-2026-011), [SEC-2026-012](#sec-2026-012)
 - **CVE-2026-92358**: [SEC-2026-007](#sec-2026-007)
 - **CVE-2026-92855**: [SEC-2026-007](#sec-2026-007)
 - **CVE-2026-92856**: [SEC-2026-007](#sec-2026-007)
@@ -53,6 +56,7 @@ Git-backed JSONL records; no database service. This page documents reviewed repa
 - **CVE-2026-96457**: [SEC-2026-007](#sec-2026-007)
 - **CVE-2026-96460**: [SEC-2026-007](#sec-2026-007)
 - **CVE-2026-96547**: [SEC-2026-007](#sec-2026-007)
+- **CVE-2026-96675**: [SEC-2026-011](#sec-2026-011), [SEC-2026-012](#sec-2026-012)
 - **CVE-2026-97174**: [SEC-2026-007](#sec-2026-007)
 - **CVE-2026-97175**: [SEC-2026-007](#sec-2026-007)
 - **CVE-2026-97367**: [SEC-2026-007](#sec-2026-007)
@@ -350,6 +354,48 @@ Evidence and sources:
 
 - [Formal Release and immutable paired evidence](<https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r3>)
 - [Native source CI](<https://github.com/rambow-cloud/keycloak/actions/runs/43118686911>)
+
+## SEC-2026-011
+
+Publish the distroless runtime update with verified disappearance of detected CVEs in the core profile.
+
+Recorded (UTC): `2026-11-18T05:12:24.130Z`. Result: **Fixed before first publication**.
+
+- Native before/after scans use identical Trivy database bytes per pair. Every listed CVE is absent on both published candidate architectures.
+- Point-in-time Trivy comparison with identical database bytes per native pair; disappearing CVEs are scan observations. No exploitability, complete JVM, cloud or extension certification. Full original reports remain in the source CI artifacts with retained hashes.
+- The comparison does not attribute application-library changes solely to distroless; exact source inputs and package inventories are retained.
+
+| Profile | Published tag | Digest |
+| --- | --- | --- |
+| core | `26.8.2-r5-core` | `sha256:71cca2f522fbf8eb3ee735e7c8fd1d874ad7ca1165f6c3c88bfe6fda6d4585bc` |
+
+Issues: [#179](https://github.com/rambow-cloud/keycloak/issues/179), [#183](https://github.com/rambow-cloud/keycloak/issues/183).
+
+Evidence and sources:
+
+- [Formal Release and immutable paired evidence](<https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r5>)
+- [Native source CI](<https://github.com/rambow-cloud/keycloak/actions/runs/44239584575>)
+
+## SEC-2026-012
+
+Publish the distroless runtime update with verified disappearance of detected CVEs in the aws profile.
+
+Recorded (UTC): `2026-11-18T05:12:24.131Z`. Result: **Fixed before first publication**.
+
+- Native before/after scans use identical Trivy database bytes per pair. Every listed CVE is absent on both published candidate architectures.
+- Point-in-time Trivy comparison with identical database bytes per native pair; disappearing CVEs are scan observations. No exploitability, complete JVM, cloud or extension certification. Full original reports remain in the source CI artifacts with retained hashes.
+- The comparison does not attribute application-library changes solely to distroless; exact source inputs and package inventories are retained.
+
+| Profile | Published tag | Digest |
+| --- | --- | --- |
+| aws | `26.8.2-r5-aws` | `sha256:1b2259b61a75625f7e93874bfd6aa41a80bc86f14b7365bc75082d1d108587be` |
+
+Issues: [#179](https://github.com/rambow-cloud/keycloak/issues/179), [#183](https://github.com/rambow-cloud/keycloak/issues/183).
+
+Evidence and sources:
+
+- [Formal Release and immutable paired evidence](<https://github.com/rambow-cloud/keycloak/releases/tag/v26.8.2-r5>)
+- [Native source CI](<https://github.com/rambow-cloud/keycloak/actions/runs/44239584575>)
 
 ## Maintain and query
 

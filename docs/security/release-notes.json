@@ -180,6 +180,34 @@
           "summary": "Remove the detected vulnerability from the published aws image through the verified runtime-input refresh; see paired package evidence."
         }
       ]
+    },
+    {
+      "release": "v26.8.2-r5",
+      "record": "SEC-2026-011",
+      "fixes": [
+        {
+          "advisory": "CVE-2026-90781",
+          "summary": "Remove the detected vulnerability from the published core image through the verified runtime-input refresh; see paired package evidence."
+        },
+        {
+          "advisory": "CVE-2026-96675",
+          "summary": "Remove the detected vulnerability from the published core image through the verified runtime-input refresh; see paired package evidence."
+        }
+      ]
+    },
+    {
+      "release": "v26.8.2-r5",
+      "record": "SEC-2026-012",
+      "fixes": [
+        {
+          "advisory": "CVE-2026-90781",
+          "summary": "Remove the detected vulnerability from the published aws image through the verified runtime-input refresh; see paired package evidence."
+        },
+        {
+          "advisory": "CVE-2026-96675",
+          "summary": "Remove the detected vulnerability from the published aws image through the verified runtime-input refresh; see paired package evidence."
+        }
+      ]
     }
   ]
 }
