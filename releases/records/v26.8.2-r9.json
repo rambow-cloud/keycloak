@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 1,
+  "status": "published",
+  "publishedAt": "2026-11-22T16:06:59.308Z",
+  "publishRunId": 45041516877,
+  "validationToolsCommit": "f0b99d7302635ee5f46470eae9e1e28affd77054",
+  "plan": {
+    "schemaVersion": 3,
+    "registry": "quay.io/rambow-cloud/keycloak",
+    "tag": "v26.8.2-r9",
+    "releaseId": 454565326,
+    "keycloakVersion": "26.8.2",
+    "revision": 9,
+    "sourceCommit": "f0b99d7302635ee5f46470eae9e1e28affd77054",
+    "toolsCommit": "f0b99d7302635ee5f46470eae9e1e28affd77054",
+    "sourceRun": {
+      "id": 45039902716,
+      "attempt": 1
+    },
+    "lockSha256": "f61f910056d015eeceb15222eea6e9f8ee2b6f166f25ab1d19017b92cee35519",
+    "imageLock": {
+      "keycloakVersion": "26.8.2",
+      "javaVersion": 25,
+      "platforms": [
+        "linux/amd64",
+        "linux/arm64"
+      ],
+      "keycloak": "quay.io/keycloak/keycloak:26.8.2@sha256:7e66a96e4739239070aeaf72e4c5decf0f7f682cfc725b9f7ea2b336eaba38b3",
+      "builder": "docker.io/library/eclipse-temurin:25-jdk-noble@sha256:4ddc1a8bdaf283421df5487411aff10b797ccf1e06a339041005114c8f489b5c",
+      "runtime": "ghcr.io/rambow-cloud/java:25.0.5.1-r4@sha256:538cc28569ffbf95daea91caedbd47e40d55941347db16aeb6a6ac5f2d716d56",
+      "postgres": "docker.io/library/postgres:17-bookworm@sha256:858bb5e98eed02eb8cafbcdc007f9a65d1b613972028944a8ec2133ccaf80d27",
+      "awsDependencies": {
+        "wrapperVersion": "4.5.0",
+        "sdkVersion": "2.46.10",
+        "lockFile": "dependencies/aws/dependencies.lock.json",
+        "rdsCa": {
+          "url": "https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem",
+          "sha256": "90a6f1a7978a1b1b096dca6c57511ca48d3b8cf052f8e704baf358f34ea2f21b"
+        }
+      }
+    },
+    "aliases": [],
+    "previousAliases": {},
+    "images": [
+      {
+        "profile": "core",
+        "inputSha256": "7c3b7cf43c091fd9ad5828dbba5be9ba6315e9b90ac2210d58d596da1b06a97d",
+        "changes": [
+          {
+            "type": "runtime-update",
+            "summary": "Refresh the reviewed distroless runtime digest; paired native scans detect no resolved CVEs.",
+            "issues": [
+              215
+            ],
+            "runtime": {
+              "to": "ghcr.io/rambow-cloud/java:25.0.5.1-r4@sha256:538cc28569ffbf95daea91caedbd47e40d55941347db16aeb6a6ac5f2d716d56",
+              "from": {
+                "core": "ghcr.io/rambow-cloud/java:25.0.5.1-r3@sha256:2b91832afe7b4845de2e70ca7407867959dedc956f529361328f4d05c4b1088d"
+              }
+            }
+          }
+        ],
+        "artifactId": 14761830519,
+        "artifactName": "keycloak-oci-core-multiarch-f0b99d7302635ee5f46470eae9e1e28affd77054",
+        "tag": "26.8.2-r9-core",
+        "digest": "sha256:901fdd5a244f3033a9ae11c54565e28e43291ed3c0ef7aa0452335977c53f1a3",
+        "archiveSha256": "d70fce1e4ad11d7bbb57adae4452922aa8f3cf50da5871d02f545bd4b86593d9",
+        "children": [
+          {
+            "architecture": "amd64",
+            "digest": "sha256:32db2f17e2f177e1dbc2349d4356dfb7377fcb2f07aba7ba374c93f1a487c305"
+          },
+          {
+            "architecture": "arm64",
+            "digest": "sha256:ebb4921bc1df17855061d88871c4b3b4b6ec857fcc0ef15640404848dd6b576f"
+          }
+        ]
+      },
+      {
+        "profile": "aws",
+        "inputSha256": "209e19ed47922f50cdfa310a5eec4f30c0a33ddd3d3a955bb36cddad7b91ea8c",
+        "changes": [
+          {
+            "type": "runtime-update",
+            "summary": "Refresh the reviewed distroless runtime digest; paired native scans detect no resolved CVEs.",
+            "issues": [
+              215
+            ],
+            "runtime": {
+              "to": "ghcr.io/rambow-cloud/java:25.0.5.1-r4@sha256:538cc28569ffbf95daea91caedbd47e40d55941347db16aeb6a6ac5f2d716d56",
+              "from": {
+                "aws": "ghcr.io/rambow-cloud/java:25.0.5.1-r3@sha256:2b91832afe7b4845de2e70ca7407867959dedc956f529361328f4d05c4b1088d"
+              }
+            }
+          }
+        ],
+        "artifactId": 14760969092,
+        "artifactName": "keycloak-oci-aws-multiarch-f0b99d7302635ee5f46470eae9e1e28affd77054",
+        "tag": "26.8.2-r9-aws",
+        "digest": "sha256:17e7b5c7df619ea7652dab754eea971d744d5ffbee93a6d7124a7533b9f808d3",
+        "archiveSha256": "efb63f058f857e4d6865d042fb24d8057c17daccdbcbcf68202824255689745e",
+        "children": [
+          {
+            "architecture": "amd64",
+            "digest": "sha256:9cf43247f9273f3842694122d5861f527649cf76146b32a5ac2e16e86ad0aa29"
+          },
+          {
+            "architecture": "arm64",
+            "digest": "sha256:c757b68653fddfe5667bc7a2f4d682b2ea84893777d2d729dc729a1cf011e0b6"
+          }
+        ]
+      }
+    ],
+    "runtimeComparisonSha256": "1db06a95d5e98d78af300ba938b9b0920d32b33e8d9b3edfcba4b9b1ebe5df9c",
+    "supplyChain": {
+      "schemaVersion": 1,
+      "cosign": {
+        "version": "3.1.4",
+        "linuxAmd64Sha256": "424e2c97d0b45fd7a6b608a87f090f35633f4c23ece5f092d48bba11aaf4bbfa"
+      },
+      "sboms": [
+        {
+          "profile": "core",
+          "architecture": "amd64",
+          "digest": "sha256:32db2f17e2f177e1dbc2349d4356dfb7377fcb2f07aba7ba374c93f1a487c305",
+          "asset": "sbom-core-amd64.cdx.json",
+          "sha256": "ace2e42947f9dbe2d03120a3f34b108461ef7520ccfb884b1c9193031e22bb2e"
+        },
+        {
+          "profile": "core",
+          "architecture": "arm64",
+          "digest": "sha256:ebb4921bc1df17855061d88871c4b3b4b6ec857fcc0ef15640404848dd6b576f",
+          "asset": "sbom-core-arm64.cdx.json",
+          "sha256": "3ca1e7be7dbb3dd361d7bacc39523e2312d8e75abaca6b038eed72050ce0d8f3"
+        },
+        {
+          "profile": "aws",
+          "architecture": "amd64",
+          "digest": "sha256:9cf43247f9273f3842694122d5861f527649cf76146b32a5ac2e16e86ad0aa29",
+          "asset": "sbom-aws-amd64.cdx.json",
+          "sha256": "10701961d3653644fcfbf2f882dfa2a91ed50f4684506345a1247820fd40a4a0"
+        },
+        {
+          "profile": "aws",
+          "architecture": "arm64",
+          "digest": "sha256:c757b68653fddfe5667bc7a2f4d682b2ea84893777d2d729dc729a1cf011e0b6",
+          "asset": "sbom-aws-arm64.cdx.json",
+          "sha256": "5c934693a2afb419b1aed84b477da2f1ca42c27ff2e9256f362d9f691968d44f"
+        }
+      ]
+    }
+  },
+  "aliasChanges": [],
+  "supplyChain": {
+    "schemaVersion": 1,
+    "status": "verified",
+    "issuer": "https://token.actions.githubusercontent.com",
+    "identities": [
+      "https://github.com/rambow-cloud/keycloak/.github/workflows/release.yml@refs/heads/main",
+      "https://github.com/rambow-cloud/keycloak/.github/workflows/release.yml@refs/tags/v26.8.2-r9"
+    ],
+    "contractSha256": "c362ff6a367a931f8e33ae15c33fd3951b346379f35383faba0fbca432b8c0bf",
+    "targets": [
+      {
+        "profile": "core",
+        "digest": "sha256:901fdd5a244f3033a9ae11c54565e28e43291ed3c0ef7aa0452335977c53f1a3",
+        "signatureVerified": true
+      },
+      {
+        "profile": "core",
+        "architecture": "amd64",
+        "digest": "sha256:32db2f17e2f177e1dbc2349d4356dfb7377fcb2f07aba7ba374c93f1a487c305",
+        "signatureVerified": true,
+        "attestationVerified": true,
+        "sbomSha256": "ace2e42947f9dbe2d03120a3f34b108461ef7520ccfb884b1c9193031e22bb2e"
+      },
+      {
+        "profile": "core",
+        "architecture": "arm64",
+        "digest": "sha256:ebb4921bc1df17855061d88871c4b3b4b6ec857fcc0ef15640404848dd6b576f",
+        "signatureVerified": true,
+        "attestationVerified": true,
+        "sbomSha256": "3ca1e7be7dbb3dd361d7bacc39523e2312d8e75abaca6b038eed72050ce0d8f3"
+      },
+      {
+        "profile": "aws",
+        "digest": "sha256:17e7b5c7df619ea7652dab754eea971d744d5ffbee93a6d7124a7533b9f808d3",
+        "signatureVerified": true
+      },
+      {
+        "profile": "aws",
+        "architecture": "amd64",
+        "digest": "sha256:9cf43247f9273f3842694122d5861f527649cf76146b32a5ac2e16e86ad0aa29",
+        "signatureVerified": true,
+        "attestationVerified": true,
+        "sbomSha256": "10701961d3653644fcfbf2f882dfa2a91ed50f4684506345a1247820fd40a4a0"
+      },
+      {
+        "profile": "aws",
+        "architecture": "arm64",
+        "digest": "sha256:c757b68653fddfe5667bc7a2f4d682b2ea84893777d2d729dc729a1cf011e0b6",
+        "signatureVerified": true,
+        "attestationVerified": true,
+        "sbomSha256": "5c934693a2afb419b1aed84b477da2f1ca42c27ff2e9256f362d9f691968d44f"
+      }
+    ]
+  }
+}
